@@ -109,6 +109,19 @@ export default function MealsActiveFilterChips({
     });
   });
 
+  // People / Dining Companions
+  (filterState.people || []).forEach((person) => {
+    chips.push({
+      id: `people-${person}`,
+      label: person,
+      onRemove: () =>
+        onRemoveFilter(
+          'people',
+          filterState.people.filter((x) => x !== person)
+        ),
+    });
+  });
+
   // Toggles
   if (filterState.hasPhoto) {
     chips.push({

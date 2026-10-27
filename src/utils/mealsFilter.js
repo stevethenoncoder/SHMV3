@@ -39,6 +39,7 @@ export const DEFAULT_MEALS_FILTER_STATE = {
   cuisines: [],
   ingredients: [],
   foodTypes: [],
+  people: [],
   hasPhoto: false,
   isBusiness: false,
   isArsenalMatch: false,
@@ -69,6 +70,7 @@ export function countActiveFilters(filterState) {
   count += (filterState.cuisines || []).length;
   count += (filterState.ingredients || []).length;
   count += (filterState.foodTypes || []).length;
+  count += (filterState.people || []).length;
   if (filterState.hasPhoto) count++;
   if (filterState.isBusiness) count++;
   if (filterState.isArsenalMatch) count++;
@@ -172,17 +174,24 @@ export function matchesFilters(meal, filterState, excludeFacetKey = null) {
     if (!hasMatch) return false;
   }
 
-  // 9. Photo Available
+  // 9. Dining Companions / People (OR within group)
+  if (excludeFacetKey !== 'people' && filterState.people && filterState.people.length > 0) {
+    if (!meal.companions || meal.companions.length === 0) return false;
+    const hasMatch = meal.companions.some((c) => filterState.people.includes(c.publicName));
+    if (!hasMatch) return false;
+  }
+
+  // 10. Photo Available
   if (excludeFacetKey !== 'hasPhoto' && filterState.hasPhoto) {
     if (!meal.photos || meal.photos.length === 0) return false;
   }
 
-  // 10. Business
+  // 11. Business
   if (excludeFacetKey !== 'isBusiness' && filterState.isBusiness) {
     if (!meal.isBusiness) return false;
   }
 
-  // 11. Arsenal Matchday
+  // 12. Arsenal Matchday
   if (excludeFacetKey !== 'isArsenalMatch' && filterState.isArsenalMatch) {
     if (!meal.arsenal || !meal.arsenal.isMatchday) return false;
   }
@@ -212,6 +221,7 @@ export function computeFacetCounts(meals, filterState) {
   const cuisineCounts = {};
   const ingredientCounts = {};
   const foodTypeCounts = {};
+  const peopleCounts = {};
 
   let photoCount = 0;
   let businessCount = 0;
@@ -274,7 +284,19 @@ export function computeFacetCounts(meals, filterState) {
       }
     }
 
-    // 8. Toggles
+    // 8. People / Dining Companions
+    if (matchesFilters(meal, filterState, 'people')) {
+      const seenPeople = new Set();
+      for (const c of meal.companions || []) {
+        const name = c.publicName;
+        if (name && !seenPeople.has(name)) {
+          seenPeople.add(name);
+          peopleCounts[name] = (peopleCounts[name] || 0) + 1;
+        }
+      }
+    }
+
+    // 9. Toggles
     if (matchesFilters(meal, filterState, 'hasPhoto') && meal.photos && meal.photos.length > 0) {
       photoCount++;
     }
@@ -298,6 +320,7 @@ export function computeFacetCounts(meals, filterState) {
     cuisineCounts,
     ingredientCounts,
     foodTypeCounts,
+    peopleCounts,
     photoCount,
     businessCount,
     arsenalCount,

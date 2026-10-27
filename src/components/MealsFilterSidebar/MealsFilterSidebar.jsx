@@ -9,6 +9,7 @@ import {
   Shield,
   Briefcase,
   X,
+  Users,
 } from 'lucide-react';
 import { CANONICAL_DECADES, CANONICAL_RATINGS } from '../../utils/mealsFilter.js';
 import './MealsFilterSidebar.css';
@@ -38,6 +39,7 @@ export default function MealsFilterSidebar({
     toggles: true,
     countries: true,
     cities: false,
+    people: false,
     cuisines: false,
     ingredients: false,
     foodTypes: false,
@@ -46,6 +48,7 @@ export default function MealsFilterSidebar({
   // Local search inputs within facets
   const [countrySearch, setCountrySearch] = useState('');
   const [citySearch, setCitySearch] = useState('');
+  const [peopleSearch, setPeopleSearch] = useState('');
   const [cuisineSearch, setCuisineSearch] = useState('');
   const [ingredientSearch, setIngredientSearch] = useState('');
   const [foodTypeSearch, setFoodTypeSearch] = useState('');
@@ -101,6 +104,7 @@ export default function MealsFilterSidebar({
 
   const countryFacet = getFacetItems(counts.countryCounts, countrySearch, 'countries');
   const cityFacet = getFacetItems(counts.cityCounts, citySearch, 'cities');
+  const peopleFacet = getFacetItems(counts.peopleCounts, peopleSearch, 'people');
   const cuisineFacet = getFacetItems(counts.cuisineCounts, cuisineSearch, 'cuisines');
   const ingredientFacet = getFacetItems(counts.ingredientCounts, ingredientSearch, 'ingredients');
   const foodTypeFacet = getFacetItems(counts.foodTypeCounts, foodTypeSearch, 'foodTypes');
@@ -418,7 +422,81 @@ export default function MealsFilterSidebar({
         )}
       </div>
 
-      {/* 6. Restaurant Type / Cuisine */}
+      {/* 6. Dining Companions (Public Only) */}
+      <div className="filter-group-section">
+        <button
+          type="button"
+          className="section-header-btn"
+          onClick={() => toggleSection('people')}
+        >
+          <span className="section-title">
+            Dining Companions
+            {(filterState.people || []).length > 0 && ` (${filterState.people.length})`}
+          </span>
+          {openSections.people ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+
+        {openSections.people && (
+          <div className="facet-content-block">
+            {peopleFacet.entries.length > 5 && (
+              <div className="facet-search-box">
+                <Search size={13} className="facet-search-icon" />
+                <input
+                  type="text"
+                  placeholder="Filter companions..."
+                  value={peopleSearch}
+                  onChange={(e) => setPeopleSearch(e.target.value)}
+                  className="facet-search-input"
+                />
+                {peopleSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setPeopleSearch('')}
+                    className="facet-search-clear"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+            )}
+
+            <div className="checkbox-list">
+              {peopleFacet.visibleEntries.map(([person, count]) => {
+                const isSelected = (filterState.people || []).includes(person);
+                return (
+                  <label key={person} className="checkbox-row">
+                    <div className="checkbox-left">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleToggleArray('people', person)}
+                        className="checkbox-native"
+                      />
+                      <span className="checkbox-visual">
+                        {isSelected && <Check size={12} strokeWidth={3} />}
+                      </span>
+                      <span className="checkbox-label">{person}</span>
+                    </div>
+                    <span className="facet-count-badge">{count}</span>
+                  </label>
+                );
+              })}
+            </div>
+
+            {peopleFacet.hasMore && (
+              <button
+                type="button"
+                className="btn-show-more"
+                onClick={() => toggleExpanded('people')}
+              >
+                {expandedFacets['people'] ? 'Show less' : `Show all (${peopleFacet.entries.length})`}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* 7. Restaurant Type / Cuisine */}
       <div className="filter-group-section">
         <button
           type="button"

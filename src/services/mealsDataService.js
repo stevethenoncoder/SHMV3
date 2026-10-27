@@ -15,6 +15,8 @@ export const MEALS_FEED_URLS = {
   FoodType: `${BASE_URL}1922827128`,
   FoodCat: `${BASE_URL}249100290`,
   Meals_Photo: `${BASE_URL}153241932`,
+  Meals_People: `${BASE_URL}668079142`,
+  People_Public: `${BASE_URL}2108210132`,
 };
 
 const INVALID_GNAME_LITERALS = new Set(['no results found', 'not looked up']);
@@ -46,6 +48,8 @@ export async function loadMealsData() {
     rawFoodType,
     rawFoodCat,
     rawPhoto,
+    rawMealsPeople,
+    rawPeoplePublic,
   ] = await Promise.all([
     fetchCsvFeed(MEALS_FEED_URLS.Meals),
     fetchCsvFeed(MEALS_FEED_URLS.Rest),
@@ -58,6 +62,8 @@ export async function loadMealsData() {
     fetchCsvFeed(MEALS_FEED_URLS.FoodType),
     fetchCsvFeed(MEALS_FEED_URLS.FoodCat),
     fetchCsvFeed(MEALS_FEED_URLS.Meals_Photo),
+    fetchCsvFeed(MEALS_FEED_URLS.Meals_People),
+    fetchCsvFeed(MEALS_FEED_URLS.People_Public),
   ]);
 
   // 1. Countries Lookup
@@ -252,7 +258,61 @@ export async function loadMealsData() {
     photosByMealId.get(mealId).push(photo);
   }
 
-  // 10. Enriched Meals
+  // 10. Public People Lookup (Strict Privacy Enforcement)
+  // Only records where Public? === 'Y', Public_Name is non-blank and not "Hidden name"
+  const publicPeopleById = new Map();
+  for (const row of rawPeoplePublic) {
+    const id = parseInt(row.People_ID, 10);
+    // Row filtering: ignore trailing empty template rows (People_ID > 1009)
+    if (isNaN(id) || id > 1009) continue;
+
+    const isPublic = (row['Public?'] || '').trim().toUpperCase() === 'Y';
+    const publicName = (row.Public_Name || '').trim();
+
+    // Must never fall back to raw People table; must never expose "Hidden name"
+    if (isPublic && publicName && publicName.toLowerCase() !== 'hidden name') {
+      publicPeopleById.set(id, {
+        peopleId: id,
+        publicName,
+      });
+    }
+  }
+
+  // 11. Meals_People Junction (Deduplicating runtime (Meal_ID, People_ID) pairs)
+  const publicCompanionsByMealId = new Map();
+  const seenMealPeoplePairs = new Set();
+  let totalMealsPeopleLoaded = 0;
+  let duplicateRelationshipsRemoved = 0;
+  let totalPublicRelationships = 0;
+
+  for (const row of rawMealsPeople) {
+    if (!row.Meal_ID || !row.People_ID) continue;
+    const mealId = parseInt(row.Meal_ID, 10);
+    const peopleId = parseInt(row.People_ID, 10);
+    if (isNaN(mealId) || isNaN(peopleId)) continue;
+
+    totalMealsPeopleLoaded++;
+    const pairKey = `${mealId}_${peopleId}`;
+    if (seenMealPeoplePairs.has(pairKey)) {
+      duplicateRelationshipsRemoved++;
+      continue;
+    }
+    seenMealPeoplePairs.add(pairKey);
+
+    const publicPerson = publicPeopleById.get(peopleId);
+    if (publicPerson) {
+      totalPublicRelationships++;
+      if (!publicCompanionsByMealId.has(mealId)) {
+        publicCompanionsByMealId.set(mealId, []);
+      }
+      publicCompanionsByMealId.get(mealId).push({
+        peopleId: publicPerson.peopleId,
+        publicName: publicPerson.publicName,
+      });
+    }
+  }
+
+  // 12. Enriched Meals
   const enrichedMeals = [];
   const mealsById = new Map();
   let resolvedRestCount = 0;
@@ -325,6 +385,7 @@ export async function loadMealsData() {
 
     const mains = mainDishesByMealId.get(id) || [];
     const photos = photosByMealId.get(id) || [];
+    const companions = publicCompanionsByMealId.get(id) || [];
     if (photos.length > 0) mealsWithPhotosCount++;
 
     const meal = {
@@ -343,6 +404,7 @@ export async function loadMealsData() {
       restaurant,
       mains,
       photos,
+      companions,
     };
 
     enrichedMeals.push(meal);
@@ -358,6 +420,7 @@ export async function loadMealsData() {
     restaurantsById,
     citiesById,
     countriesById,
+    publicPeopleById,
     counts: {
       totalMeals: enrichedMeals.length,
       resolvedRestaurants: resolvedRestCount,
@@ -369,6 +432,10 @@ export async function loadMealsData() {
       totalValidPhotos,
       mealsWithPhotos: mealsWithPhotosCount,
       mealsWithoutPhotos: enrichedMeals.length - mealsWithPhotosCount,
+      totalSelectablePeople: publicPeopleById.size,
+      totalMealsPeopleLoaded,
+      duplicateRelationshipsRemoved,
+      totalPublicRelationships,
     },
   };
 }

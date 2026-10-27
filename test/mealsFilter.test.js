@@ -27,6 +27,7 @@ const mockMeals = [
     mains: [
       { food: { name: 'Roast Duck', ingredient: { name: 'Duck' }, foodType: { name: 'Roast' } } },
     ],
+    companions: [{ peopleId: 744, publicName: 'Lou Holland' }],
     arsenal: null,
   },
   {
@@ -45,6 +46,10 @@ const mockMeals = [
     },
     mains: [
       { food: { name: 'Ribeye Steak', ingredient: { name: 'Beef' }, foodType: { name: 'Steak' } } },
+    ],
+    companions: [
+      { peopleId: 744, publicName: 'Lou Holland' },
+      { peopleId: 493, publicName: 'Rich Benson' },
     ],
     arsenal: { isMatchday: true, opponent: 'Chelsea', arsenalScore: 3, opponentScore: 1 },
   },
@@ -65,6 +70,7 @@ const mockMeals = [
     mains: [
       { food: { name: 'Beef Stew', ingredient: { name: 'Beef' }, foodType: { name: 'Stew' } } },
     ],
+    companions: [{ peopleId: 493, publicName: 'Rich Benson' }],
     arsenal: null,
   },
   {
@@ -84,6 +90,7 @@ const mockMeals = [
     mains: [
       { food: { name: 'Fish and Chips', ingredient: { name: 'Cod' }, foodType: { name: 'Fried' } } },
     ],
+    companions: [],
     arsenal: { isMatchday: true, opponent: 'Spurs', arsenalScore: 2, opponentScore: 0 },
   },
   {
@@ -103,6 +110,7 @@ const mockMeals = [
     mains: [
       { food: { name: 'Spaghetti Carbonara', ingredient: { name: 'Pork' }, foodType: { name: 'Pasta' } } },
     ],
+    companions: [{ peopleId: 744, publicName: 'Lou Holland' }],
     arsenal: null,
   },
   {
@@ -116,6 +124,7 @@ const mockMeals = [
     photos: [],
     restaurant: null, // Test orphan restaurant handling!
     mains: [],
+    companions: [],
     arsenal: null,
   },
 ];
@@ -211,6 +220,52 @@ assert(testArsenal.length === 2 && testArsenal.every((m) => m.arsenal?.isMatchda
 
 const testPhotos = filterMeals(mockMeals, { ...DEFAULT_MEALS_FILTER_STATE, hasPhoto: true });
 assert(testPhotos.length === 3 && testPhotos.every((m) => m.photos.length > 0), '10b. Photo filter returns only meals with photos (3)');
+
+// 11. Single Dining Companion filter
+const testLou = filterMeals(mockMeals, { ...DEFAULT_MEALS_FILTER_STATE, people: ['Lou Holland'] });
+assert(testLou.length === 3 && testLou.map((m) => m.id).sort().join(',') === '1,2,5', '11. Single People filter (Lou Holland returns 3 meals)');
+
+// 12. Multiple selected Dining Companions (OR within group)
+const testOrCompanions = filterMeals(mockMeals, {
+  ...DEFAULT_MEALS_FILTER_STATE,
+  people: ['Lou Holland', 'Rich Benson'],
+});
+assert(testOrCompanions.length === 4 && testOrCompanions.map((m) => m.id).sort().join(',') === '1,2,3,5', '12. Multiple People values use OR semantics (Lou Holland OR Rich Benson returns 4)');
+
+// 13. People AND Country combination
+const testLouFrance = filterMeals(mockMeals, {
+  ...DEFAULT_MEALS_FILTER_STATE,
+  people: ['Lou Holland'],
+  countries: ['France'],
+});
+assert(testLouFrance.length === 1 && testLouFrance[0].id === 1, '13. People combines with Country (Lou Holland AND France returns 1 meal: Paris)');
+
+// 14. People AND Rating combination
+const testLouExceptional = filterMeals(mockMeals, {
+  ...DEFAULT_MEALS_FILTER_STATE,
+  people: ['Lou Holland'],
+  ratings: ['Exceptional'],
+});
+assert(testLouExceptional.length === 1 && testLouExceptional[0].id === 1, '14. People combines with Rating (Lou Holland AND Exceptional returns 1 meal)');
+
+// 15. Dynamic companion facet counts respond to other filters
+const countsInFrance = computeFacetCounts(mockMeals, {
+  ...DEFAULT_MEALS_FILTER_STATE,
+  countries: ['France'],
+});
+assert(
+  countsInFrance.peopleCounts['Lou Holland'] === 1 &&
+  countsInFrance.peopleCounts['Rich Benson'] === 1 &&
+  countsInFrance.peopleCounts['Dad'] === undefined,
+  '15. Dynamic counts: Selecting France narrows People counts to attendees of French meals (Lou: 1, Rich: 1)'
+);
+
+// 16. Removing companion filter restores all results
+const stateLou = { ...DEFAULT_MEALS_FILTER_STATE, people: ['Lou Holland'] };
+const countBefore = filterMeals(mockMeals, stateLou).length;
+stateLou.people = [];
+const countAfter = filterMeals(mockMeals, stateLou).length;
+assert(countBefore === 3 && countAfter === 6, '16. Removing companion chip restores full dataset (3 -> 6)');
 
 console.log(`\nResults: ${passedTests}/${totalTests} tests passed.`);
 if (passedTests !== totalTests) {

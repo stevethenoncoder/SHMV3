@@ -49,6 +49,7 @@ export default function MealsMobileFilterSheet({
     toggles: true,
     countries: false,
     cities: false,
+    people: false,
     cuisines: false,
     ingredients: false,
     foodTypes: false,
@@ -285,6 +286,52 @@ export default function MealsMobileFilterSheet({
                             onChange={() => handleToggleArray('cities', city)}
                           />
                           <span>{city}</span>
+                        </div>
+                        <span className="count-pill">{count}</span>
+                      </label>
+                    );
+                  })}
+              </div>
+            )}
+          </div>
+
+          {/* Dining Companions */}
+          <div className="sheet-group">
+            <button
+              type="button"
+              className="sheet-section-btn"
+              onClick={() => toggleSection('people')}
+            >
+              <span>
+                Dining Companions
+                {(draft.people || []).length > 0 && ` (${draft.people.length})`}
+              </span>
+              {openSections.people ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+            {openSections.people && (
+              <div className="sheet-checkbox-list">
+                {Object.entries(counts.peopleCounts || {})
+                  .filter(([name, count]) => count > 0 || (draft.people || []).includes(name))
+                  .sort((a, b) => {
+                    const aSel = (draft.people || []).includes(a[0]);
+                    const bSel = (draft.people || []).includes(b[0]);
+                    if (aSel && !bSel) return -1;
+                    if (!aSel && bSel) return 1;
+                    if (b[1] !== a[1]) return b[1] - a[1];
+                    return a[0].localeCompare(b[0]);
+                  })
+                  .slice(0, 20)
+                  .map(([person, count]) => {
+                    const isSelected = (draft.people || []).includes(person);
+                    return (
+                      <label key={person} className="sheet-check-item">
+                        <div className="check-left">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleToggleArray('people', person)}
+                          />
+                          <span>{person}</span>
                         </div>
                         <span className="count-pill">{count}</span>
                       </label>

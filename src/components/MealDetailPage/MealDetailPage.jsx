@@ -11,6 +11,7 @@ import {
   Briefcase,
   Globe,
   Quote,
+  Users,
 } from 'lucide-react';
 import './MealDetailPage.css';
 
@@ -229,7 +230,24 @@ export default function MealDetailPage({ meal, onBack }) {
           )}
         </section>
 
-        {/* 6. Photo Gallery Section */}
+        {/* 6. Dining Companions (Public Only) */}
+        {meal.companions && meal.companions.length > 0 && (
+          <section className="detail-section companions-section">
+            <h2 className="section-heading">
+              <Users size={18} />
+              <span>Dining Companions ({meal.companions.length})</span>
+            </h2>
+            <div className="detail-companions-chips">
+              {meal.companions.map((companion) => (
+                <span key={companion.peopleId} className="detail-companion-pill">
+                  {companion.publicName}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 7. Photo Gallery Section */}
         {meal.photos.length > 0 && (
           <section className="detail-section photos-section">
             <h2 className="section-heading">
