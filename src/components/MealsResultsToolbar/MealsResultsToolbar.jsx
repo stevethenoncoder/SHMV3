@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, ChevronDown, X } from 'lucide-react';
+import { Search, ChevronDown, X, SlidersHorizontal } from 'lucide-react';
 import './MealsResultsToolbar.css';
 
 export default function MealsResultsToolbar({
@@ -11,6 +11,8 @@ export default function MealsResultsToolbar({
   onSortChange,
   pageSize,
   onPageSizeChange,
+  activeFilterCount = 0,
+  onOpenMobileFilters,
 }) {
   return (
     <div className="meals-toolbar">
@@ -37,6 +39,22 @@ export default function MealsResultsToolbar({
             </button>
           )}
         </div>
+
+        {/* Mobile Filter Button (visible on mobile / narrow viewports) */}
+        {onOpenMobileFilters && (
+          <button
+            type="button"
+            className="mobile-filter-trigger-btn"
+            onClick={onOpenMobileFilters}
+            aria-label="Open filter sidebar"
+          >
+            <SlidersHorizontal size={15} />
+            <span>Filters</span>
+            {activeFilterCount > 0 && (
+              <span className="mobile-filter-count-badge">{activeFilterCount}</span>
+            )}
+          </button>
+        )}
 
         {/* Right Controls: Sort & Page Size */}
         <div className="toolbar-controls-right">
@@ -83,7 +101,7 @@ export default function MealsResultsToolbar({
       {/* Counter Row */}
       <div className="toolbar-count-row">
         <h2 className="display-count">
-          Displaying {filteredCount} {filteredCount === 1 ? 'Meal' : 'Meals'}
+          Displaying {filteredCount} of {totalCount} {totalCount === 1 ? 'Meal' : 'Meals'}
           {searchQuery && (
             <span className="search-filter-indicator">
               {' '}matching &ldquo;{searchQuery}&rdquo;

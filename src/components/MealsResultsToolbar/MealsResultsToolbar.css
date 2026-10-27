@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .toolbar-main-row {
@@ -10,14 +10,14 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
 }
 
 .meals-search-wrap {
   position: relative;
   flex: 1;
-  min-width: 280px;
-  max-width: 520px;
+  min-width: 260px;
+  max-width: 480px;
   display: flex;
   align-items: center;
 }
@@ -31,11 +31,11 @@
 
 .meals-search-input {
   width: 100%;
-  padding: 10px 36px 10px 36px;
+  padding: 9px 36px 9px 36px;
   background-color: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   color: var(--text-primary);
   outline: none;
   box-shadow: var(--shadow-sm);
@@ -64,10 +64,39 @@
   color: var(--text-primary);
 }
 
+/* Mobile Filter Trigger Button */
+.mobile-filter-trigger-btn {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.mobile-filter-trigger-btn:hover {
+  background-color: var(--bg-subtle);
+}
+
+.mobile-filter-count-badge {
+  background-color: var(--accent);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+}
+
 .toolbar-controls-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .control-group {
@@ -93,7 +122,7 @@
   background-color: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 7px 28px 7px 10px;
+  padding: 6px 26px 6px 10px;
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-primary);
@@ -108,7 +137,7 @@
 
 .select-arrow {
   position: absolute;
-  right: 9px;
+  right: 8px;
   color: #64748b;
   pointer-events: none;
 }
@@ -120,7 +149,7 @@
 }
 
 .display-count {
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
@@ -129,6 +158,12 @@
 .search-filter-indicator {
   font-weight: 500;
   color: var(--text-muted);
+}
+
+@media (max-width: 1024px) {
+  .mobile-filter-trigger-btn {
+    display: inline-flex;
+  }
 }
 
 @media (max-width: 640px) {
