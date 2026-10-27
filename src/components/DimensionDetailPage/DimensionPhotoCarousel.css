@@ -1,0 +1,103 @@
+.dimension-photo-carousel-container {
+  width: 100%;
+  margin: var(--spacing-lg, 1.5rem) 0;
+}
+
+.dimension-photo-carousel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm, 0.75rem);
+}
+
+.carousel-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-main, #0f172a);
+  margin: 0;
+}
+
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.carousel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--color-bg-surface, #ffffff);
+  border: 1px solid var(--color-border, #cbd5e1);
+  color: var(--color-text-main, #0f172a);
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.carousel-btn:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.dimension-photo-strip {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.dimension-photo-strip::-webkit-scrollbar {
+  height: 6px;
+}
+
+.dimension-photo-strip::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 3px;
+}
+
+.photo-card {
+  flex: 0 0 240px;
+  height: 160px;
+  border-radius: var(--radius-md, 8px);
+  overflow: hidden;
+  position: relative;
+  background-color: #e2e8f0;
+  border: 1px solid var(--color-border, #e2e8f0);
+}
+
+.photo-card.clickable {
+  cursor: pointer;
+}
+
+.carousel-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+.photo-card.clickable:hover .carousel-img {
+  transform: scale(1.04);
+}
+
+.photo-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.35rem 0.5rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0) 100%);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

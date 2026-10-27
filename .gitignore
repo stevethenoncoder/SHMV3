@@ -1,0 +1,22 @@
+node_modules/
+dist/
+.env
+.env.*
+*.service-account.json
+credentials/
+.DS_Store
+*.local
+.firebase/
+
+# Temporary exploratory scripts and CSV dumps
+sheets_csv/
+pubhtml_dump*.html
+*.py
+main_feed_raw.csv
+config_feed_raw.csv
+inspect_feeds.js
+generate_detailed.js
+detailed_inspect.js
+capture_screenshots.js
+test_mobile_sort.js
+*.png

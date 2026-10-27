@@ -1,0 +1,268 @@
+.app-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-page);
+}
+
+.main-content {
+  flex: 1;
+}
+
+.explorer-page-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 4rem;
+}
+
+/* Desktop Hero Section */
+.desktop-project-hero {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-titles-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.hero-subheading {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  margin-top: 0.35rem;
+}
+
+/* Journey Status Lozenge on Explorer */
+.hero-journey-lozenge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 0.45rem 0.95rem;
+  box-shadow: var(--shadow-sm);
+  cursor: default;
+  transition: box-shadow 0.15s ease;
+}
+
+.hero-journey-lozenge:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.hero-journey-label {
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.hero-journey-bar {
+  display: flex;
+  width: 140px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: #e2e8f0;
+}
+
+.hero-journey-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+  min-width: 2px;
+}
+
+/* Two-column layout */
+.explorer-body-layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.results-column {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Desktop Grid & List */
+.places-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 1.25rem;
+}
+
+.places-desktop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Desktop vs Mobile wrappers */
+.desktop-results-wrapper {
+  display: block;
+}
+
+.mobile-list-wrapper {
+  display: none;
+}
+
+.places-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Empty results state */
+.empty-results-box {
+  background: var(--bg-surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 3rem 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+.empty-pin-icon {
+  color: #cbd5e1;
+}
+
+.empty-results-box h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.empty-results-box p {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.btn-clear {
+  background: var(--brand-dark-green);
+  color: #ffffff;
+  border: none;
+  padding: 0.45rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+/* Loading & Error Screens */
+.app-loading-screen,
+.app-error-screen {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+  color: var(--accent);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-dialog {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  text-align: center;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-md);
+}
+
+.retry-btn {
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+/* Responsive Behavior */
+@media (max-width: 1023px) {
+  .places-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+}
+
+/* Mobile Layout (< 768px) */
+@media (max-width: 767px) {
+  .desktop-header {
+    display: none;
+  }
+
+  .desktop-project-hero {
+    display: none;
+  }
+
+  .filter-sidebar {
+    display: none;
+  }
+
+  .results-toolbar {
+    display: none;
+  }
+
+  .desktop-results-wrapper {
+    display: none;
+  }
+
+  .mobile-list-wrapper {
+    display: block;
+  }
+
+  .explorer-page-container {
+    padding: 0.75rem 0.75rem calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .explorer-body-layout {
+    display: block;
+  }
+
+  .map-view-container {
+    margin: -0.75rem -0.75rem calc(-4.5rem - env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Map container styles */
+.map-view-container {
+  width: 100%;
+}

@@ -1,0 +1,57 @@
+.project-selector {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  padding: 3px;
+  border-radius: var(--radius-full);
+  gap: 2px;
+}
+
+.proj-pill-btn {
+  border: none;
+  background: transparent;
+  padding: 4px 14px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.proj-pill-btn:hover {
+  color: var(--text-primary);
+}
+
+.proj-pill-btn.active {
+  background: var(--brand-dark-green);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Mobile specific pill selector styling as in 04-mobile-composite */
+.project-selector.mobile {
+  background: #0f3d24;
+  border: none;
+  padding: 4px;
+  width: 100%;
+  display: flex;
+  border-radius: var(--radius-full);
+  margin: 0.5rem 0;
+}
+
+.project-selector.mobile .proj-pill-btn {
+  flex: 1;
+  text-align: center;
+  color: #a7d7b5;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+}
+
+.project-selector.mobile .proj-pill-btn.active {
+  background: #14532d;
+  color: #ffffff;
+}

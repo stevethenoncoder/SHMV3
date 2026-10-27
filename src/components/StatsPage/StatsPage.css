@@ -1,0 +1,792 @@
+.stats-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  width: 100%;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+/* 1. Header Banner */
+.stats-header-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 0.5rem 0 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.stats-main-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 0.35rem 0;
+  letter-spacing: -0.02em;
+}
+
+.stats-main-subtitle {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 650px;
+  line-height: 1.45;
+}
+
+.stats-project-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.stats-badge-project {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stats-badge-dim {
+  font-size: 0.775rem;
+  color: var(--text-muted);
+}
+
+/* 2. Generic Card and Section styling */
+.stats-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.stats-title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.title-icon-primary {
+  color: var(--brand-green);
+}
+
+.title-icon-amber {
+  color: #f59e0b;
+}
+
+.stats-section-title-row {
+  margin-bottom: 1.25rem;
+}
+
+.stats-section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.stats-section-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0.3rem 0 0 0;
+}
+
+/* 3. Metric Cards Grid (9 items on 1 line) */
+.stats-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.stats-metric-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.55rem 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  min-width: 0;
+}
+
+.stats-metric-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.stats-metric-card.highlight-target {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.metric-card-label {
+  font-size: 0.725rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: capitalize;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metric-card-label-with-dot {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.status-dot-indicator {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.heart-icon-metric {
+  flex-shrink: 0;
+}
+
+.metric-card-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+/* 4. Journey Status Bar */
+.journey-status-bar-container {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.15rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.journey-status-label-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.journey-bar-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.journey-bar-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.journey-bar-and-key-row {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.journey-stacked-bar {
+  flex: 1;
+  display: flex;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #e2e8f0;
+}
+
+.journey-bar-segment {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.3s ease;
+  min-width: 2px;
+}
+
+.segment-label {
+  font-size: 0.675rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  user-select: none;
+}
+
+.journey-side-key {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.journey-key-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.725rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+}
+
+.legend-name {
+  color: var(--text-muted);
+  font-size: 0.725rem;
+}
+
+/* 5. Streamlined Activity Timeline (Full-width, squeezed) */
+.stats-section-timeline {
+  width: 100%;
+}
+
+.stats-timeline-card {
+  gap: 0.85rem;
+  padding: 1.15rem 1.4rem;
+}
+
+.timeline-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stats-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.timeline-toggle-group {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.mobile-timeline-swap-btn {
+  display: none;
+}
+
+.timeline-toggle-btn {
+  background: transparent;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.timeline-toggle-btn.active {
+  background: #ffffff;
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-chart-wrapper {
+  min-height: 155px;
+  display: flex;
+  align-items: flex-end;
+  padding: 0.35rem 0 0.35rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.timeline-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 140px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  gap: 0.5rem;
+}
+
+.timeline-bars-track {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 100%;
+  height: 155px;
+  gap: 2px;
+  overflow: hidden;
+  padding-bottom: 2px;
+}
+
+.timeline-bar-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  gap: 2px;
+}
+
+.timeline-bar-val-indicator {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  text-align: center;
+  user-select: none;
+}
+
+.timeline-bar-val-indicator.zero-val {
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.timeline-column-bar-box {
+  width: 100%;
+  max-width: 26px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 3px 3px 0 0;
+  overflow: hidden;
+  background: #f1f5f9;
+}
+
+.bar-sub-segment {
+  width: 100%;
+  transition: height 0.2s ease;
+}
+
+.timeline-col-labels {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 22px;
+  justify-content: flex-start;
+}
+
+.timeline-bar-tick {
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  line-height: 1;
+}
+
+.timeline-bar-month-label {
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1.1;
+}
+
+.timeline-bar-year-label {
+  font-size: 0.575rem;
+  color: #94a3b8;
+  text-align: center;
+  line-height: 1;
+}
+
+.timeline-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding-top: 0.15rem;
+}
+
+.t-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.t-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+/* Cumulative Journey Line Chart */
+.timeline-cumulative-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.cumulative-fit-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.cumulative-line-svg {
+  width: 100%;
+  height: 150px;
+  display: block;
+}
+
+.cumulative-point-circle {
+  cursor: pointer;
+  transition: r 0.2s ease;
+}
+
+.cumulative-point-circle:hover {
+  r: 5.5px;
+}
+
+.cumulative-val-text {
+  font-size: 11px;
+  font-weight: 700;
+  fill: #065f46;
+  font-family: inherit;
+  user-select: none;
+}
+
+.cumulative-date-text {
+  font-size: 10px;
+  font-weight: 600;
+  fill: #64748b;
+  font-family: inherit;
+  user-select: none;
+}
+
+/* 6. Progress Tables Grid */
+.stats-progress-tables-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.progress-table-card {
+  gap: 1rem;
+  padding: 1.25rem 1.4rem;
+}
+
+.table-card-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  max-height: 520px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.stats-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.825rem;
+  text-align: left;
+}
+
+.stats-data-table thead {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  z-index: 2;
+  border-bottom: 1px solid var(--border);
+}
+
+.stats-data-table th {
+  padding: 0.65rem 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.th-sortable {
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.th-sortable:hover {
+  color: var(--text-primary);
+  background-color: #f1f5f9;
+}
+
+.th-sortable span {
+  margin-right: 0.35rem;
+}
+
+.sort-icon-idle {
+  color: #cbd5e1;
+  vertical-align: middle;
+}
+
+.sort-icon-active {
+  color: var(--brand-green);
+  vertical-align: middle;
+}
+
+.stats-data-table td {
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.stats-data-table tr:hover td {
+  background-color: #f8fafc;
+}
+
+.td-name {
+  color: var(--text-primary);
+  white-space: nowrap;
+  font-size: 0.8125rem;
+}
+
+/* Row Progress Mini Stacked Bar */
+.row-progress-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.row-mini-stacked-bar {
+  display: flex;
+  width: 70px;
+  height: 10px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #e2e8f0;
+  flex-shrink: 0;
+}
+
+.row-pct-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 32px;
+}
+
+/* Row Rating Score Bar */
+.row-score-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.row-score-track {
+  width: 70px;
+  height: 8px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.row-score-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.2s ease;
+}
+
+.row-score-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 38px;
+}
+
+.ratings-pill {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  background: #f1f5f9;
+  border-radius: var(--radius-full);
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* 7. Responsive Breakpoints */
+@media (max-width: 1200px) {
+  .stats-cards-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .stats-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .stats-middle-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-progress-tables-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .stats-page-container {
+    padding: 0.65rem 0.5rem calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .stats-header-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem 0.85rem;
+  }
+
+  .stats-main-title {
+    font-size: 1.25rem;
+  }
+
+  .stats-project-badge {
+    align-items: flex-start;
+  }
+
+  .stats-section-overview,
+  .stats-section-timeline {
+    width: 100%;
+  }
+
+  .stats-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .stats-metric-card {
+    padding: 0.45rem 0.65rem;
+  }
+
+  .metric-card-label {
+    font-size: 0.75rem;
+  }
+
+  .metric-card-value {
+    font-size: 1.15rem;
+  }
+
+  /* Journey Status Bar: full-width across screen */
+  .journey-status-bar-container {
+    padding: 0.65rem 0.65rem;
+  }
+
+  .journey-bar-and-key-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+    width: 100%;
+  }
+
+  .journey-stacked-bar {
+    width: 100%;
+    height: 24px;
+    flex: none;
+    border-radius: var(--radius-sm);
+  }
+
+  .journey-side-key {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.5rem;
+  }
+
+  .journey-key-item {
+    font-size: 0.725rem;
+  }
+
+  /* Streamlined Activity Timeline: full 100% width with single swap button */
+  .stats-timeline-card {
+    width: 100%;
+    padding: 0.75rem 0.6rem;
+    box-sizing: border-box;
+  }
+
+  .timeline-card-header {
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .desktop-only-toggle {
+    display: none !important;
+  }
+
+  .mobile-timeline-swap-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #f1f5f9;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: 0.25rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+
+  .mobile-timeline-swap-btn:active {
+    background: #e2e8f0;
+    transform: scale(0.96);
+  }
+
+  .timeline-chart-wrapper {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .timeline-bars-track {
+    width: 100%;
+    gap: 1px;
+  }
+
+  .timeline-cumulative-container {
+    width: 100%;
+  }
+
+  .cumulative-fit-wrapper {
+    width: 100%;
+  }
+
+  .cumulative-line-svg {
+    width: 100%;
+  }
+
+  /* Remove Progress by County and Progress by Category on mobile */
+  .stats-progress-tables-grid {
+    display: none !important;
+  }
+}
