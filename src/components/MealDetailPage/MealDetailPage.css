@@ -1,0 +1,458 @@
+.meal-detail-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+
+.detail-nav-bar {
+  margin-bottom: 20px;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-back:hover {
+  background-color: var(--bg-subtle);
+  color: var(--text-primary);
+  border-color: #cbd5e1;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Header */
+.detail-header {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  box-shadow: var(--shadow-card);
+}
+
+.detail-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.detail-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.detail-restaurant-name {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.detail-rating-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.detail-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.value-tag {
+  font-weight: 700;
+  color: #0f172a;
+  background-color: #f1f5f9;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+}
+
+.business-badge,
+.leisure-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.business-badge {
+  background-color: #eff6ff;
+  color: #1e40af;
+}
+
+.leisure-badge {
+  background-color: #f8fafc;
+  color: #475569;
+  border: 1px solid var(--border);
+}
+
+.sentiment-badge {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+.sentiment-cat {
+  margin-left: 3px;
+  font-weight: 600;
+}
+
+/* Arsenal Matchday Banner */
+.arsenal-matchday-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.arsenal-badge-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: #dc2626;
+  color: #ffffff;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+}
+
+.arsenal-content {
+  flex: 1;
+}
+
+.arsenal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #991b1b;
+  margin: 0 0 4px 0;
+}
+
+.arsenal-score {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #b91c1c;
+  margin-bottom: 6px;
+}
+
+.arsenal-comment {
+  font-size: 0.88rem;
+  color: #7f1d1d;
+  line-height: 1.45;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Personal Review Quote */
+.detail-review-section {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  box-shadow: var(--shadow-card);
+}
+
+.review-quote-wrapper {
+  display: flex;
+  gap: 14px;
+}
+
+.quote-icon {
+  color: #cbd5e1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.review-text {
+  font-size: 1.1rem;
+  color: #1e293b;
+  line-height: 1.6;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Detail Sections */
+.detail-section {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  box-shadow: var(--shadow-card);
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 18px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* Mains Grid */
+.mains-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.main-dish-card {
+  padding: 16px;
+  background-color: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dish-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.dish-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.dish-rating-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  flex-shrink: 0;
+}
+
+.dish-comment {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0;
+}
+
+.dish-taxonomy-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.taxonomy-pill {
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 2px 7px;
+  background-color: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: #475569;
+}
+
+.empty-subtext {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+/* Photos Grid */
+.detail-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.photo-figure {
+  margin: 0;
+  background-color: #0f172a;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.gallery-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.2s ease;
+}
+
+.gallery-image:hover {
+  opacity: 0.92;
+}
+
+.photo-caption {
+  padding: 10px 12px;
+  background-color: #ffffff;
+  border: 1px solid var(--border);
+  border-top: none;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Venue Section */
+.venue-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.venue-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+}
+
+.venue-address {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0 0 10px 0;
+}
+
+.venue-meta-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.venue-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  font-size: 0.8rem;
+  border-radius: var(--radius-full);
+  font-weight: 500;
+}
+
+.venue-pill.cuisine {
+  background-color: #f1f5f9;
+  color: #334155;
+  border: 1px solid var(--border);
+}
+
+.venue-pill.google-rating {
+  background-color: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  font-weight: 600;
+}
+
+.venue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.venue-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.venue-btn.map {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.venue-btn.map:hover {
+  background-color: #dbeafe;
+}
+
+.venue-btn.website {
+  background-color: #f8fafc;
+  color: #334155;
+  border: 1px solid var(--border);
+}
+
+.venue-btn.website:hover {
+  background-color: #f1f5f9;
+}
+
+.detail-not-found {
+  text-align: center;
+  padding: 60px 20px;
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.detail-not-found h2 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.detail-not-found p {
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}

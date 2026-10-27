@@ -1,0 +1,145 @@
+.meals-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.toolbar-main-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.meals-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+  max-width: 520px;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.meals-search-input {
+  width: 100%;
+  padding: 10px 36px 10px 36px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  outline: none;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
+}
+
+.meals-search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+}
+
+.search-clear-btn:hover {
+  color: var(--text-primary);
+}
+
+.toolbar-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.control-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.toolbar-select {
+  appearance: none;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 7px 28px 7px 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  outline: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.toolbar-select:focus {
+  border-color: var(--accent);
+}
+
+.select-arrow {
+  position: absolute;
+  right: 9px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.toolbar-count-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.display-count {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.search-filter-indicator {
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .toolbar-main-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .meals-search-wrap {
+    max-width: 100%;
+  }
+  .toolbar-controls-right {
+    justify-content: space-between;
+  }
+}
