@@ -438,6 +438,18 @@
   transition: all 0.15s ease;
 }
 
+.venue-btn.profile-btn {
+  background-color: var(--accent);
+  color: #ffffff;
+  border: 1px solid var(--accent);
+  cursor: pointer;
+}
+
+.venue-btn.profile-btn:hover {
+  background-color: #1e293b;
+  border-color: #1e293b;
+}
+
 .venue-btn.map {
   background-color: #eff6ff;
   color: #1d4ed8;

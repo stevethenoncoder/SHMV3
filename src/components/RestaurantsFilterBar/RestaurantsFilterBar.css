@@ -1,0 +1,421 @@
+.restaurants-filter-bar-root {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+  width: 100%;
+}
+
+/* Search Row */
+.restaurants-search-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.restaurants-search-field {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.search-field-icon {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-tertiary, #94a3b8);
+  pointer-events: none;
+}
+
+.restaurants-search-input {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 2.65rem;
+  font-size: 0.95rem;
+  background-color: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 8px;
+  color: var(--text-primary, #0f172a);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.restaurants-search-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #0284c7);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.search-field-clear {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: var(--text-tertiary, #94a3b8);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.search-field-clear:hover {
+  color: var(--text-primary, #0f172a);
+  background-color: var(--bg-hover, #f1f5f9);
+}
+
+.restaurants-mobile-filter-trigger {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+  background-color: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.mobile-filter-badge {
+  background-color: var(--color-primary, #0284c7);
+  color: #ffffff;
+  font-size: 0.75rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  font-weight: 700;
+}
+
+/* Horizontal Dropdowns Row */
+.restaurants-dropdowns-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.filter-dropdown-container {
+  position: relative;
+}
+
+.filter-dropdown-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary, #475569);
+  background-color: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.filter-dropdown-btn:hover {
+  background-color: var(--bg-hover, #f8fafc);
+  border-color: var(--border-medium, #cbd5e1);
+  color: var(--text-primary, #0f172a);
+}
+
+.filter-dropdown-btn.active {
+  background-color: rgba(2, 132, 199, 0.08);
+  border-color: var(--color-primary, #0284c7);
+  color: var(--color-primary, #0284c7);
+  font-weight: 600;
+}
+
+.filter-dropdown-btn.open {
+  border-color: var(--color-primary, #0284c7);
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+}
+
+.dropdown-chevron {
+  transition: transform 0.15s ease;
+}
+
+.filter-dropdown-btn.open .dropdown-chevron {
+  transform: rotate(180deg);
+}
+
+.filter-badge {
+  background-color: var(--color-primary, #0284c7);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.05rem 0.35rem;
+  border-radius: 9999px;
+  line-height: 1.2;
+}
+
+/* Popover Panel */
+.filter-popover-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 50;
+  min-width: 230px;
+  max-width: 320px;
+  background-color: #ffffff;
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+}
+
+.checkbox-filter-list-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.popover-search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border-light, #e2e8f0);
+}
+
+.popover-search-icon {
+  position: absolute;
+  left: 0.5rem;
+  color: var(--text-tertiary, #94a3b8);
+  pointer-events: none;
+}
+
+.popover-search-input {
+  width: 100%;
+  padding: 0.35rem 1.5rem 0.35rem 1.65rem;
+  font-size: 0.8rem;
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 4px;
+}
+
+.popover-search-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #0284c7);
+}
+
+.popover-search-clear {
+  position: absolute;
+  right: 0.35rem;
+  background: none;
+  border: none;
+  color: var(--text-tertiary, #94a3b8);
+  cursor: pointer;
+  padding: 0.2rem;
+}
+
+.popover-options-scroll {
+  max-height: 240px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.popover-option-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: var(--text-primary, #1e293b);
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.popover-option-item:hover {
+  background-color: var(--bg-hover, #f8fafc);
+}
+
+.popover-option-item.selected {
+  background-color: rgba(2, 132, 199, 0.08);
+  color: var(--color-primary, #0284c7);
+  font-weight: 500;
+}
+
+.popover-option-item input[type='checkbox'] {
+  cursor: pointer;
+  accent-color: var(--color-primary, #0284c7);
+}
+
+.popover-option-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.popover-option-count {
+  font-size: 0.75rem;
+  color: var(--text-tertiary, #94a3b8);
+  font-feature-settings: 'tnum';
+}
+
+.popover-no-results {
+  font-size: 0.8rem;
+  color: var(--text-tertiary, #94a3b8);
+  padding: 0.5rem;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Active Chips Strip */
+.restaurants-active-chips-strip {
+  width: 100%;
+  padding-top: 0.25rem;
+}
+
+.chips-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  background-color: rgba(2, 132, 199, 0.08);
+  border: 1px solid rgba(2, 132, 199, 0.2);
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  color: var(--color-primary, #0284c7);
+}
+
+.chip-label {
+  font-weight: 500;
+}
+
+.chip-remove-btn {
+  background: none;
+  border: none;
+  color: var(--color-primary, #0284c7);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.1rem;
+  border-radius: 9999px;
+}
+
+.chip-remove-btn:hover {
+  background-color: rgba(2, 132, 199, 0.2);
+}
+
+.chips-clear-all-btn {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  text-decoration: underline;
+}
+
+.chips-clear-all-btn:hover {
+  color: #b91c1c;
+}
+
+/* Table Toolbar */
+.restaurants-table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border-light, #e2e8f0);
+  border-bottom: 1px solid var(--border-light, #e2e8f0);
+  margin-top: 0.25rem;
+}
+
+.restaurants-result-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.result-stats-count {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  font-feature-settings: 'tnum';
+}
+
+.result-stats-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #64748b);
+}
+
+.restaurants-toolbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.restaurants-sort-wrapper,
+.restaurants-page-size-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sort-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary, #64748b);
+}
+
+.sort-select,
+.pagesize-select {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.85rem;
+  background-color: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 6px;
+  color: var(--text-primary, #0f172a);
+  cursor: pointer;
+}
+
+.sort-select:focus,
+.pagesize-select:focus {
+  outline: none;
+  border-color: var(--color-primary, #0284c7);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .restaurants-dropdowns-row {
+    display: none;
+  }
+
+  .restaurants-mobile-filter-trigger {
+    display: flex;
+  }
+}
+
+@media (max-width: 640px) {
+  .restaurants-table-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .restaurants-toolbar-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

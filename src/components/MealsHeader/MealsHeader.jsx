@@ -2,7 +2,12 @@ import React from 'react';
 import { UtensilsCrossed } from 'lucide-react';
 import './MealsHeader.css';
 
-export default function MealsHeader({ activeNav = 'chronicle', onSelectNav }) {
+export default function MealsHeader({
+  activeNav = 'chronicle',
+  onSelectNav,
+  mealCount = 4776,
+  restaurantCount = 3051,
+}) {
   return (
     <header className="meals-header">
       <div className="header-inner">
@@ -33,9 +38,13 @@ export default function MealsHeader({ activeNav = 'chronicle', onSelectNav }) {
           >
             Chronicle
           </button>
-          <span className="nav-link disabled" title="Coming soon">
+          <button
+            type="button"
+            className={`nav-link ${activeNav === 'restaurants' ? 'active' : ''}`}
+            onClick={() => onSelectNav && onSelectNav('restaurants')}
+          >
             Restaurants
-          </span>
+          </button>
           <span className="nav-link disabled" title="Coming soon">
             Food
           </span>
@@ -47,11 +56,15 @@ export default function MealsHeader({ activeNav = 'chronicle', onSelectNav }) {
           </span>
         </nav>
 
-        {/* Right: Subtitle Tag */}
+        {/* Right: Counter Pill */}
         <div className="header-right">
           <div className="archive-counter-pill">
             <span className="counter-dot" />
-            <span>4,776 Meals</span>
+            <span>
+              {activeNav === 'restaurants'
+                ? `${restaurantCount.toLocaleString()} Restaurants`
+                : `${mealCount.toLocaleString()} Meals`}
+            </span>
           </div>
         </div>
       </div>

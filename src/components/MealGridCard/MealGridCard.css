@@ -7,28 +7,40 @@
   overflow: hidden;
   box-shadow: var(--shadow-card);
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-  cursor: pointer;
   position: relative;
 }
 
 .meal-card:hover {
-  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
   border-color: #cbd5e1;
 }
 
-.meal-card:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* 1. Media Container */
+/* 1. Media Container (Click navigates to Meal Detail) */
 .meal-card-media {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 10;
   background-color: #0f172a;
   overflow: hidden;
+}
+
+/* Generic Type Icon Fallback Container */
+.meal-card-media.type-fallback-container {
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.clickable-media {
+  cursor: pointer;
+  user-select: none;
+}
+
+.clickable-media:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 .meal-card-image {
@@ -39,8 +51,52 @@
   transition: transform 0.3s ease;
 }
 
-.meal-card:hover .meal-card-image {
+.clickable-media:hover .meal-card-image {
   transform: scale(1.03);
+}
+
+/* Fallback type icon: sized cleanly to fit comfortably within the 16:10 box */
+.meal-card-image.type-fallback-image {
+  width: auto;
+  height: 65%;
+  max-width: 65%;
+  max-height: 65%;
+  object-fit: contain;
+  margin: auto;
+  transition: transform 0.25s ease;
+}
+
+.clickable-media:hover .meal-card-image.type-fallback-image {
+  transform: scale(1.06);
+}
+
+/* Restaurant Type Badge overlay on photo */
+.meal-card-cuisine-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  background-color: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+  z-index: 2;
+}
+
+.meal-card-cuisine-badge:hover {
+  background-color: rgba(15, 23, 42, 0.95);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.04);
 }
 
 .meal-card-photo-count {
@@ -57,6 +113,7 @@
   font-size: 0.75rem;
   font-weight: 600;
   border-radius: var(--radius-full);
+  pointer-events: none;
 }
 
 .meal-card-spend-badge {
@@ -70,6 +127,7 @@
   font-weight: 700;
   border-radius: var(--radius-full);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
 }
 
 /* 2. Typographic Header Variant (When No Photos Exist) */
@@ -82,6 +140,10 @@
   border-bottom: 1px solid var(--border);
 }
 
+.clickable-media.meal-card-typographic-header:hover {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
 .typographic-header-left {
   display: flex;
   align-items: center;
@@ -89,6 +151,7 @@
 }
 
 .typographic-cuisine-pill {
+  font-family: inherit;
   font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -98,6 +161,14 @@
   color: #334155;
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.typographic-cuisine-pill:hover {
+  background-color: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
 }
 
 .typographic-value {
@@ -107,10 +178,22 @@
 }
 
 .typographic-year-marker {
+  font-family: inherit;
   font-size: 0.85rem;
   font-weight: 800;
   color: #94a3b8;
   letter-spacing: -0.02em;
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.typographic-year-marker:hover {
+  color: var(--accent);
+  background-color: #f1f5f9;
 }
 
 /* 3. Card Body */
@@ -129,6 +212,7 @@
   gap: 10px;
 }
 
+/* Title (Click navigates to Meal Detail) */
 .meal-card-title {
   font-size: 1.05rem;
   font-weight: 700;
@@ -141,19 +225,49 @@
   -webkit-box-orient: vertical;
 }
 
+.clickable-title {
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.clickable-title:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.clickable-title:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Rating Badge (Click adds to Filter) */
 .meal-card-rating-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 2px 7px;
+  font-family: inherit;
   font-size: 0.75rem;
   font-weight: 600;
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
   white-space: nowrap;
   flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
 }
 
+.meal-card-rating-badge:hover {
+  transform: scale(1.05);
+  filter: brightness(0.95);
+}
+
+.meal-card-rating-badge:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Location Subtitle */
 .meal-card-location {
   display: flex;
   align-items: center;
@@ -167,6 +281,48 @@
   color: #94a3b8;
 }
 
+.location-links {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.meal-card-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: left;
+  border-bottom: 1px dashed transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.meal-card-link-btn:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.meal-card-link-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.location-sep {
+  color: var(--text-muted);
+}
+
+/* Primary Main Dish Tag (Click adds to Filter) */
+.meal-card-dish-row {
+  display: flex;
+  align-items: center;
+  margin-top: 2px;
+}
+
 .meal-card-dish-tag {
   display: inline-flex;
   align-items: center;
@@ -175,16 +331,36 @@
   background-color: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: var(--radius-md);
+  font-family: inherit;
   font-size: 0.8rem;
   color: #1e293b;
-  margin-top: 2px;
   width: fit-content;
   max-width: 100%;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.meal-card-dish-tag:hover {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.meal-card-dish-tag:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 .dish-icon {
   flex-shrink: 0;
   color: #64748b;
+  transition: color 0.15s ease;
+}
+
+.meal-card-dish-tag:hover .dish-icon {
+  color: #1d4ed8;
 }
 
 .dish-name {
@@ -199,6 +375,7 @@
   color: #64748b;
 }
 
+/* Comment Excerpt */
 .meal-card-comment {
   font-size: 0.85rem;
   color: #475569;
@@ -227,6 +404,12 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  transition: color 0.15s ease;
+  user-select: none;
+}
+
+.meal-card-date[style*="cursor: pointer"]:hover {
+  color: var(--accent);
 }
 
 .meal-card-badges-right {
@@ -242,10 +425,18 @@
   padding: 2px 6px;
   background-color: #fee2e2;
   color: #991b1b;
+  font-family: inherit;
   font-size: 0.7rem;
   font-weight: 700;
   border-radius: var(--radius-sm);
   border: 1px solid #fecaca;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.meal-card-afc-pill:hover {
+  background-color: #fecaca;
+  transform: scale(1.05);
 }
 
 .meal-card-biz-pill {
@@ -254,7 +445,16 @@
   padding: 2px 6px;
   background-color: #f1f5f9;
   color: #475569;
+  font-family: inherit;
   font-size: 0.7rem;
   font-weight: 600;
   border-radius: var(--radius-sm);
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.meal-card-biz-pill:hover {
+  background-color: #e2e8f0;
+  transform: scale(1.05);
 }

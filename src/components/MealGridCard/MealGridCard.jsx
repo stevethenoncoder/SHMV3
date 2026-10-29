@@ -1,5 +1,6 @@
 import React from 'react';
-import { Star, MapPin, Calendar, Utensils, Camera, PoundSterling, Shield } from 'lucide-react';
+import { Star, MapPin, Calendar, Utensils, Camera, Shield } from 'lucide-react';
+import { formatRatingLabel, getDecade } from '../../utils/mealsFilter.js';
 import './MealGridCard.css';
 
 /**
@@ -25,41 +26,75 @@ function getRatingBadgeStyle(rating) {
   return { bg: '#f1f5f9', text: '#64748b', border: '#e2e8f0' };
 }
 
-export default function MealGridCard({ meal, onSelectMeal }) {
-  const hasPhotos = meal.photos && meal.photos.length > 0;
+export default function MealGridCard({ meal, onSelectMeal, onAddFilter }) {
+  const hasPhotos = Boolean(meal.photos && meal.photos.length > 0);
   const primaryPhoto = hasPhotos ? meal.photos[0] : null;
+  const typeIcon = meal.restaurant?.type?.typeIcon || meal.typeIcon || null;
+  const displayPhotoUrl = primaryPhoto ? primaryPhoto.url : typeIcon;
+  const isTypeFallback = !primaryPhoto && Boolean(typeIcon);
+
   const primaryMain = meal.mains && meal.mains.length > 0 ? meal.mains[0] : null;
   const ratingStyle = getRatingBadgeStyle(meal.rating);
 
   const restaurantName = meal.restaurant?.name || 'Restaurant Record Missing';
-  const locationText = [
-    meal.restaurant?.city?.name,
-    meal.restaurant?.city?.country?.name,
-  ]
-    .filter(Boolean)
-    .join(', ');
+  const cityName = meal.restaurant?.city?.name || null;
+  const countryName = meal.restaurant?.city?.country?.name || null;
+  const cuisineName = meal.restaurant?.type?.name || null;
 
-  const handleCardClick = () => {
+  const handleMediaClick = () => {
+    if (onSelectMeal) onSelectMeal(meal.id);
+  };
+
+  const handleTitleClick = (e) => {
+    e.stopPropagation();
     if (onSelectMeal) onSelectMeal(meal.id);
   };
 
   return (
-    <article className="meal-card" onClick={handleCardClick} tabIndex={0}>
-      {/* 1. Media Container: Photo vs. Adaptive Typographic Header */}
-      {hasPhotos ? (
-        <div className="meal-card-media">
+    <article className="meal-card">
+      {/* 1. Media Container: Real photo or generic type icon fallback (Clicking navigates to Meal Detail) */}
+      {displayPhotoUrl ? (
+        <div
+          className={`meal-card-media clickable-media ${isTypeFallback ? 'type-fallback-container' : ''}`}
+          onClick={handleMediaClick}
+          tabIndex={0}
+          role="button"
+          aria-label={`View details for meal at ${restaurantName}`}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleMediaClick();
+            }
+          }}
+        >
           <img
-            src={primaryPhoto.url}
-            alt={`${restaurantName} meal photo`}
-            className="meal-card-image"
+            src={displayPhotoUrl}
+            alt={isTypeFallback ? `${cuisineName || restaurantName} cuisine icon` : `${restaurantName} meal photo`}
+            className={`meal-card-image ${isTypeFallback ? 'type-fallback-image' : ''}`}
             loading="lazy"
             onError={(e) => {
-              // Gracefully hide broken image and switch to fallback
-              e.currentTarget.style.display = 'none';
-              e.currentTarget.parentElement.classList.add('media-failed');
+              if (primaryPhoto && typeIcon && e.currentTarget.src !== typeIcon) {
+                e.currentTarget.src = typeIcon;
+              } else {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement.classList.add('media-failed');
+              }
             }}
           />
-          {meal.photos.length > 1 && (
+          {cuisineName && (
+            <button
+              type="button"
+              className="meal-card-cuisine-badge"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onAddFilter) onAddFilter('cuisines', cuisineName);
+              }}
+              title={`Filter by cuisine: ${cuisineName}`}
+            >
+              {cuisineName}
+            </button>
+          )}
+          {hasPhotos && meal.photos.length > 1 && (
             <div className="meal-card-photo-count" title={`${meal.photos.length} photos available`}>
               <Camera size={13} />
               <span>{meal.photos.length}</span>
@@ -72,61 +107,152 @@ export default function MealGridCard({ meal, onSelectMeal }) {
           )}
         </div>
       ) : (
-        <div className="meal-card-typographic-header">
+        <div
+          className="meal-card-typographic-header clickable-media"
+          onClick={handleMediaClick}
+          tabIndex={0}
+          role="button"
+          aria-label={`View details for meal at ${restaurantName}`}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleMediaClick();
+            }
+          }}
+        >
           <div className="typographic-header-left">
-            <span className="typographic-cuisine-pill">
-              {meal.restaurant?.type?.name || 'Dining'}
-            </span>
+            {cuisineName && (
+              <button
+                type="button"
+                className="typographic-cuisine-pill"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onAddFilter) onAddFilter('cuisines', cuisineName);
+                }}
+                title={`Filter by cuisine: ${cuisineName}`}
+              >
+                {cuisineName}
+              </button>
+            )}
             {meal.valueGBP !== null && (
               <span className="typographic-value">£{meal.valueGBP.toFixed(0)}</span>
             )}
           </div>
-          <span className="typographic-year-marker">{meal.year || ''}</span>
+          {meal.year && (
+            <button
+              type="button"
+              className="typographic-year-marker"
+              onClick={(e) => {
+                e.stopPropagation();
+                const decade = getDecade(meal.year);
+                if (decade && onAddFilter) onAddFilter('decades', decade);
+              }}
+              title={`Filter by decade: ${getDecade(meal.year) || meal.year}`}
+            >
+              {meal.year}
+            </button>
+          )}
         </div>
       )}
 
       {/* 2. Card Content Body */}
       <div className="meal-card-body">
-        {/* Top Header: Restaurant & Rating Badge */}
+        {/* Top Header: Restaurant (Click navigates to Meal Detail) & Rating Badge (Click filters by Rating) */}
         <div className="meal-card-header-row">
-          <h3 className="meal-card-title" title={restaurantName}>
+          <h3
+            className="meal-card-title clickable-title"
+            title={`View meal details for ${restaurantName}`}
+            onClick={handleTitleClick}
+            tabIndex={0}
+            role="button"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleTitleClick(e);
+              }
+            }}
+          >
             {restaurantName}
           </h3>
           {meal.rating && meal.rating !== 'Unrated' && (
-            <span
+            <button
+              type="button"
               className="meal-card-rating-badge"
               style={{
                 backgroundColor: ratingStyle.bg,
                 color: ratingStyle.text,
                 borderColor: ratingStyle.border,
               }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onAddFilter) onAddFilter('ratings', meal.rating);
+              }}
+              title={`Filter by rating: ${formatRatingLabel(meal.rating)}`}
             >
               <Star size={11} fill="currentColor" />
-              <span>{meal.rating}</span>
-            </span>
+              <span>{formatRatingLabel(meal.rating)}</span>
+            </button>
           )}
         </div>
 
-        {/* Location Subtitle */}
-        {locationText && (
+        {/* Location Subtitle: City and Country independently add to filter */}
+        {(cityName || countryName) && (
           <div className="meal-card-location">
             <MapPin size={13} className="location-pin-icon" />
-            <span>{locationText}</span>
+            <span className="location-links">
+              {cityName && (
+                <button
+                  type="button"
+                  className="meal-card-link-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onAddFilter) onAddFilter('cities', cityName);
+                  }}
+                  title={`Filter by city: ${cityName}`}
+                >
+                  {cityName}
+                </button>
+              )}
+              {cityName && countryName && <span className="location-sep">, </span>}
+              {countryName && (
+                <button
+                  type="button"
+                  className="meal-card-link-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onAddFilter) onAddFilter('countries', countryName);
+                  }}
+                  title={`Filter by country: ${countryName}`}
+                >
+                  {countryName}
+                </button>
+              )}
+            </span>
           </div>
         )}
 
-        {/* Primary Main Dish Tag */}
+        {/* Primary Main Dish Tag: Click filters by dish name */}
         {primaryMain && primaryMain.food && (
-          <div className="meal-card-dish-tag">
-            <Utensils size={13} className="dish-icon" />
-            <span className="dish-name">{primaryMain.food.name}</span>
-            {primaryMain.rating && (
-              <span className="dish-rating-sub">({primaryMain.rating})</span>
-            )}
+          <div className="meal-card-dish-row">
+            <button
+              type="button"
+              className="meal-card-dish-tag"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onAddFilter) onAddFilter('search', primaryMain.food.name);
+              }}
+              title={`Filter by dish: ${primaryMain.food.name}`}
+            >
+              <Utensils size={13} className="dish-icon" />
+              <span className="dish-name">{primaryMain.food.name}</span>
+              {primaryMain.rating && (
+                <span className="dish-rating-sub">({formatRatingLabel(primaryMain.rating)})</span>
+              )}
+            </button>
           </div>
         )}
 
-        {/* Comment Excerpt */}
+        {/* Comment Excerpt (Neutral, does not navigate) */}
         {meal.comment && (
           <p className="meal-card-comment">
             &ldquo;{meal.comment}&rdquo;
@@ -135,25 +261,49 @@ export default function MealGridCard({ meal, onSelectMeal }) {
 
         {/* Card Footer: Date & Contextual Tags */}
         <div className="meal-card-footer">
-          <div className="meal-card-date">
+          <div
+            className="meal-card-date"
+            onClick={(e) => {
+              const decade = getDecade(meal.year);
+              if (decade && onAddFilter) {
+                e.stopPropagation();
+                onAddFilter('decades', decade);
+              }
+            }}
+            title={meal.year ? `Filter by decade: ${getDecade(meal.year)}` : ''}
+            style={{ cursor: meal.year ? 'pointer' : 'default' }}
+          >
             <Calendar size={13} />
             <span>{meal.formattedDate}</span>
           </div>
 
           <div className="meal-card-badges-right">
             {meal.arsenal && (
-              <span
+              <button
+                type="button"
                 className="meal-card-afc-pill"
-                title={`Arsenal Matchday: vs ${meal.arsenal.opponent || 'Match'}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onAddFilter) onAddFilter('isArsenalMatch', true);
+                }}
+                title={`Filter to Arsenal Matchday: vs ${meal.arsenal.opponent || 'Match'}`}
               >
                 <Shield size={11} />
                 <span>AFC</span>
-              </span>
+              </button>
             )}
             {meal.isBusiness && (
-              <span className="meal-card-biz-pill" title="Business Dining">
+              <button
+                type="button"
+                className="meal-card-biz-pill"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onAddFilter) onAddFilter('isBusiness', true);
+                }}
+                title="Filter to Business Dining"
+              >
                 Biz
-              </span>
+              </button>
             )}
           </div>
         </div>

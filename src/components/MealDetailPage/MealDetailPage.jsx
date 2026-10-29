@@ -13,6 +13,7 @@ import {
   Quote,
   Users,
 } from 'lucide-react';
+import { formatRatingLabel } from '../../utils/mealsFilter.js';
 import './MealDetailPage.css';
 
 function getRatingBadgeStyle(rating) {
@@ -35,7 +36,7 @@ function getRatingBadgeStyle(rating) {
   return { bg: '#f1f5f9', text: '#64748b', border: '#e2e8f0' };
 }
 
-export default function MealDetailPage({ meal, onBack }) {
+export default function MealDetailPage({ meal, onBack, onSelectRestaurant }) {
   if (!meal) {
     return (
       <div className="meal-detail-container">
@@ -92,7 +93,7 @@ export default function MealDetailPage({ meal, onBack }) {
                 }}
               >
                 <Star size={14} fill="currentColor" />
-                <span>{meal.rating}</span>
+                <span>{formatRatingLabel(meal.rating)}</span>
               </span>
             )}
           </div>
@@ -193,7 +194,7 @@ export default function MealDetailPage({ meal, onBack }) {
                           }}
                         >
                           <Star size={11} fill="currentColor" />
-                          <span>{main.rating}</span>
+                          <span>{formatRatingLabel(main.rating)}</span>
                         </span>
                       )}
                     </div>
@@ -306,6 +307,17 @@ export default function MealDetailPage({ meal, onBack }) {
               </div>
 
               <div className="venue-actions">
+                {onSelectRestaurant && meal.restaurant.id && (
+                  <button
+                    type="button"
+                    className="venue-btn profile-btn"
+                    onClick={() => onSelectRestaurant(meal.restaurant.id)}
+                    title={`View dining history at ${meal.restaurant.name}`}
+                  >
+                    <Utensils size={14} />
+                    <span>View Restaurant History</span>
+                  </button>
+                )}
                 {meal.restaurant.mapUrl && (
                   <a
                     href={meal.restaurant.mapUrl}

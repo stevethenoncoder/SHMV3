@@ -15,6 +15,16 @@ export const CANONICAL_RATINGS = [
   'The Worst in the World',
 ];
 
+/**
+ * Formats a rating text for compact lozenge / badge display.
+ * Replaces verbose "OK but wouldn't recommend" with "OK".
+ */
+export function formatRatingLabel(rating) {
+  if (!rating) return '';
+  if (rating.toLowerCase().includes('ok but')) return 'OK';
+  return rating;
+}
+
 export const RATING_RANK = {
   'the dogs': 9,
   exceptional: 8,

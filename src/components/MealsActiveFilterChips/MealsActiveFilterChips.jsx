@@ -1,5 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { formatRatingLabel } from '../../utils/mealsFilter.js';
 import './MealsActiveFilterChips.css';
 
 export default function MealsActiveFilterChips({
@@ -35,7 +36,7 @@ export default function MealsActiveFilterChips({
   (filterState.ratings || []).forEach((rating) => {
     chips.push({
       id: `rating-${rating}`,
-      label: `Rating: ${rating}`,
+      label: `Rating: ${formatRatingLabel(rating)}`,
       onRemove: () =>
         onRemoveFilter(
           'ratings',

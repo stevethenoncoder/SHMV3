@@ -1,0 +1,72 @@
+.restaurant-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.restaurant-kpi-card {
+  background-color: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.restaurant-kpi-card:hover {
+  border-color: var(--border-medium, #cbd5e1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.restaurant-kpi-value {
+  font-size: 1.85rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: -0.025em;
+  font-feature-settings: 'tnum';
+}
+
+.restaurant-kpi-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary, #64748b);
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 900px) {
+  .restaurant-kpi-strip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .restaurant-kpi-value {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .restaurant-kpi-strip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .restaurant-kpi-card {
+    padding: 0.75rem 0.85rem;
+  }
+
+  .restaurant-kpi-value {
+    font-size: 1.35rem;
+  }
+
+  .restaurant-kpi-label {
+    font-size: 0.7rem;
+  }
+}

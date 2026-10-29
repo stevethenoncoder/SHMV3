@@ -1,4 +1,5 @@
-import { fetchCsvFeed } from '../data/fetchFeeds.js';
+import { fetchCsvFeed, clearCsvCache } from '../data/fetchFeeds.js';
+import { RATING_RANK } from '../utils/mealsFilter.js';
 
 const BASE_URL =
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vS5zY2-4h1TBiHM1bgJ4NiFiBgngiFNAozE-NWNStZOmSW8BT7UuYBBut9WhpJeKutRaUk3DkDZFNlH/pub?output=csv&gid=';
@@ -17,15 +18,37 @@ export const MEALS_FEED_URLS = {
   Meals_Photo: `${BASE_URL}153241932`,
   Meals_People: `${BASE_URL}668079142`,
   People_Public: `${BASE_URL}2108210132`,
+  RatingMeal: `${BASE_URL}1413438668`,
 };
 
 const INVALID_GNAME_LITERALS = new Set(['no results found', 'not looked up']);
 
 /**
- * Loads all 11 required Meals worksheets in parallel,
+ * Concurrently fetches an array of feed URLs with a bounded concurrency pool
+ * so we do not exceed browser connection limits to Google Docs.
+ */
+async function fetchFeedsWithConcurrency(urls, concurrency = 4, bypassCache = false) {
+  const results = new Array(urls.length);
+  let nextIndex = 0;
+
+  const workers = Array.from({ length: Math.min(concurrency, urls.length) }, async () => {
+    while (nextIndex < urls.length) {
+      const idx = nextIndex++;
+      results[idx] = await fetchCsvFeed(urls[idx], { bypassCache });
+    }
+  });
+
+  await Promise.all(workers);
+  return results;
+}
+
+/**
+ * Loads all 11 required Meals worksheets with bounded concurrency,
  * cleans formula spill rows, normalises data types,
  * constructs efficient ID lookups, and assembles enriched Meal objects.
  *
+ * @param {Object} [options]
+ * @param {boolean} [options.bypassCache=false]
  * @returns {Promise<{
  *   meals: Array<Object>,
  *   mealsById: Map<number, Object>,
@@ -35,7 +58,29 @@ const INVALID_GNAME_LITERALS = new Set(['no results found', 'not looked up']);
  *   counts: Object
  * }>}
  */
-export async function loadMealsData() {
+export async function loadMealsData(options = {}) {
+  const { bypassCache = false } = options;
+  if (bypassCache) {
+    clearCsvCache();
+  }
+
+  const feedUrlList = [
+    MEALS_FEED_URLS.Meals,
+    MEALS_FEED_URLS.Rest,
+    MEALS_FEED_URLS.City,
+    MEALS_FEED_URLS.Country,
+    MEALS_FEED_URLS.Type,
+    MEALS_FEED_URLS.Meals_Main,
+    MEALS_FEED_URLS.Food,
+    MEALS_FEED_URLS.Ingredient,
+    MEALS_FEED_URLS.FoodType,
+    MEALS_FEED_URLS.FoodCat,
+    MEALS_FEED_URLS.Meals_Photo,
+    MEALS_FEED_URLS.Meals_People,
+    MEALS_FEED_URLS.People_Public,
+    MEALS_FEED_URLS.RatingMeal,
+  ];
+
   const [
     rawMeals,
     rawRest,
@@ -50,21 +95,8 @@ export async function loadMealsData() {
     rawPhoto,
     rawMealsPeople,
     rawPeoplePublic,
-  ] = await Promise.all([
-    fetchCsvFeed(MEALS_FEED_URLS.Meals),
-    fetchCsvFeed(MEALS_FEED_URLS.Rest),
-    fetchCsvFeed(MEALS_FEED_URLS.City),
-    fetchCsvFeed(MEALS_FEED_URLS.Country),
-    fetchCsvFeed(MEALS_FEED_URLS.Type),
-    fetchCsvFeed(MEALS_FEED_URLS.Meals_Main),
-    fetchCsvFeed(MEALS_FEED_URLS.Food),
-    fetchCsvFeed(MEALS_FEED_URLS.Ingredient),
-    fetchCsvFeed(MEALS_FEED_URLS.FoodType),
-    fetchCsvFeed(MEALS_FEED_URLS.FoodCat),
-    fetchCsvFeed(MEALS_FEED_URLS.Meals_Photo),
-    fetchCsvFeed(MEALS_FEED_URLS.Meals_People),
-    fetchCsvFeed(MEALS_FEED_URLS.People_Public),
-  ]);
+    rawRatingMeal,
+  ] = await fetchFeedsWithConcurrency(feedUrlList, 4, bypassCache);
 
   // 1. Countries Lookup
   const countriesById = new Map();
@@ -105,6 +137,8 @@ export async function loadMealsData() {
       restaurantTypesById.set(id, {
         id,
         name: row.Type?.trim() || '',
+        typeIcon: row.TypeIcon?.trim() || row.typeIcon?.trim() || null,
+        typeGroup: row.TypeGroup?.trim() || null,
       });
     }
   }
@@ -184,6 +218,7 @@ export async function loadMealsData() {
       address: row.Rest_Address?.trim() || null,
       city: citiesById.get(cityId) || null,
       type: restaurantTypesById.get(typeId) || null,
+      typeIcon: restaurantTypesById.get(typeId)?.typeIcon || null,
       latitude: !isNaN(lat) ? lat : null,
       longitude: !isNaN(lng) ? lng : null,
       googleName,
@@ -312,6 +347,19 @@ export async function loadMealsData() {
     }
   }
 
+  // 11. RatingMeal Lookup (Canonical Meal Ratings 1-8)
+  const ratingMealById = new Map();
+  const ratingMealByText = new Map();
+  for (const row of rawRatingMeal) {
+    const id = parseInt(row.Rating_Meal_ID, 10);
+    const text = row.Rating_Meal_Text?.trim();
+    if (!isNaN(id) && text) {
+      const entry = { id, text };
+      ratingMealById.set(id, entry);
+      ratingMealByText.set(text.toLowerCase(), entry);
+    }
+  }
+
   // 12. Enriched Meals
   const enrichedMeals = [];
   const mealsById = new Map();
@@ -388,13 +436,18 @@ export async function loadMealsData() {
     const companions = publicCompanionsByMealId.get(id) || [];
     if (photos.length > 0) mealsWithPhotosCount++;
 
+    const ratingText = row.Meal_Rating?.trim() || 'Unrated';
+    const ratingEntry = ratingMealByText.get(ratingText.toLowerCase()) || null;
+    const ratingId = ratingEntry ? ratingEntry.id : null;
+
     const meal = {
       id,
       date: isoDate,
       formattedDate,
       timestamp,
       year: parseInt(row.Year, 10) || (isoDate ? parseInt(isoDate.slice(0, 4), 10) : null),
-      rating: row.Meal_Rating?.trim() || 'Unrated',
+      rating: ratingText,
+      ratingId,
       valueGBP,
       comment: row.Comment?.trim() || null,
       sentiment: row.Sentiment?.trim() || null,
@@ -402,8 +455,10 @@ export async function loadMealsData() {
       isBusiness,
       arsenal,
       restaurant,
+      typeIcon: restaurant?.type?.typeIcon || null,
       mains,
       photos,
+      hasPhoto: photos.length > 0,
       companions,
     };
 
@@ -414,18 +469,193 @@ export async function loadMealsData() {
   // Default ordering: newest first
   enrichedMeals.sort((a, b) => b.timestamp - a.timestamp);
 
+  // 13. Enrich Restaurants with Dining History
+  const mealsByRestaurantId = new Map();
+  for (const meal of enrichedMeals) {
+    if (meal.restaurant && meal.restaurant.id) {
+      const restId = meal.restaurant.id;
+      if (!mealsByRestaurantId.has(restId)) {
+        mealsByRestaurantId.set(restId, []);
+      }
+      mealsByRestaurantId.get(restId).push(meal);
+    }
+  }
+
+  const enrichedRestaurants = [];
+  let restaurantsWithMealsCount = 0;
+  let zeroMealRestaurantsCount = 0;
+  let repeatVisitRestaurantsCount = 0;
+  let maxVisitsRecorded = 0;
+  let maxVisitedRestaurant = null;
+
+  for (const [restId, rest] of restaurantsById.entries()) {
+    const rMeals = mealsByRestaurantId.get(restId) || [];
+    const mealCount = rMeals.length;
+
+    if (mealCount > 0) {
+      restaurantsWithMealsCount++;
+      if (mealCount > 1) repeatVisitRestaurantsCount++;
+      if (mealCount > maxVisitsRecorded) {
+        maxVisitsRecorded = mealCount;
+        maxVisitedRestaurant = { id: restId, name: rest.name, count: mealCount };
+      }
+    } else {
+      zeroMealRestaurantsCount++;
+    }
+
+    // Sort visits chronologically newest first (rMeals from enrichedMeals is already newest first)
+    const latestMeal = rMeals[0] || null;
+    const firstMeal = rMeals[rMeals.length - 1] || null;
+
+    const yearsSet = new Set();
+    const ratingDistribution = {};
+    const photosList = [];
+    const mainDishesMap = new Map();
+
+    for (const m of rMeals) {
+      if (m.year) yearsSet.add(m.year);
+
+      if (m.rating && m.rating !== 'Unrated') {
+        ratingDistribution[m.rating] = (ratingDistribution[m.rating] || 0) + 1;
+      }
+
+      for (const p of m.photos || []) {
+        photosList.push({
+          ...p,
+          mealId: m.id,
+          mealDate: m.formattedDate,
+          mealRating: m.rating,
+        });
+      }
+
+      for (const d of m.mains || []) {
+        const dishName = d.food?.name;
+        if (dishName) {
+          if (!mainDishesMap.has(dishName)) {
+            mainDishesMap.set(dishName, {
+              name: dishName,
+              count: 0,
+              latestRating: d.rating,
+              category: d.food?.category || null,
+              ingredient: d.food?.ingredient?.name || null,
+              style: d.food?.foodType?.name || null,
+            });
+          }
+          const dishRecord = mainDishesMap.get(dishName);
+          dishRecord.count++;
+          if (d.rating) dishRecord.latestRating = d.rating;
+        }
+      }
+    }
+
+    const yearsVisited = Array.from(yearsSet).sort((a, b) => a - b);
+    const mainDishes = Array.from(mainDishesMap.values()).sort((a, b) => b.count - a.count);
+
+    // Primary photo: valid photo from the most recent photographed meal at this restaurant
+    let primaryPhoto = null;
+    for (const m of rMeals) {
+      if (m.photos && m.photos.length > 0) {
+        primaryPhoto = m.photos[0];
+        break;
+      }
+    }
+
+    // Determine highest / best rating achieved at this venue
+    let bestRating = null;
+    let bestRatingRank = -999;
+    for (const rating of Object.keys(ratingDistribution)) {
+      const rank = RATING_RANK[rating.toLowerCase()] ?? -10;
+      if (rank > bestRatingRank) {
+        bestRatingRank = rank;
+        bestRating = rating;
+      }
+    }
+
+    // Calculate derived Restaurant Average Rating using published RatingMeal lookup
+    let ratingSum = 0;
+    let ratedMealCount = 0;
+    for (const m of rMeals) {
+      if (m.ratingId) {
+        ratingSum += m.ratingId;
+        ratedMealCount++;
+      }
+    }
+    const averageRatingNumeric = ratedMealCount > 0 ? ratingSum / ratedMealCount : null;
+    let averageRatingText = null;
+    if (averageRatingNumeric !== null) {
+      const roundedId = Math.min(8, Math.max(1, Math.round(averageRatingNumeric)));
+      averageRatingText = ratingMealById.get(roundedId)?.text || null;
+    }
+
+    // Attach derived personal dining history
+    rest.meals = rMeals;
+    rest.mealCount = mealCount;
+    rest.ratedMealCount = ratedMealCount;
+    rest.averageRatingNumeric = averageRatingNumeric;
+    rest.averageRatingText = averageRatingText;
+    rest.firstVisit = firstMeal
+      ? {
+          date: firstMeal.date,
+          formattedDate: firstMeal.formattedDate,
+          year: firstMeal.year,
+          timestamp: firstMeal.timestamp,
+        }
+      : null;
+    rest.latestVisit = latestMeal
+      ? {
+          date: latestMeal.date,
+          formattedDate: latestMeal.formattedDate,
+          year: latestMeal.year,
+          timestamp: latestMeal.timestamp,
+        }
+      : null;
+    rest.yearsVisited = yearsVisited;
+    rest.yearSpan =
+      yearsVisited.length > 0
+        ? yearsVisited.length === 1
+          ? `${yearsVisited[0]}`
+          : `${yearsVisited[0]} – ${yearsVisited[yearsVisited.length - 1]}`
+        : null;
+    rest.ratingDistribution = ratingDistribution;
+    rest.bestRating = bestRating;
+    rest.latestRating = latestMeal?.rating || null;
+    rest.primaryPhoto = primaryPhoto;
+    rest.photos = photosList;
+    rest.mainDishes = mainDishes;
+
+    // Public browse includes restaurants with actual dining history
+    if (mealCount > 0) {
+      enrichedRestaurants.push(rest);
+    }
+  }
+
+  // Default discovery order: most recently visited first
+  enrichedRestaurants.sort((a, b) => {
+    const timeA = a.latestVisit?.timestamp || 0;
+    const timeB = b.latestVisit?.timestamp || 0;
+    return timeB - timeA;
+  });
+
   return {
     meals: enrichedMeals,
     mealsById,
+    restaurants: enrichedRestaurants,
     restaurantsById,
     citiesById,
     countriesById,
     publicPeopleById,
+    ratingMealById,
+    ratingMealByText,
     counts: {
       totalMeals: enrichedMeals.length,
       resolvedRestaurants: resolvedRestCount,
       unresolvedRestaurants: unresolvedRestCount,
       totalRestaurants: restaurantsById.size,
+      totalRestaurantsWithMeals: enrichedRestaurants.length,
+      zeroMealRestaurants: zeroMealRestaurantsCount,
+      repeatVisitRestaurants: repeatVisitRestaurantsCount,
+      maxVisitsRecorded,
+      maxVisitedRestaurant,
       totalMains: totalMainsLoaded,
       resolvedFoods: resolvedFoodsCount,
       unresolvedFoods: unresolvedFoodsCount,
