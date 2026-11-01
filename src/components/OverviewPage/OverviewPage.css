@@ -1,0 +1,1079 @@
+/* ==========================================================================
+   Overview Page Styles (Landing Page)
+   ========================================================================== */
+
+.overview-page {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  color: var(--text-primary, #0f172a);
+}
+
+/* Hero / Header Banner */
+.overview-hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #334155 100%);
+  color: #ffffff;
+  border-radius: var(--radius-lg, 16px);
+  padding: 2.25rem 2rem;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.overview-hero-left h1 {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.overview-hero-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.65rem;
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.overview-hero-subtitle {
+  font-size: 1rem;
+  color: #94a3b8;
+  margin: 0;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+.overview-hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.overview-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.overview-cta-btn.primary {
+  background-color: var(--accent, #0284c7);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+}
+
+.overview-cta-btn.primary:hover {
+  background-color: #0369a1;
+  transform: translateY(-1px);
+}
+
+.overview-cta-btn.secondary {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.overview-cta-btn.secondary:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   Section 1: Headline Key Stats, Top 5 Restaurants & Revolving Photo Carousel
+   ========================================================================== */
+
+.overview-headline-section {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+@media (max-width: 1024px) {
+  .overview-headline-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+.overview-metrics-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  justify-content: flex-start;
+}
+
+.overview-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 640px) {
+  .overview-kpi-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Compressed KPI Cards (~half the height of the original) */
+.kpi-card {
+  background: var(--surface-card, #ffffff);
+  border-radius: var(--radius-lg, 12px);
+  padding: 0.75rem 0.95rem;
+  border: 1px solid var(--border-light, #e2e8f0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 86px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.kpi-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.kpi-title {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary, #64748b);
+}
+
+.kpi-icon-wrap {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f5f9;
+  color: #334155;
+  flex-shrink: 0;
+}
+
+.kpi-icon-wrap.meals {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+
+.kpi-icon-wrap.cost {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.kpi-icon-wrap.restaurants {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.kpi-value {
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-primary, #0f172a);
+  margin-bottom: 0.2rem;
+}
+
+.kpi-subtext {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #64748b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Revolving Photo Carousel Column & Card */
+.overview-carousel-col {
+  display: flex;
+  min-height: 280px;
+}
+
+.overview-photo-carousel-card {
+  position: relative;
+  width: 100%;
+  min-height: 280px;
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: #0f172a;
+  border: 1px solid var(--border-light, #e2e8f0);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.22), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.overview-photo-carousel-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -6px rgba(15, 23, 42, 0.32), 0 10px 14px -6px rgba(15, 23, 42, 0.15);
+}
+
+.carousel-image-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background-color: #0f172a;
+}
+
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  animation: carouselFadeIn 0.6s ease;
+  transition: transform 0.6s ease;
+}
+
+.overview-photo-carousel-card:hover .carousel-image {
+  transform: scale(1.03);
+}
+
+@keyframes carouselFadeIn {
+  from {
+    opacity: 0.3;
+    transform: scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Top Floating Controls Bar */
+.carousel-top-bar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1rem 0 1rem;
+}
+
+.carousel-tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.tag-icon {
+  color: #38bdf8;
+}
+
+.carousel-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 9999px;
+  padding: 3px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.carousel-nav-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.carousel-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #38bdf8;
+}
+
+.carousel-counter-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  padding: 0 4px;
+  min-width: 38px;
+  text-align: center;
+}
+
+/* Bottom Overlay with Restaurant Name and Date */
+.carousel-overlay {
+  position: relative;
+  z-index: 10;
+  padding: 2.5rem 1.25rem 1.1rem 1.25rem;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.7) 65%, transparent 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.carousel-overlay-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  overflow: hidden;
+}
+
+.carousel-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.carousel-restaurant-name {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.carousel-rating-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  background: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.carousel-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  flex-wrap: wrap;
+}
+
+.carousel-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+
+.meta-icon {
+  color: #94a3b8;
+}
+
+.meta-dot {
+  color: #64748b;
+  font-size: 0.7rem;
+}
+
+.carousel-cuisine-tag {
+  color: #e2e8f0;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.carousel-action-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 5px 10px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.overview-photo-carousel-card:hover .carousel-action-hint {
+  background: rgba(56, 189, 248, 0.28);
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+.carousel-action-arrow {
+  transition: transform 0.2s ease;
+}
+
+.overview-photo-carousel-card:hover .carousel-action-arrow {
+  transform: translateX(2px);
+}
+
+/* Subtle Progress Track at the bottom */
+.carousel-progress-track {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  z-index: 20;
+}
+
+.carousel-progress-fill {
+  height: 100%;
+  background: #38bdf8;
+  transition: width 0.3s ease;
+}
+
+/* Top 5 Restaurants Card */
+.overview-top-restaurants-card {
+  background: var(--surface-card, #ffffff);
+  border-radius: var(--radius-lg, 12px);
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border-light, #e2e8f0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.top-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.top-card-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.top-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.top-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+  background-color: #f8fafc;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 0.84rem;
+  border: 1px solid transparent;
+}
+
+.top-item-row:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateX(2px);
+}
+
+.top-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  overflow: hidden;
+}
+
+.rank-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  background-color: #e2e8f0;
+  color: #475569;
+}
+
+.rank-badge.rank-1 {
+  background-color: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.rank-badge.rank-2 {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.rank-badge.rank-3 {
+  background-color: #ffedd5;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+.top-item-name {
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-item-meta {
+  font-size: 0.74rem;
+  color: var(--text-secondary, #64748b);
+  margin-left: 0.25rem;
+}
+
+.top-item-count {
+  font-weight: 700;
+  color: var(--accent, #0284c7);
+  font-size: 0.82rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* ==========================================================================
+   Full-Width Progression of Meals Line Graph
+   ========================================================================== */
+
+.overview-progression-section {
+  background: var(--surface-card, #ffffff);
+  border-radius: var(--radius-lg, 14px);
+  padding: 1.5rem 1.75rem;
+  border: 1px solid var(--border-light, #e2e8f0);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.progression-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.progression-title-wrap h2 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.25rem 0;
+  color: var(--text-primary, #0f172a);
+}
+
+.progression-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-secondary, #64748b);
+  margin: 0;
+}
+
+.progression-toggle-group {
+  display: inline-flex;
+  padding: 3px;
+  background-color: #f1f5f9;
+  border-radius: 8px;
+  border: 1px solid var(--border-light, #e2e8f0);
+}
+
+.progression-toggle-btn {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.progression-toggle-btn.active {
+  background: #ffffff;
+  color: var(--text-primary, #0f172a);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progression-chart-container {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+}
+
+.progression-svg {
+  width: 100%;
+  height: 260px;
+  overflow: visible;
+}
+
+.chart-grid-line {
+  stroke: #f1f5f9;
+  stroke-width: 1;
+}
+
+.chart-axis-text {
+  font-size: 11px;
+  fill: #94a3b8;
+  font-family: inherit;
+  user-select: none;
+}
+
+.progression-wavy-curve {
+  fill: none;
+  stroke: var(--accent, #0284c7);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 4px 8px rgba(2, 132, 199, 0.25));
+}
+
+.chart-data-point {
+  fill: #ffffff;
+  stroke: var(--accent, #0284c7);
+  stroke-width: 2.5;
+  cursor: pointer;
+  transition: transform 0.15s ease, r 0.15s ease;
+}
+
+.chart-data-point:hover,
+.chart-data-point.is-hovered {
+  r: 6;
+  fill: var(--accent, #0284c7);
+  stroke: #ffffff;
+  stroke-width: 3;
+}
+
+/* ==========================================================================
+   Section 3: Categorical Top 5 Grids (Food, Locations, People)
+   ========================================================================== */
+
+.overview-breakdowns-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .overview-breakdowns-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.breakdown-card {
+  background: var(--surface-card, #ffffff);
+  border-radius: var(--radius-lg, 12px);
+  padding: 1.5rem;
+  border: 1px solid var(--border-light, #e2e8f0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.breakdown-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 0.85rem;
+}
+
+.breakdown-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.breakdown-icon {
+  color: var(--accent, #0284c7);
+}
+
+.breakdown-card-header h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary, #0f172a);
+}
+
+.breakdown-subsections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.sub-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.sub-breakdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+}
+
+.sub-breakdown-total {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  background-color: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.sub-top-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.sub-top-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.sub-top-item:hover {
+  background-color: #f8fafc;
+}
+
+.sub-top-labels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+}
+
+.sub-item-name {
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+}
+
+.sub-item-count {
+  font-weight: 700;
+  color: var(--text-secondary, #64748b);
+  font-size: 0.78rem;
+}
+
+.sub-item-progress-track {
+  width: 100%;
+  height: 5px;
+  background-color: #f1f5f9;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.sub-item-progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}
+
+.fill-cuisine {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.fill-dish {
+  background: linear-gradient(90deg, #06b6d4, #0284c7);
+}
+
+.fill-country {
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+}
+
+.fill-city {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.fill-people {
+  background: linear-gradient(90deg, #8b5cf6, #6d28d9);
+}
+
+/* ==========================================================================
+   Section 4: Visual Graphs (Ratings Pie & Sentiment Split Line Graph)
+   ========================================================================== */
+
+.overview-graphs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .overview-graphs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.graph-card {
+  background: var(--surface-card, #ffffff);
+  border-radius: var(--radius-lg, 12px);
+  padding: 1.5rem;
+  border: 1px solid var(--border-light, #e2e8f0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.graph-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.graph-card-header h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 0.2rem 0;
+  color: var(--text-primary, #0f172a);
+}
+
+.graph-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #64748b);
+  margin: 0;
+}
+
+/* Pie Chart Layout */
+.pie-chart-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.pie-svg-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+}
+
+.pie-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.pie-slice {
+  cursor: pointer;
+  transition: opacity 0.2s ease, filter 0.2s ease;
+  stroke: #ffffff;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.pie-slice:hover,
+.pie-slice.is-hovered {
+  opacity: 0.95;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.28));
+}
+
+.pie-donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.donut-center-total {
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text-primary, #0f172a);
+}
+
+.donut-center-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.pie-legend-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.pie-legend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.pie-legend-item:hover {
+  background-color: #f8fafc;
+}
+
+.pie-legend-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pie-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pie-legend-count {
+  font-weight: 700;
+  color: var(--text-secondary, #475569);
+  font-size: 0.78rem;
+}
+
+/* Sentiment Line Graph */
+.sentiment-chart-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sentiment-legend {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.sentiment-legend-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sentiment-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.sentiment-svg {
+  width: 100%;
+  height: 220px;
+}
+
+.sentiment-curve {
+  fill: none;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sentiment-curve.positive {
+  stroke: #10b981;
+}
+
+.sentiment-curve.neutral {
+  stroke: #3b82f6;
+}
+
+.sentiment-curve.negative {
+  stroke: #ef4444;
+}
+
+/* Tooltip */
+.chart-tooltip-floating {
+  position: absolute;
+  z-index: 1000;
+  background-color: rgba(15, 23, 42, 0.92);
+  color: #ffffff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  pointer-events: none;
+  transform: translate(-50%, -120%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+}

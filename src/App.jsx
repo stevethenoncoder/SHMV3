@@ -12,8 +12,12 @@ import MealCommentBar from './components/MealCommentBar/MealCommentBar.jsx';
 import RestaurantKpiStrip from './components/RestaurantKpiStrip/RestaurantKpiStrip.jsx';
 import RestaurantsFilterBar from './components/RestaurantsFilterBar/RestaurantsFilterBar.jsx';
 import RestaurantsDirectory from './components/RestaurantsDirectory/RestaurantsDirectory.jsx';
+import RestaurantsMap from './components/RestaurantsMap/RestaurantsMap.jsx';
 import RestaurantsMobileFilterSheet from './components/RestaurantsMobileFilterSheet/RestaurantsMobileFilterSheet.jsx';
 import RestaurantDetailPage from './components/RestaurantDetailPage/RestaurantDetailPage.jsx';
+import OverviewPage from './components/OverviewPage/OverviewPage.jsx';
+import RelationshipsPage from './components/RelationshipsPage/RelationshipsPage.jsx';
+import StatsPage from './components/StatsPage/StatsPage.jsx';
 
 import Pagination from './components/Pagination/Pagination.jsx';
 import {
@@ -45,15 +49,25 @@ export default function App() {
   const [restaurantsById, setRestaurantsById] = useState(new Map());
   const [publicPeopleById, setPublicPeopleById] = useState(new Map());
 
-  // Section Navigation: 'chronicle' | 'restaurants'
+  // Section Navigation: 'overview' | 'chronicle' | 'restaurants' | 'relationships' | 'stats'
   const [activeSection, setActiveSection] = useState(() => {
-    if (typeof window === 'undefined') return 'chronicle';
+    if (typeof window === 'undefined') return 'overview';
     const path = window.location.pathname;
+    if (path.startsWith('/stats')) return 'stats';
+    if (path.startsWith('/relationships')) return 'relationships';
     if (path.startsWith('/restaurants')) return 'restaurants';
+    if (path.startsWith('/chronicle')) return 'chronicle';
     const params = new URLSearchParams(window.location.search);
+    if (params.get('section') === 'stats') return 'stats';
+    if (params.get('section') === 'relationships') return 'relationships';
     if (params.get('section') === 'restaurants' || params.get('restaurant')) return 'restaurants';
-    return 'chronicle';
+    if (params.get('section') === 'chronicle' || params.get('meal')) return 'chronicle';
+    return 'overview';
   });
+
+  // Track if user jumped to Chronicle with a preselection from another area
+  // e.g. { section: 'overview', label: 'Return to Overview' } or { section: 'restaurants', label: 'Return to Restaurants' }
+  const [chronicleOrigin, setChronicleOrigin] = useState(null);
 
   // Active Detail ID states
   const [activeMealId, setActiveMealId] = useState(() => {
@@ -82,6 +96,10 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     const initial = { ...DEFAULT_MEALS_FILTER_STATE };
     if (params.get('search')) initial.search = params.get('search');
+    if (params.get('restaurant')) {
+      const restId = parseInt(params.get('restaurant'), 10);
+      if (!isNaN(restId)) initial.restaurantId = restId;
+    }
     if (params.get('country')) initial.countries = [params.get('country')];
     if (params.get('city')) initial.cities = [params.get('city')];
     if (params.get('rating')) initial.ratings = [params.get('rating')];
@@ -105,6 +123,7 @@ export default function App() {
   const [restaurantSortOption, setRestaurantSortOption] = useState('visits_desc');
   const [restaurantCurrentPage, setRestaurantCurrentPage] = useState(1);
   const [restaurantPageSize, setRestaurantPageSize] = useState(18);
+  const [restaurantViewMode, setRestaurantViewMode] = useState('list');
 
   // Ingest data once
   const fetchData = async (bypassCache = false) => {
@@ -151,7 +170,23 @@ export default function App() {
         return;
       }
 
-      // 3. Match /restaurants browse
+      // 3. Match /stats browse
+      if (path.startsWith('/stats') || params.get('section') === 'stats') {
+        setActiveSection('stats');
+        setActiveRestaurantId(null);
+        setActiveMealId(null);
+        return;
+      }
+
+      // 4. Match /relationships browse
+      if (path.startsWith('/relationships') || params.get('section') === 'relationships') {
+        setActiveSection('relationships');
+        setActiveRestaurantId(null);
+        setActiveMealId(null);
+        return;
+      }
+
+      // 5. Match /restaurants browse
       if (path.startsWith('/restaurants') || params.get('section') === 'restaurants') {
         setActiveSection('restaurants');
         setActiveRestaurantId(null);
@@ -159,7 +194,15 @@ export default function App() {
         return;
       }
 
-      // 4. Default /meals or /
+      // 6. Match /chronicle browse
+      if (path.startsWith('/chronicle') || params.get('section') === 'chronicle') {
+        setActiveSection('chronicle');
+        setActiveRestaurantId(null);
+        setActiveMealId(null);
+        return;
+      }
+
+      // 5. Query params or default Overview (/)
       const qMealId = params.get('meal');
       const qRestId = params.get('restaurant');
       if (qMealId) {
@@ -171,7 +214,7 @@ export default function App() {
         setActiveRestaurantId(parseInt(qRestId, 10));
         setActiveMealId(null);
       } else {
-        setActiveSection('chronicle');
+        setActiveSection('overview');
         setActiveMealId(null);
         setActiveRestaurantId(null);
       }
@@ -262,25 +305,66 @@ export default function App() {
 
   // --- NAVIGATION ACTION HANDLERS ---
   const handleSelectNav = (section) => {
+    setChronicleOrigin(null);
     setActiveSection(section);
     setActiveMealId(null);
     setActiveRestaurantId(null);
-    const targetUrl = section === 'restaurants' ? '/restaurants' : '/';
+    let targetUrl = '/';
+    if (section === 'chronicle') targetUrl = '/chronicle';
+    else if (section === 'restaurants') targetUrl = '/restaurants';
+    else if (section === 'relationships') targetUrl = '/relationships';
+    else if (section === 'stats') targetUrl = '/stats';
     window.history.pushState(null, '', targetUrl);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
+  };
+
+  const handleApplyChronicleFilter = (filterKey, filterValue, metaName) => {
+    const origin =
+      activeSection === 'relationships'
+        ? { section: 'relationships', label: 'Return to Relationships' }
+        : { section: 'overview', label: 'Return to Overview' };
+    setChronicleOrigin(origin);
+    setActiveSection('chronicle');
+    setActiveMealId(null);
+    setActiveRestaurantId(null);
+
+    if (typeof filterKey === 'object' && filterKey !== null) {
+      // Multi-filter object support (e.g. from Relationships bipartite flow)
+      const mergedFilters = {
+        ...DEFAULT_MEALS_FILTER_STATE,
+        ...filterKey,
+      };
+      setMealsFilterState(mergedFilters);
+      window.history.pushState(null, '', '/chronicle');
+    } else if (filterKey === 'restaurantId') {
+      setMealsFilterState({
+        ...DEFAULT_MEALS_FILTER_STATE,
+        restaurantId: filterValue,
+        restaurantName: metaName || '',
+      });
+      window.history.pushState(null, '', `/?restaurant=${filterValue}`);
+    } else {
+      setMealsFilterState({
+        ...DEFAULT_MEALS_FILTER_STATE,
+        [filterKey]: Array.isArray(filterValue) ? filterValue : [filterValue],
+      });
+      window.history.pushState(null, '', '/chronicle');
+    }
+    setMealsCurrentPage(1);
+    window.scrollTo(0, 0);
   };
 
   const handleOpenMeal = (mealId) => {
     setActiveMealId(mealId);
     setActiveRestaurantId(null);
     window.history.pushState(null, '', `/meals/${mealId}`);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   };
 
   const handleBackToChronicle = () => {
     setActiveMealId(null);
     window.history.pushState(null, '', '/');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   };
 
   const handleOpenRestaurant = (restaurantId) => {
@@ -288,18 +372,53 @@ export default function App() {
     setActiveMealId(null);
     setActiveRestaurantId(restaurantId);
     window.history.pushState(null, '', `/restaurants/${restaurantId}`);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   };
 
   const handleBackToRestaurants = () => {
     setActiveRestaurantId(null);
     window.history.pushState(null, '', '/restaurants');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
+  };
+
+  const handleNavigateToChronicleWithRestaurant = (restaurant) => {
+    setChronicleOrigin({ section: 'restaurants', label: 'Return to Restaurants' });
+    setActiveSection('chronicle');
+    setActiveMealId(null);
+    setActiveRestaurantId(null);
+    setMealsFilterState({
+      ...DEFAULT_MEALS_FILTER_STATE,
+      restaurantId: restaurant.id,
+      restaurantName: restaurant.name,
+    });
+    setMealsCurrentPage(1);
+    window.history.pushState(null, '', `/?restaurant=${restaurant.id}`);
+    window.scrollTo(0, 0);
+  };
+
+  const handleReturnFromChronicle = () => {
+    if (!chronicleOrigin) return;
+    const targetSection = chronicleOrigin.section;
+    setChronicleOrigin(null);
+    setMealsFilterState(DEFAULT_MEALS_FILTER_STATE);
+    setMealsCurrentPage(1);
+    setActiveMealId(null);
+    setActiveRestaurantId(null);
+    setActiveSection(targetSection);
+    let targetUrl = '/';
+    if (targetSection === 'restaurants') targetUrl = '/restaurants';
+    else if (targetSection === 'relationships') targetUrl = '/relationships';
+    window.history.pushState(null, '', targetUrl);
+    window.scrollTo(0, 0);
   };
 
   // --- MEALS FILTER ACTION HANDLERS ---
   const handleUpdateMealFilter = (key, value) => {
-    setMealsFilterState((prev) => ({ ...prev, [key]: value }));
+    if (key === 'restaurantId' && !value) {
+      setMealsFilterState((prev) => ({ ...prev, restaurantId: null, restaurantName: '' }));
+    } else {
+      setMealsFilterState((prev) => ({ ...prev, [key]: value }));
+    }
     setMealsCurrentPage(1);
   };
 
@@ -321,6 +440,7 @@ export default function App() {
   };
 
   const handleClearAllMealFilters = () => {
+    setChronicleOrigin(null);
     setMealsFilterState(DEFAULT_MEALS_FILTER_STATE);
     setMealsCurrentPage(1);
   };
@@ -381,6 +501,21 @@ export default function App() {
     restaurantFilterState,
   ]);
 
+  // Sensitive return action: only active when user jumped into Chronicle with a pre-selection
+  const returnAction = useMemo(() => {
+    if (activeSection !== 'chronicle' || activeMealId !== null || !chronicleOrigin) {
+      return null;
+    }
+    // Only sensitive if there is an active pre-selected filter state
+    if (activeMealsFiltersCount === 0) {
+      return null;
+    }
+    return {
+      label: chronicleOrigin.label,
+      onReturn: handleReturnFromChronicle,
+    };
+  }, [activeSection, activeMealId, chronicleOrigin, activeMealsFiltersCount]);
+
   return (
     <div className="meals-app-layout">
       {/* Primary Header */}
@@ -397,6 +532,7 @@ export default function App() {
           meals={meals}
           actionTrigger={actionTrigger}
           onSelectMeal={handleOpenMeal}
+          returnAction={returnAction}
         />
       )}
 
@@ -427,7 +563,7 @@ export default function App() {
             onBack={handleBackToChronicle}
             onSelectRestaurant={handleOpenRestaurant}
           />
-        ) : activeSection === 'restaurants' && activeRestaurantId ? (
+        ) : activeRestaurantId ? (
           /* 2. Restaurant Detail View */
           <RestaurantDetailPage
             restaurant={activeRestaurant}
@@ -465,39 +601,50 @@ export default function App() {
                 setRestaurantCurrentPage(1);
               }}
               onOpenMobileFilters={() => setIsMobileRestaurantFilterOpen(true)}
+              viewMode={restaurantViewMode}
+              onViewModeChange={setRestaurantViewMode}
             />
 
-            {/* 3. Flat Restaurant Directory & Expanded Meal Rows */}
-            <RestaurantsDirectory
-              restaurants={paginatedRestaurants}
-              sortOption={restaurantSortOption}
-              onSortChange={(s) => {
-                setRestaurantSortOption(s);
-                setRestaurantCurrentPage(1);
-              }}
-              onSelectMeal={handleOpenMeal}
-              onSelectRestaurant={handleOpenRestaurant}
-              onClearFilters={handleClearAllRestaurantFilters}
-            />
-
-            {/* 4. Pagination */}
-            {totalFilteredRestaurantsCount > 0 && (
-              <div className="meals-pagination-container">
-                <Pagination
-                  currentPage={safeRestaurantCurrentPage}
-                  totalPages={totalRestaurantPages}
-                  pageSize={restaurantPageSize}
-                  totalItems={totalFilteredRestaurantsCount}
-                  onPageChange={(p) => {
-                    setRestaurantCurrentPage(p);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  onPageSizeChange={(sz) => {
-                    setRestaurantPageSize(sz);
+            {/* 3. View Switcher: Map View vs Flat Directory Table */}
+            {restaurantViewMode === 'map' ? (
+              <RestaurantsMap
+                restaurants={sortedRestaurants}
+                onSelectRestaurantForChronicle={handleNavigateToChronicleWithRestaurant}
+              />
+            ) : (
+              <>
+                <RestaurantsDirectory
+                  restaurants={paginatedRestaurants}
+                  sortOption={restaurantSortOption}
+                  onSortChange={(s) => {
+                    setRestaurantSortOption(s);
                     setRestaurantCurrentPage(1);
                   }}
+                  onSelectMeal={handleOpenMeal}
+                  onSelectRestaurant={handleOpenRestaurant}
+                  onClearFilters={handleClearAllRestaurantFilters}
                 />
-              </div>
+
+                {/* 4. Pagination */}
+                {totalFilteredRestaurantsCount > 0 && (
+                  <div className="meals-pagination-container">
+                    <Pagination
+                      currentPage={safeRestaurantCurrentPage}
+                      totalPages={totalRestaurantPages}
+                      pageSize={restaurantPageSize}
+                      totalItems={totalFilteredRestaurantsCount}
+                      onPageChange={(p) => {
+                        setRestaurantCurrentPage(p);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      onPageSizeChange={(sz) => {
+                        setRestaurantPageSize(sz);
+                        setRestaurantCurrentPage(1);
+                      }}
+                    />
+                  </div>
+                )}
+              </>
             )}
 
             {/* 5. Mobile Filter Sheet */}
@@ -511,7 +658,7 @@ export default function App() {
               publicPeopleById={publicPeopleById}
             />
           </div>
-        ) : (
+        ) : activeSection === 'chronicle' ? (
           /* 4. Meal Chronicle Browse View */
           <div className="chronicle-view">
             <div className="chronicle-layout">
@@ -607,6 +754,30 @@ export default function App() {
               counts={mealFacetCounts}
             />
           </div>
+        ) : activeSection === 'relationships' ? (
+          /* 5. Dining Relationships Flow View */
+          <RelationshipsPage
+            meals={meals}
+            onApplyChronicleFilter={handleApplyChronicleFilter}
+          />
+        ) : activeSection === 'stats' ? (
+          /* 6. Dining Intelligence & Archive KPIs */
+          <StatsPage
+            meals={meals}
+            restaurants={restaurants}
+            onApplyChronicleFilter={handleApplyChronicleFilter}
+          />
+        ) : (
+          /* 7. Overview Landing Page (Default) */
+          <OverviewPage
+            meals={meals}
+            restaurants={restaurants}
+            onNavigateToChronicle={() => handleSelectNav('chronicle')}
+            onNavigateToRestaurants={() => handleSelectNav('restaurants')}
+            onNavigateToMealDetail={handleOpenMeal}
+            onNavigateToRestaurantDetail={handleOpenRestaurant}
+            onApplyChronicleFilter={handleApplyChronicleFilter}
+          />
         )}
       </main>
     </div>

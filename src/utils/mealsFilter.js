@@ -42,6 +42,8 @@ export const RATING_RANK = {
 
 export const DEFAULT_MEALS_FILTER_STATE = {
   search: '',
+  restaurantId: null,
+  restaurantName: '',
   decades: [],
   ratings: [],
   countries: [],
@@ -73,6 +75,7 @@ export function getDecade(year) {
 export function countActiveFilters(filterState) {
   let count = 0;
   if (filterState.search && filterState.search.trim()) count++;
+  if (filterState.restaurantId) count++;
   count += (filterState.decades || []).length;
   count += (filterState.ratings || []).length;
   count += (filterState.countries || []).length;
@@ -119,6 +122,13 @@ export function matchesFilters(meal, filterState, excludeFacetKey = null) {
       !country.includes(q) &&
       !matchDish
     ) {
+      return false;
+    }
+  }
+
+  // 1b. Specific Restaurant Filter (Exact Match)
+  if (excludeFacetKey !== 'restaurantId' && filterState.restaurantId) {
+    if (meal.restaurant?.id !== filterState.restaurantId) {
       return false;
     }
   }

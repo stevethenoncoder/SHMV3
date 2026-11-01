@@ -1,0 +1,93 @@
+.rating-distribution-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.rating-row {
+  display: grid;
+  grid-template-columns: 180px 1fr 100px;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.rating-row:hover {
+  background-color: #f8fafc;
+}
+
+.rating-row.is-selected {
+  background-color: #f0fdf4;
+  outline: 1px solid #86efac;
+}
+
+.rating-row-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rating-rank-num {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  width: 20px;
+}
+
+.rating-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rating-bar-track {
+  height: 10px;
+  background-color: #f1f5f9;
+  border-radius: 9999px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.rating-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.rating-row-counts {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  font-feature-settings: 'tnum';
+}
+
+.rating-count {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.rating-percentage {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: #64748b;
+  min-width: 44px;
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .rating-row {
+    grid-template-columns: 130px 1fr 70px;
+    gap: 8px;
+  }
+}

@@ -1,0 +1,132 @@
+.sentiment-proportional-bar {
+  display: flex;
+  height: 18px;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin: 14px 0 16px 0;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.sentiment-bar-segment {
+  height: 100%;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sentiment-bar-segment:hover {
+  filter: brightness(1.15);
+  transform: scaleY(1.1);
+}
+
+.sentiment-category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.sentiment-cat-card {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.sentiment-cat-card:hover {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.sentiment-cat-card.active {
+  background-color: #f0fdf4;
+  border-color: #86efac;
+}
+
+.cat-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.cat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cat-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.cat-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  font-feature-settings: 'tnum';
+}
+
+.cat-pct {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.granular-sentiments-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.granular-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.granular-chips-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.granular-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  padding: 2px 8px;
+  font-size: 0.74rem;
+}
+
+.granular-term {
+  font-weight: 600;
+  color: #334155;
+}
+
+.granular-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+@media (max-width: 640px) {
+  .sentiment-category-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

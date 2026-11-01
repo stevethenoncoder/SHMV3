@@ -1,0 +1,136 @@
+.new-repeat-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-dot.new-dot {
+  background-color: #10b981;
+}
+
+.legend-dot.repeat-dot {
+  background-color: #3b82f6;
+}
+
+.stacked-bars-container {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  margin-top: 10px;
+  user-select: none;
+}
+
+.stacked-bars-track {
+  display: flex;
+  align-items: flex-end;
+  height: 180px;
+  gap: 4px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 2px;
+}
+
+.stacked-bar-col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  cursor: pointer;
+  position: relative;
+}
+
+.stacked-bar-outer {
+  width: 100%;
+  max-width: 18px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px 4px 0 0;
+  overflow: hidden;
+  transition: all 0.15s ease;
+}
+
+.stacked-bar-col:hover .stacked-bar-outer {
+  transform: scaleY(1.04);
+  filter: brightness(1.1);
+}
+
+.bar-segment {
+  width: 100%;
+  transition: all 0.15s ease;
+}
+
+.bar-segment.repeat-segment {
+  background-color: #3b82f6;
+}
+
+.bar-segment.new-segment {
+  background-color: #10b981;
+}
+
+.bar-x-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-top: 6px;
+  white-space: nowrap;
+}
+
+.stacked-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background-color: #0f172a;
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 40;
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.stacked-tooltip .tooltip-title {
+  font-weight: 700;
+  color: #38bdf8;
+  margin-bottom: 2px;
+}
+
+.stacked-tooltip .tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.74rem;
+}
+
+.stacked-tooltip .tooltip-row.green {
+  color: #6ee7b7;
+}
+
+.stacked-tooltip .tooltip-row.blue {
+  color: #93c5fd;
+}
+
+.stacked-tooltip .tooltip-row.total {
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  margin-top: 3px;
+  padding-top: 3px;
+  color: #ffffff;
+}

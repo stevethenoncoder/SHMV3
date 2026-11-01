@@ -1,0 +1,140 @@
+.stats-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.stats-kpi-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stats-kpi-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.kpi-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kpi-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.kpi-icon-wrap {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpi-icon-wrap.emerald {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+
+.kpi-icon-wrap.blue {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.kpi-icon-wrap.teal {
+  background-color: #f0fdfa;
+  color: #0d9488;
+}
+
+.kpi-icon-wrap.amber {
+  background-color: #fffbeb;
+  color: #d97706;
+}
+
+.kpi-icon-wrap.yellow {
+  background-color: #fefce8;
+  color: #ca8a04;
+}
+
+.kpi-icon-wrap.indigo {
+  background-color: #eef2ff;
+  color: #4f46e5;
+}
+
+.kpi-icon-wrap.green {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+
+.kpi-icon-wrap.purple {
+  background-color: #faf5ff;
+  color: #9333ea;
+}
+
+.kpi-value {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #0f172a;
+  font-feature-settings: 'tnum';
+  line-height: 1.2;
+}
+
+.kpi-value.text-compact {
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.kpi-sub-unit {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.kpi-subtext {
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.comparison-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.comparison-pill.up {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+
+.comparison-pill.down {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+@media (max-width: 640px) {
+  .stats-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

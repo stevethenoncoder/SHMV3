@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Quote, RefreshCw } from 'lucide-react';
+import { Quote, RefreshCw, ArrowLeft } from 'lucide-react';
 import './MealCommentBar.css';
 
 /**
  * Top bar displayed directly underneath the main header.
- * Displays a random personal dining comment formatted as:
+ * Displays an optional Return button when navigated to Chronicle with pre-selection,
+ * and a random personal dining comment formatted as:
  * "Comment (Restaurant, Year)"
  * Clickable to open that specific meal detail.
  * Refreshes on every user action across the site.
@@ -13,6 +14,7 @@ export default function MealCommentBar({
   meals = [],
   actionTrigger = 0,
   onSelectMeal,
+  returnAction = null,
 }) {
   // Pool of all meals that have a non-empty comment
   const mealsWithComments = useMemo(() => {
@@ -46,44 +48,75 @@ export default function MealCommentBar({
     }
   }, [actionTrigger, manualRefresh, mealsWithComments.length]);
 
-  if (!currentMeal) {
+  if (!currentMeal && !returnAction) {
     return null;
   }
 
-  const restaurantName = currentMeal.restaurant?.name || 'Unknown Venue';
-  const year = currentMeal.year || (currentMeal.date ? currentMeal.date.slice(0, 4) : '');
+  const restaurantName = currentMeal?.restaurant?.name || 'Unknown Venue';
+  const year = currentMeal?.year || (currentMeal?.date ? currentMeal.date.slice(0, 4) : '');
   const attribution = year ? `(${restaurantName}, ${year})` : `(${restaurantName})`;
 
-  return (
-    <div className="meal-comment-bar-root" role="complementary" aria-label="Random dining memory">
-      <div className="meal-comment-bar-container">
-        <button
-          type="button"
-          className="meal-comment-clickable"
-          onClick={() => onSelectMeal && onSelectMeal(currentMeal.id)}
-          title={`View meal from ${currentMeal.formattedDate || 'archive'} at ${restaurantName}`}
-        >
-          <Quote size={15} className="comment-quote-icon" aria-hidden="true" />
-          <span className="comment-quote-text">
-            “{currentMeal.comment.trim()}”
-          </span>
-          <span className="comment-attribution">
-            {attribution}
-          </span>
-        </button>
+  const rootClasses = [
+    'meal-comment-bar-root',
+    returnAction ? 'has-return-action' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
-        <button
-          type="button"
-          className="comment-refresh-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            setManualRefresh((prev) => prev + 1);
-          }}
-          title="Show another random memory"
-          aria-label="Show another random memory"
-        >
-          <RefreshCw size={13} />
-        </button>
+  const containerClasses = [
+    'meal-comment-bar-container',
+    returnAction ? 'has-return-action' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  return (
+    <div className={rootClasses} role="complementary" aria-label="Random dining memory">
+      <div className={containerClasses}>
+        {returnAction && (
+          <button
+            type="button"
+            className="comment-bar-return-btn"
+            onClick={returnAction.onReturn}
+            title={returnAction.label}
+            aria-label={returnAction.label}
+          >
+            <ArrowLeft size={14} className="return-btn-icon" aria-hidden="true" />
+            <span className="return-btn-text">{returnAction.label}</span>
+          </button>
+        )}
+
+        {currentMeal && (
+          <button
+            type="button"
+            className="meal-comment-clickable"
+            onClick={() => onSelectMeal && onSelectMeal(currentMeal.id)}
+            title={`View meal from ${currentMeal.formattedDate || 'archive'} at ${restaurantName}`}
+          >
+            <Quote size={15} className="comment-quote-icon" aria-hidden="true" />
+            <span className="comment-quote-text">
+              “{currentMeal.comment.trim()}”
+            </span>
+            <span className="comment-attribution">
+              {attribution}
+            </span>
+          </button>
+        )}
+
+        {currentMeal && (
+          <button
+            type="button"
+            className="comment-refresh-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              setManualRefresh((prev) => prev + 1);
+            }}
+            title="Show another random memory"
+            aria-label="Show another random memory"
+          >
+            <RefreshCw size={13} />
+          </button>
+        )}
       </div>
     </div>
   );

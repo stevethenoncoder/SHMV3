@@ -3,7 +3,7 @@ import { UtensilsCrossed } from 'lucide-react';
 import './MealsHeader.css';
 
 export default function MealsHeader({
-  activeNav = 'chronicle',
+  activeNav = 'overview',
   onSelectNav,
   mealCount = 4776,
   restaurantCount = 3051,
@@ -16,8 +16,8 @@ export default function MealsHeader({
           <button
             type="button"
             className="brand-link"
-            onClick={() => onSelectNav && onSelectNav('chronicle')}
-            title="Go to Chronicle"
+            onClick={() => onSelectNav && onSelectNav('overview')}
+            title="Go to Overview"
           >
             <div className="brand-logo-badge">
               <UtensilsCrossed size={18} className="brand-icon" />
@@ -33,6 +33,13 @@ export default function MealsHeader({
         <nav className="desktop-nav" aria-label="Main Navigation">
           <button
             type="button"
+            className={`nav-link ${activeNav === 'overview' ? 'active' : ''}`}
+            onClick={() => onSelectNav && onSelectNav('overview')}
+          >
+            Overview
+          </button>
+          <button
+            type="button"
             className={`nav-link ${activeNav === 'chronicle' ? 'active' : ''}`}
             onClick={() => onSelectNav && onSelectNav('chronicle')}
           >
@@ -45,15 +52,26 @@ export default function MealsHeader({
           >
             Restaurants
           </button>
+          <button
+            type="button"
+            className={`nav-link ${activeNav === 'relationships' ? 'active' : ''}`}
+            onClick={() => onSelectNav && onSelectNav('relationships')}
+          >
+            Relationships
+          </button>
           <span className="nav-link disabled" title="Coming soon">
             Food
           </span>
           <span className="nav-link disabled" title="Coming soon">
             Places
           </span>
-          <span className="nav-link disabled" title="Coming soon">
+          <button
+            type="button"
+            className={`nav-link ${activeNav === 'stats' ? 'active' : ''}`}
+            onClick={() => onSelectNav && onSelectNav('stats')}
+          >
             Stats
-          </span>
+          </button>
         </nav>
 
         {/* Right: Counter Pill */}

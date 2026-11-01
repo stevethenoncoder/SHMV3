@@ -1,0 +1,125 @@
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-txt {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.legend-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.legend-cell.c0 {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.legend-cell.c1 {
+  background-color: #d1fae5;
+}
+
+.legend-cell.c2 {
+  background-color: #a7f3d0;
+}
+
+.legend-cell.c3 {
+  background-color: #34d399;
+}
+
+.legend-cell.c4 {
+  background-color: #047857;
+}
+
+.heatmap-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 10px;
+  user-select: none;
+  overflow-x: auto;
+}
+
+.heatmap-header-row,
+.heatmap-row {
+  display: grid;
+  grid-template-columns: 42px repeat(7, 1fr);
+  gap: 4px;
+  align-items: center;
+}
+
+.heatmap-corner-cell {
+  width: 42px;
+}
+
+.heatmap-col-header {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+  color: #64748b;
+  padding-bottom: 4px;
+}
+
+.heatmap-row-header {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-align: right;
+  padding-right: 8px;
+}
+
+.heatmap-cell {
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.cell-num {
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-feature-settings: 'tnum';
+}
+
+.heatmap-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background-color: #0f172a;
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 40;
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.heatmap-tooltip .tooltip-title {
+  font-weight: 700;
+  color: #34d399;
+}
+
+.heatmap-tooltip .tooltip-count {
+  font-size: 0.74rem;
+  color: #e2e8f0;
+}

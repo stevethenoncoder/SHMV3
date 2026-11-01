@@ -19,6 +19,18 @@ export default function MealsActiveFilterChips({
     });
   }
 
+  // Restaurant Filter
+  if (filterState.restaurantId || filterState.restaurantName) {
+    chips.push({
+      id: 'restaurant',
+      label: `Restaurant: ${filterState.restaurantName || filterState.restaurantId}`,
+      onRemove: () => {
+        onRemoveFilter('restaurantId', null);
+        onRemoveFilter('restaurantName', '');
+      },
+    });
+  }
+
   // Decades
   (filterState.decades || []).forEach((decade) => {
     chips.push({

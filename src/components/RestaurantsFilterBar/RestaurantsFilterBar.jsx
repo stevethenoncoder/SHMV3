@@ -7,6 +7,8 @@ import {
   Check,
   ArrowUpDown,
   SlidersHorizontal,
+  List,
+  Map,
 } from 'lucide-react';
 import {
   CANONICAL_VISIT_BANDS,
@@ -143,6 +145,8 @@ export default function RestaurantsFilterBar({
   pageSize = 18,
   onPageSizeChange,
   onOpenMobileFilters,
+  viewMode = 'list',
+  onViewModeChange,
 }) {
   const [openDropdown, setOpenDropdown] = useState(null);
 
@@ -543,6 +547,28 @@ export default function RestaurantsFilterBar({
         </div>
 
         <div className="restaurants-toolbar-controls">
+          {/* View Mode Toggle: List vs Map */}
+          <div className="restaurants-view-mode-group" role="group" aria-label="View mode">
+            <button
+              type="button"
+              className={`restaurants-view-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => onViewModeChange && onViewModeChange('list')}
+              title="List view"
+            >
+              <List size={14} />
+              <span>List</span>
+            </button>
+            <button
+              type="button"
+              className={`restaurants-view-btn ${viewMode === 'map' ? 'active' : ''}`}
+              onClick={() => onViewModeChange && onViewModeChange('map')}
+              title="Map view"
+            >
+              <Map size={14} />
+              <span>Map</span>
+            </button>
+          </div>
+
           <div className="restaurants-sort-wrapper">
             <label htmlFor="restaurant-sort-select" className="sort-label">
               <ArrowUpDown size={14} />

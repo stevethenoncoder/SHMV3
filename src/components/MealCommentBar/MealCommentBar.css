@@ -95,9 +95,79 @@
   border-color: var(--border-light, #e2e8f0);
 }
 
-/* Responsive: Hide on mobile */
+/* Return Navigation Button on Left Side */
+.comment-bar-return-btn {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 13px;
+  background-color: #ffffff;
+  border: 1px solid #bae6fd;
+  border-radius: 9999px;
+  color: #0284c7;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(2, 132, 199, 0.08);
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.comment-bar-return-btn:hover {
+  background-color: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.28);
+  transform: translateY(-50%) translateX(-2px);
+}
+
+.comment-bar-return-btn:hover .return-btn-icon {
+  transform: translateX(-2px);
+}
+
+.return-btn-icon {
+  flex-shrink: 0;
+  transition: transform 0.18s ease;
+}
+
+.meal-comment-bar-container.has-return-action .meal-comment-clickable {
+  max-width: calc(100% - 280px);
+}
+
+/* Responsive: Hide quote on mobile, but keep return button accessible when active */
 @media (max-width: 768px) {
   .meal-comment-bar-root {
     display: none;
+  }
+
+  .meal-comment-bar-root.has-return-action {
+    display: block;
+    padding: 0.45rem 1rem;
+    background-color: #f8fafc;
+  }
+
+  .meal-comment-bar-root.has-return-action .meal-comment-bar-container {
+    justify-content: flex-start;
+  }
+
+  .meal-comment-bar-root.has-return-action .meal-comment-clickable,
+  .meal-comment-bar-root.has-return-action .comment-refresh-btn {
+    display: none;
+  }
+
+  .meal-comment-bar-root.has-return-action .comment-bar-return-btn {
+    position: static;
+    transform: none;
+    font-size: 0.8rem;
+    padding: 4px 11px;
+  }
+
+  .meal-comment-bar-root.has-return-action .comment-bar-return-btn:hover {
+    transform: none;
   }
 }

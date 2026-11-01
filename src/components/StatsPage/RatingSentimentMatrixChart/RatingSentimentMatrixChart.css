@@ -1,0 +1,236 @@
+.matrix-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.matrix-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.matrix-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.matrix-legend-swatch.blue { background-color: #3b82f6; }
+.matrix-legend-swatch.orange { background-color: #ea580c; }
+.matrix-legend-swatch.yellow { background-color: #eab308; }
+.matrix-legend-swatch.green { background-color: #10b981; }
+
+.matrix-chart-body {
+  position: relative;
+  margin-top: 14px;
+  user-select: none;
+}
+
+.matrix-rows-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.matrix-row-item {
+  display: grid;
+  grid-template-columns: 82px 1fr 105px;
+  align-items: center;
+  gap: 12px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.matrix-row-item:hover {
+  background-color: #f8fafc;
+}
+
+.matrix-row-item.is-selected {
+  background-color: #f0fdf4;
+  outline: 1px solid #86efac;
+}
+
+.matrix-row-y-label {
+  text-align: right;
+  min-width: 0;
+}
+
+.matrix-rating-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.matrix-bar-track {
+  display: flex;
+  height: 18px;
+  background-color: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.matrix-segment {
+  height: 100%;
+  transition: all 0.15s ease;
+}
+
+.matrix-segment.seg-negative { background-color: #3b82f6; }
+.matrix-segment.seg-neutral { background-color: #ea580c; }
+.matrix-segment.seg-nocomment { background-color: #eab308; }
+.matrix-segment.seg-positive { background-color: #10b981; }
+.matrix-segment.empty { background-color: #f1f5f9; }
+
+.matrix-row-item:hover .matrix-segment {
+  filter: brightness(1.08);
+}
+
+/* Row Volume: Mini Line Graph / Spark indicator + Total Number */
+.matrix-row-volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.matrix-spark-track {
+  flex: 1;
+  height: 2px;
+  background-color: #e2e8f0;
+  border-radius: 1px;
+  position: relative;
+  min-width: 44px;
+}
+
+.matrix-spark-line {
+  position: relative;
+  height: 2px;
+  background-color: #64748b;
+  border-radius: 1px;
+  transition: width 0.18s ease;
+}
+
+.matrix-spark-dot {
+  position: absolute;
+  right: -3px;
+  top: -2.5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #334155;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.15s ease;
+}
+
+.matrix-row-item:hover .matrix-spark-line {
+  background-color: #2563eb;
+}
+
+.matrix-row-item:hover .matrix-spark-dot {
+  background-color: #1d4ed8;
+}
+
+.matrix-row-total-val {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #64748b;
+  font-feature-settings: 'tnum';
+  min-width: 36px;
+  text-align: right;
+}
+
+/* X Axis */
+.matrix-x-axis-row {
+  display: grid;
+  grid-template-columns: 82px 1fr 105px;
+  gap: 12px;
+  margin-top: 6px;
+  padding-top: 4px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.matrix-x-axis-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+  padding: 0 2px;
+}
+
+.matrix-x-axis-right-spacer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-right: 2px;
+}
+
+/* Tooltip */
+.matrix-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background-color: #0f172a;
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 40;
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.matrix-tt-title {
+  font-weight: 700;
+  color: #38bdf8;
+  margin-bottom: 2px;
+}
+
+.matrix-tt-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 0.74rem;
+}
+
+.matrix-tt-row.green { color: #6ee7b7; }
+.matrix-tt-row.orange { color: #fdba74; }
+.matrix-tt-row.blue { color: #93c5fd; }
+.matrix-tt-row.yellow { color: #fde047; }
+
+.matrix-tt-hint {
+  font-size: 0.68rem;
+  color: #38bdf8;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  margin-top: 3px;
+  padding-top: 3px;
+}
+
+@media (max-width: 640px) {
+  .matrix-row-item,
+  .matrix-x-axis-row {
+    grid-template-columns: 72px 1fr 85px;
+    gap: 8px;
+  }
+  .matrix-spark-track {
+    min-width: 30px;
+  }
+}
