@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import StatsFilterSidebar from './StatsFilterSidebar/StatsFilterSidebar.jsx';
-import StatsKpiStrip from './StatsKpiStrip/StatsKpiStrip.jsx';
+import StatsInfoSquare from './StatsInfoSquare/StatsInfoSquare.jsx';
 import MealsOverTimeNewRepeatHero from './MealsOverTimeNewRepeatHero/MealsOverTimeNewRepeatHero.jsx';
 import RatingSentimentMatrixChart from './RatingSentimentMatrixChart/RatingSentimentMatrixChart.jsx';
 import SpendByDayChart from './SpendByDayChart/SpendByDayChart.jsx';
 import DiningCalendarHeatmap from './DiningCalendarHeatmap/DiningCalendarHeatmap.jsx';
 import RestaurantTypeChart from './RestaurantTypeChart/RestaurantTypeChart.jsx';
 import TopRestaurantsChart from './TopRestaurantsChart/TopRestaurantsChart.jsx';
+import TopCountriesChart from './TopCountriesChart/TopCountriesChart.jsx';
 import RatingValueScatter from './RatingValueScatter/RatingValueScatter.jsx';
 import StatsInsights from './StatsInsights/StatsInsights.jsx';
 
@@ -21,6 +22,7 @@ import {
   buildDiningHeatmap,
   buildTopRestaurantTypes,
   buildTopRestaurants,
+  buildTopCountriesWithCities,
   buildValueRatingScatter,
   buildStatsInsights,
   calculateStatsFacetCounts,
@@ -86,6 +88,11 @@ export default function StatsPage({
     return buildTopRestaurants(filteredMeals, 10);
   }, [filteredMeals]);
 
+  // Top 10 Countries split by destination city
+  const topCountries = useMemo(() => {
+    return buildTopCountriesWithCities(filteredMeals, 10);
+  }, [filteredMeals]);
+
   // Rating vs Meal Value Scatter
   const valueScatter = useMemo(() => {
     return buildValueRatingScatter(filteredMeals);
@@ -140,6 +147,32 @@ export default function StatsPage({
     }));
   }, []);
 
+  const handleToggleCountry = useCallback((countryName) => {
+    setFilterState((prev) => {
+      const current = prev.countries || [];
+      const exists = current.includes(countryName);
+      return {
+        ...prev,
+        countries: exists
+          ? current.filter((c) => c !== countryName)
+          : [...current, countryName],
+      };
+    });
+  }, []);
+
+  const handleToggleCity = useCallback((cityName) => {
+    setFilterState((prev) => {
+      const current = prev.cities || [];
+      const exists = current.includes(cityName);
+      return {
+        ...prev,
+        cities: exists
+          ? current.filter((c) => c !== cityName)
+          : [...current, cityName],
+      };
+    });
+  }, []);
+
   return (
     <div className="stats-dashboard-root">
       {/* Mobile Filters Trigger Bar (< 1024px) */}
@@ -180,16 +213,16 @@ export default function StatsPage({
             </div>
           </div>
 
-          {/* 1. Headline KPI Cards at the Top */}
-          <StatsKpiStrip kpis={kpis} />
+          {/* 1. Hero Row: Squeezed Meals Over Time + Info Square */}
+          <div className="stats-hero-row">
+            <MealsOverTimeNewRepeatHero
+              series={newVsRepeat}
+              onSelectPeriod={handleUpdateFilter}
+            />
+            <StatsInfoSquare kpis={kpis} />
+          </div>
 
-          {/* 2. Hero Graph across the Top: Meals Over Time (New vs Repeat) */}
-          <MealsOverTimeNewRepeatHero
-            series={newVsRepeat}
-            onSelectPeriod={handleUpdateFilter}
-          />
-
-          {/* 3. Balanced 2-Column Analytical Grid */}
+          {/* 2. Balanced 2-Column Analytical Grid */}
           <div className="stats-analytical-grid">
             {/* Column 1: Combined Rating & Sentiment 100% Stacked Chart (Image 2) */}
             <RatingSentimentMatrixChart
@@ -201,23 +234,32 @@ export default function StatsPage({
             {/* Column 2: Spend by Day of Week: Personal vs Business (Image 1) */}
             <SpendByDayChart spendData={spendByDay} />
 
-            {/* Column 3: Dining Calendar Heatmap (12 months x 7 days) */}
+            {/* Column 3: Location Breakdown - Top 10 Countries by City */}
+            <TopCountriesChart
+              countryData={topCountries}
+              activeCountries={filterState.countries}
+              activeCities={filterState.cities}
+              onToggleCountry={handleToggleCountry}
+              onToggleCity={handleToggleCity}
+            />
+
+            {/* Column 4: Dining Calendar Heatmap (12 months x 7 days) */}
             <DiningCalendarHeatmap heatmap={diningHeatmap} />
 
-            {/* Column 4: Rating vs Meal Value Bubble Chart */}
+            {/* Column 5: Rating vs Meal Value Bubble Chart */}
             <RatingValueScatter
               scatterData={valueScatter}
               onToggleRating={handleToggleRating}
             />
 
-            {/* Column 5: Top Restaurant Types / Cuisines */}
+            {/* Column 6: Top Restaurant Types / Cuisines */}
             <RestaurantTypeChart
               typeData={topTypes}
               activeTypes={filterState.restaurantTypes}
               onToggleType={handleToggleType}
             />
 
-            {/* Column 6: Top Most Visited Destinations */}
+            {/* Column 7: Top Most Visited Destinations */}
             <TopRestaurantsChart
               restaurantData={topRestaurants}
               activeRestaurantId={filterState.restaurantId}

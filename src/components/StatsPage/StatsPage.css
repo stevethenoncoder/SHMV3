@@ -139,6 +139,35 @@
   font-weight: 500;
 }
 
+/* Hero Row: Squeezed Meals Over Time + Info Square */
+.stats-hero-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  gap: 20px;
+  align-items: stretch;
+  margin-bottom: 20px;
+  min-width: 0;
+}
+
+.stats-hero-row > * {
+  min-width: 0;
+}
+
+.stats-hero-row .hero-card {
+  margin-bottom: 0;
+  height: 100%;
+}
+
+.stats-hero-row .info-square-card {
+  height: 100%;
+}
+
+@media (max-width: 1060px) {
+  .stats-hero-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* 2-Column Analytical Grid */
 .stats-analytical-grid {
   display: grid;

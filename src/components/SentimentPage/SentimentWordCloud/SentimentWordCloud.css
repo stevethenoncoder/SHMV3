@@ -1,0 +1,215 @@
+/* Sentiment Word Cloud Styling */
+
+.word-cloud-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.word-cloud-card .stats-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.word-cloud-card .stats-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.word-cloud-card .stats-card-subtitle {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.word-cloud-card .stats-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Active word filter notification */
+.active-word-filter-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  border-radius: 8px;
+  padding: 7px 12px;
+  margin-bottom: 14px;
+  font-size: 0.82rem;
+}
+
+.active-word-text strong {
+  color: #1d4ed8;
+}
+
+.clear-word-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.clear-word-btn:hover {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* Cloud Container */
+.word-cloud-container {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 10px;
+  padding: 16px 12px;
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  min-height: 480px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Individual Tag Buttons */
+.word-cloud-tag {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  cursor: pointer;
+  line-height: 1.25;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  user-select: none;
+  outline: none;
+}
+
+.word-cloud-tag.positive {
+  color: #065f46;
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+}
+
+.word-cloud-tag.neutral {
+  color: #92400e;
+  background-color: #fef3c7;
+  border: 1px solid #fde68a;
+}
+
+.word-cloud-tag.negative {
+  color: #991b1b;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.word-cloud-tag:hover,
+.word-cloud-tag.is-hovered {
+  transform: scale(1.12);
+  z-index: 10;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.word-cloud-tag.is-selected {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  font-weight: 800 !important;
+  box-shadow: 0 0 0 2px #93c5fd, 0 4px 10px rgba(37, 99, 235, 0.2);
+  z-index: 15;
+}
+
+.word-count-sup {
+  font-size: 0.65em;
+  opacity: 0.75;
+  font-weight: 600;
+}
+
+/* Floating Tooltip */
+.word-cloud-tooltip {
+  position: absolute;
+  z-index: 50;
+  background-color: #0f172a;
+  color: #f8fafc;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  min-width: 150px;
+  transition: opacity 0.1s ease;
+}
+
+.word-tt-title {
+  font-weight: 700;
+  font-size: 0.88rem;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 3px;
+}
+
+.word-tt-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+
+.word-tt-row .tt-cat.positive {
+  color: #34d399;
+}
+
+.word-tt-row .tt-cat.neutral {
+  color: #fbbf24;
+}
+
+.word-tt-row .tt-cat.negative {
+  color: #f87171;
+}
+
+.word-tt-hint {
+  margin-top: 6px;
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-style: italic;
+  text-align: center;
+}
+
+.stats-empty-block {
+  text-align: center;
+  padding: 40px 20px;
+  color: #94a3b8;
+  font-size: 0.88rem;
+  font-style: italic;
+  width: 100%;
+}

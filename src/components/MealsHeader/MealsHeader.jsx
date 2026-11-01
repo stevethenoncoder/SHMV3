@@ -59,6 +59,13 @@ export default function MealsHeader({
           >
             Relationships
           </button>
+          <button
+            type="button"
+            className={`nav-link ${activeNav === 'sentiment' ? 'active' : ''}`}
+            onClick={() => onSelectNav && onSelectNav('sentiment')}
+          >
+            Sentiment
+          </button>
           <span className="nav-link disabled" title="Coming soon">
             Food
           </span>

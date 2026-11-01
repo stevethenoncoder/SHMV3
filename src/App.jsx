@@ -18,6 +18,7 @@ import RestaurantDetailPage from './components/RestaurantDetailPage/RestaurantDe
 import OverviewPage from './components/OverviewPage/OverviewPage.jsx';
 import RelationshipsPage from './components/RelationshipsPage/RelationshipsPage.jsx';
 import StatsPage from './components/StatsPage/StatsPage.jsx';
+import SentimentPage from './components/SentimentPage/SentimentPage.jsx';
 
 import Pagination from './components/Pagination/Pagination.jsx';
 import {
@@ -49,15 +50,17 @@ export default function App() {
   const [restaurantsById, setRestaurantsById] = useState(new Map());
   const [publicPeopleById, setPublicPeopleById] = useState(new Map());
 
-  // Section Navigation: 'overview' | 'chronicle' | 'restaurants' | 'relationships' | 'stats'
+  // Section Navigation: 'overview' | 'chronicle' | 'restaurants' | 'relationships' | 'sentiment' | 'stats'
   const [activeSection, setActiveSection] = useState(() => {
     if (typeof window === 'undefined') return 'overview';
     const path = window.location.pathname;
+    if (path.startsWith('/sentiment')) return 'sentiment';
     if (path.startsWith('/stats')) return 'stats';
     if (path.startsWith('/relationships')) return 'relationships';
     if (path.startsWith('/restaurants')) return 'restaurants';
     if (path.startsWith('/chronicle')) return 'chronicle';
     const params = new URLSearchParams(window.location.search);
+    if (params.get('section') === 'sentiment') return 'sentiment';
     if (params.get('section') === 'stats') return 'stats';
     if (params.get('section') === 'relationships') return 'relationships';
     if (params.get('section') === 'restaurants' || params.get('restaurant')) return 'restaurants';
@@ -68,6 +71,8 @@ export default function App() {
   // Track if user jumped to Chronicle with a preselection from another area
   // e.g. { section: 'overview', label: 'Return to Overview' } or { section: 'restaurants', label: 'Return to Restaurants' }
   const [chronicleOrigin, setChronicleOrigin] = useState(null);
+  // Track origin when navigating into a Meal Detail overview
+  const [mealOrigin, setMealOrigin] = useState(null);
 
   // Active Detail ID states
   const [activeMealId, setActiveMealId] = useState(() => {
@@ -170,7 +175,15 @@ export default function App() {
         return;
       }
 
-      // 3. Match /stats browse
+      // 3. Match /sentiment browse
+      if (path.startsWith('/sentiment') || params.get('section') === 'sentiment') {
+        setActiveSection('sentiment');
+        setActiveRestaurantId(null);
+        setActiveMealId(null);
+        return;
+      }
+
+      // 4. Match /stats browse
       if (path.startsWith('/stats') || params.get('section') === 'stats') {
         setActiveSection('stats');
         setActiveRestaurantId(null);
@@ -178,7 +191,7 @@ export default function App() {
         return;
       }
 
-      // 4. Match /relationships browse
+      // 5. Match /relationships browse
       if (path.startsWith('/relationships') || params.get('section') === 'relationships') {
         setActiveSection('relationships');
         setActiveRestaurantId(null);
@@ -313,6 +326,7 @@ export default function App() {
     if (section === 'chronicle') targetUrl = '/chronicle';
     else if (section === 'restaurants') targetUrl = '/restaurants';
     else if (section === 'relationships') targetUrl = '/relationships';
+    else if (section === 'sentiment') targetUrl = '/sentiment';
     else if (section === 'stats') targetUrl = '/stats';
     window.history.pushState(null, '', targetUrl);
     window.scrollTo(0, 0);
@@ -354,7 +368,18 @@ export default function App() {
     window.scrollTo(0, 0);
   };
 
-  const handleOpenMeal = (mealId) => {
+  const handleOpenMeal = (mealId, origin = null) => {
+    if (origin) {
+      setMealOrigin(origin);
+    } else if (activeSection === 'sentiment') {
+      setMealOrigin({ section: 'sentiment', label: 'Back to Sentiment' });
+    } else if (activeSection === 'overview') {
+      setMealOrigin({ section: 'overview', label: 'Back to Overview' });
+    } else if (activeSection === 'restaurants') {
+      setMealOrigin({ section: 'restaurants', label: 'Back to Restaurants' });
+    } else {
+      setMealOrigin(null);
+    }
     setActiveMealId(mealId);
     setActiveRestaurantId(null);
     window.history.pushState(null, '', `/meals/${mealId}`);
@@ -363,7 +388,23 @@ export default function App() {
 
   const handleBackToChronicle = () => {
     setActiveMealId(null);
-    window.history.pushState(null, '', '/');
+    if (mealOrigin?.section === 'sentiment') {
+      setActiveSection('sentiment');
+      window.history.pushState(null, '', '/sentiment');
+    } else if (mealOrigin?.section === 'overview') {
+      setActiveSection('overview');
+      window.history.pushState(null, '', '/');
+    } else if (mealOrigin?.section === 'restaurants') {
+      setActiveSection('restaurants');
+      window.history.pushState(null, '', '/restaurants');
+    } else if (activeSection === 'sentiment') {
+      window.history.pushState(null, '', '/sentiment');
+    } else {
+      let target = '/';
+      if (activeSection === 'chronicle') target = '/chronicle';
+      window.history.pushState(null, '', target);
+    }
+    setMealOrigin(null);
     window.scrollTo(0, 0);
   };
 
@@ -562,6 +603,14 @@ export default function App() {
             meal={activeMeal}
             onBack={handleBackToChronicle}
             onSelectRestaurant={handleOpenRestaurant}
+            backLabel={
+              mealOrigin?.label ||
+              (activeSection === 'sentiment'
+                ? 'Back to Sentiment'
+                : activeSection === 'overview'
+                ? 'Back to Overview'
+                : 'Back to Chronicle')
+            }
           />
         ) : activeRestaurantId ? (
           /* 2. Restaurant Detail View */
@@ -760,8 +809,16 @@ export default function App() {
             meals={meals}
             onApplyChronicleFilter={handleApplyChronicleFilter}
           />
+        ) : activeSection === 'sentiment' ? (
+          /* 6. Sentiment & Comments View */
+          <SentimentPage
+            meals={meals}
+            onSelectMeal={(id) =>
+              handleOpenMeal(id, { section: 'sentiment', label: 'Back to Sentiment' })
+            }
+          />
         ) : activeSection === 'stats' ? (
-          /* 6. Dining Intelligence & Archive KPIs */
+          /* 7. Dining Intelligence & Archive KPIs */
           <StatsPage
             meals={meals}
             restaurants={restaurants}

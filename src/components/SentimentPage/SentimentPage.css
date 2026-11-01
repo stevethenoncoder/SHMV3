@@ -1,0 +1,243 @@
+/* Sentiment Page Root Layout & Top Toggle Buttons */
+
+.sentiment-page-root {
+  width: 100%;
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 24px 24px 80px 24px;
+  box-sizing: border-box;
+  font-family: inherit;
+  color: #0f172a;
+}
+
+/* Header Area */
+.sentiment-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.sentiment-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 600px;
+}
+
+.sentiment-badge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 3px 10px;
+  background-color: #f3e8ff;
+  color: #7e22ce;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sentiment-page-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.sentiment-page-subtitle {
+  font-size: 0.88rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Toggle Buttons Bar */
+.sentiment-toggle-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.toggle-bar-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.sentiment-toggle-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Button Base */
+.sentiment-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  background: #ffffff;
+}
+
+.btn-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-label {
+  font-weight: 700;
+}
+
+.btn-count {
+  font-size: 0.75rem;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.btn-check-icon {
+  margin-left: 2px;
+}
+
+/* Positive Active / Inactive */
+.sentiment-toggle-btn.positive.is-active {
+  background-color: #ecfdf5;
+  border-color: #10b981;
+  color: #065f46;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+}
+
+.sentiment-toggle-btn.positive.is-active .btn-count {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+/* Neutral Active / Inactive */
+.sentiment-toggle-btn.neutral.is-active {
+  background-color: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2);
+}
+
+.sentiment-toggle-btn.neutral.is-active .btn-count {
+  background-color: #f59e0b;
+  color: #ffffff;
+}
+
+/* Negative Active / Inactive */
+.sentiment-toggle-btn.negative.is-active {
+  background-color: #fef2f2;
+  border-color: #ef4444;
+  color: #991b1b;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+}
+
+.sentiment-toggle-btn.negative.is-active .btn-count {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+/* Inactive (Pressed OUT) States */
+.sentiment-toggle-btn.is-inactive {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+  opacity: 0.65;
+  box-shadow: none;
+}
+
+.sentiment-toggle-btn.is-inactive:hover {
+  opacity: 0.9;
+  border-color: #cbd5e1;
+  background-color: #f1f5f9;
+}
+
+.sentiment-toggle-btn.is-inactive .btn-count {
+  background-color: #e2e8f0;
+  color: #64748b;
+}
+
+/* Two-column layout */
+.sentiment-content-grid {
+  display: grid;
+  grid-template-columns: minmax(360px, 440px) 1fr;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.sentiment-column-left {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sentiment-column-right {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1080px) {
+  .sentiment-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sentiment-column-left {
+    order: 1;
+  }
+
+  .sentiment-column-right {
+    order: 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .sentiment-page-root {
+    padding: 16px 12px 60px 12px;
+  }
+
+  .sentiment-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .sentiment-toggle-bar {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sentiment-toggle-buttons {
+    width: 100%;
+  }
+
+  .sentiment-toggle-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+}

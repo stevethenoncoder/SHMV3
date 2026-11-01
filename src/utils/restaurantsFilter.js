@@ -104,18 +104,26 @@ export function countActiveRestaurantFilters(filterState) {
   return count;
 }
 
+export function stripAccents(str) {
+  if (!str) return '';
+  return String(str)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
 /**
  * Checks if search text matches restaurant-level properties.
  */
 export function restaurantMatchesSearch(restaurant, query) {
   if (!query) return true;
-  const q = query.trim().toLowerCase();
-  const name = (restaurant.name || '').toLowerCase();
-  const city = (restaurant.city?.name || '').toLowerCase();
-  const country = (restaurant.city?.country?.name || '').toLowerCase();
-  const cuisine = (restaurant.type?.name || '').toLowerCase();
-  const address = (restaurant.address || '').toLowerCase();
-  const gAddress = (restaurant.googleAddress || '').toLowerCase();
+  const q = stripAccents(query.trim());
+  const name = stripAccents(restaurant.name || '');
+  const city = stripAccents(restaurant.city?.name || '');
+  const country = stripAccents(restaurant.city?.country?.name || '');
+  const cuisine = stripAccents(restaurant.type?.name || '');
+  const address = stripAccents(restaurant.address || '');
+  const gAddress = stripAccents(restaurant.googleAddress || '');
 
   return (
     name.includes(q) ||
@@ -132,18 +140,18 @@ export function restaurantMatchesSearch(restaurant, query) {
  */
 export function mealMatchesSearch(meal, query) {
   if (!query) return true;
-  const q = query.trim().toLowerCase();
-  if (meal.comment && meal.comment.toLowerCase().includes(q)) return true;
+  const q = stripAccents(query.trim());
+  if (meal.comment && stripAccents(meal.comment).includes(q)) return true;
 
   for (const d of meal.mains || []) {
-    if (d.food?.name && d.food.name.toLowerCase().includes(q)) return true;
-    if (d.food?.category && d.food.category.toLowerCase().includes(q)) return true;
-    if (d.food?.ingredient?.name && d.food.ingredient.name.toLowerCase().includes(q)) return true;
-    if (d.food?.foodType?.name && d.food.foodType.name.toLowerCase().includes(q)) return true;
+    if (d.food?.name && stripAccents(d.food.name).includes(q)) return true;
+    if (d.food?.category && stripAccents(d.food.category).includes(q)) return true;
+    if (d.food?.ingredient?.name && stripAccents(d.food.ingredient.name).includes(q)) return true;
+    if (d.food?.foodType?.name && stripAccents(d.food.foodType.name).includes(q)) return true;
   }
 
   for (const c of meal.companions || []) {
-    if (c.publicName && c.publicName.toLowerCase().includes(q)) return true;
+    if (c.publicName && stripAccents(c.publicName).includes(q)) return true;
   }
 
   return false;

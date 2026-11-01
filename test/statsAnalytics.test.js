@@ -14,6 +14,7 @@ import {
   buildDiningHeatmap,
   buildTopRestaurantTypes,
   buildTopRestaurants,
+  buildTopCountriesWithCities,
   buildValueRatingScatter,
   buildStatsInsights,
   buildRatingSentimentMatrix,
@@ -313,5 +314,50 @@ test('10. Rating vs Meal Value Bubble chart categorizes spend into 10-pound buck
   const dogs100 = data.bubbles.find((b) => b.ratingId === 1 && b.bucket === 100);
   assert.ok(dogs100);
   assert.strictEqual(dogs100.count, 1);
+});
+
+test('11. buildTopCountriesWithCities calculates top countries with city splits correctly', () => {
+  const mockMeals = [
+    { id: 1, restaurant: { city: { name: 'Paris', country: { name: 'France' } } } },
+    { id: 2, restaurant: { city: { name: 'Paris', country: { name: 'France' } } } },
+    { id: 3, restaurant: { city: { name: 'Lyon', country: { name: 'France' } } } },
+    { id: 4, restaurant: { city: { name: 'Madrid', country: { name: 'Spain' } } } },
+    { id: 5, restaurant: { city: { name: 'Barcelona', country: { name: 'Spain' } } } },
+  ];
+
+  const res = buildTopCountriesWithCities(mockMeals, 10);
+  assert.strictEqual(res.countries.length, 2);
+  assert.strictEqual(res.countries[0].country, 'France');
+  assert.strictEqual(res.countries[0].total, 3);
+  assert.strictEqual(res.countries[0].cities.length, 2);
+  assert.strictEqual(res.countries[0].cities[0].city, 'Paris');
+  assert.strictEqual(res.countries[0].cities[0].count, 2);
+  assert.strictEqual(res.countries[0].cities[1].city, 'Lyon');
+  assert.strictEqual(res.countries[0].cities[1].count, 1);
+
+  assert.strictEqual(res.countries[1].country, 'Spain');
+  assert.strictEqual(res.countries[1].total, 2);
+});
+
+test('12. calculateHeadlineKpis accumulates totalSpend and peopleCount', () => {
+  const mockMeals = [
+    {
+      id: 1,
+      valueGBP: 50,
+      companions: [{ publicName: 'Alice' }, { publicName: 'Bob' }],
+      restaurant: { id: 1, city: { name: 'London', country: { name: 'UK' } } },
+    },
+    {
+      id: 2,
+      valueGBP: 75,
+      companions: [{ publicName: 'Alice' }],
+      restaurant: { id: 2, city: { name: 'London', country: { name: 'UK' } } },
+    },
+  ];
+
+  const kpis = calculateHeadlineKpis(mockMeals, mockMeals, { dateMode: 'all' });
+  assert.strictEqual(kpis.mealsCount, 2);
+  assert.strictEqual(kpis.totalSpend, 125);
+  assert.strictEqual(kpis.peopleCount, 2);
 });
 

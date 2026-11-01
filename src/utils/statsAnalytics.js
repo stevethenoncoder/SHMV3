@@ -277,6 +277,8 @@ export function calculateHeadlineKpis(
   const cities = new Set();
   const countries = new Set();
   const values = [];
+  const uniquePeople = new Set();
+  let totalSpend = 0;
   let ratingSum = 0;
   let ratedCount = 0;
   let positiveCount = 0;
@@ -304,6 +306,15 @@ export function calculateHeadlineKpis(
 
     if (typeof meal.valueGBP === 'number' && !isNaN(meal.valueGBP) && meal.valueGBP > 0) {
       values.push(meal.valueGBP);
+      totalSpend += meal.valueGBP;
+    }
+
+    if (Array.isArray(meal.companions)) {
+      for (const comp of meal.companions) {
+        if (comp.publicName) {
+          uniquePeople.add(comp.publicName);
+        }
+      }
     }
 
     if (meal.ratingId && meal.ratingId >= 1 && meal.ratingId <= 8) {
@@ -401,6 +412,8 @@ export function calculateHeadlineKpis(
     sentimentTotal,
     citiesCount: cities.size,
     countriesCount: countries.size,
+    totalSpend: Math.round(totalSpend),
+    peopleCount: uniquePeople.size,
     comparison,
   };
 }
@@ -807,6 +820,109 @@ export function buildTopRestaurants(filteredMeals = [], limit = 10) {
 
   const maxVisits = sorted.length > 0 ? sorted[0].visitCount : 1;
   return { restaurants: sorted, maxVisits, total: filteredMeals.length };
+}
+
+/**
+ * Builds Top 10 Countries with split by destination city.
+ * Used for the Location horizontal bar chart.
+ */
+export function buildTopCountriesWithCities(filteredMeals = [], limit = 10) {
+  const countryMap = new Map();
+  let totalMealsWithCountry = 0;
+
+  for (const meal of filteredMeals) {
+    const country = meal.restaurant?.city?.country?.name || meal.restaurant?.country?.name;
+    if (!country) continue;
+    const city = meal.restaurant?.city?.name || 'Unknown City';
+
+    totalMealsWithCountry++;
+
+    if (!countryMap.has(country)) {
+      countryMap.set(country, {
+        country,
+        total: 0,
+        cities: new Map(),
+      });
+    }
+
+    const cEntry = countryMap.get(country);
+    cEntry.total++;
+    cEntry.cities.set(city, (cEntry.cities.get(city) || 0) + 1);
+  }
+
+  // Sort countries by total descending
+  const sortedCountries = Array.from(countryMap.values())
+    .sort((a, b) => b.total - a.total)
+    .slice(0, limit);
+
+  const maxCountryTotal = sortedCountries.length > 0 ? sortedCountries[0].total : 1;
+
+  // Harmonious modern palette for city segments
+  const CITY_PALETTE = [
+    '#0284c7', // Sky Blue
+    '#0d9488', // Teal
+    '#3b82f6', // Royal Blue
+    '#10b981', // Emerald
+    '#6366f1', // Indigo
+    '#8b5cf6', // Violet
+    '#06b6d4', // Cyan
+    '#f59e0b', // Amber
+    '#ec4899', // Pink
+    '#64748b', // Slate
+    '#14b8a6', // Light Teal
+    '#a855f7', // Purple
+  ];
+
+  const countries = sortedCountries.map((c) => {
+    // Sort cities by count descending
+    const cityList = Array.from(c.cities.entries())
+      .map(([name, count]) => ({
+        city: name,
+        count,
+        percentage: Math.round((count / c.total) * 1000) / 10,
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    // If a country has many small cities, keep top cities and group remainder
+    let displayCities = [];
+    if (cityList.length > 8) {
+      const topCities = cityList.slice(0, 7);
+      const otherCities = cityList.slice(7);
+      const otherCount = otherCities.reduce((acc, cur) => acc + cur.count, 0);
+      displayCities = [
+        ...topCities,
+        {
+          city: `Other cities (${otherCities.length})`,
+          count: otherCount,
+          percentage: Math.round((otherCount / c.total) * 1000) / 10,
+          isOther: true,
+        },
+      ];
+    } else {
+      displayCities = cityList;
+    }
+
+    const citySegments = displayCities.map((cityObj, idx) => ({
+      ...cityObj,
+      color: cityObj.isOther ? '#94a3b8' : CITY_PALETTE[idx % CITY_PALETTE.length],
+      segmentWidthPct: (cityObj.count / c.total) * 100,
+    }));
+
+    return {
+      country: c.country,
+      total: c.total,
+      percentage: totalMealsWithCountry > 0 ? Math.round((c.total / totalMealsWithCountry) * 1000) / 10 : 0,
+      relativeWidthPct: Math.max((c.total / maxCountryTotal) * 100, 4),
+      cities: citySegments,
+      totalCitiesCount: cityList.length,
+    };
+  });
+
+  return {
+    countries,
+    maxCountryTotal,
+    totalMeals: totalMealsWithCountry,
+  };
 }
 
 export const BUBBLE_SPEND_BUCKETS = [

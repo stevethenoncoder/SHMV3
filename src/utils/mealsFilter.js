@@ -2,6 +2,14 @@
  * Pure filtering, dynamic faceting, and sorting engine for the Meals dataset.
  */
 
+export function stripAccents(str) {
+  if (!str) return '';
+  return String(str)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
 export const CANONICAL_DECADES = ['2020s', '2010s', '2000s', '1990s'];
 
 export const CANONICAL_RATINGS = [
@@ -94,20 +102,20 @@ export function countActiveFilters(filterState) {
  * Checks if a meal satisfies all active filters (optionally excluding one facet group).
  */
 export function matchesFilters(meal, filterState, excludeFacetKey = null) {
-  // 1. Search (matches restaurant, comment, city, country, or dish metadata)
+  // 1. Search (matches restaurant, comment, city, country, or dish metadata - accent-insensitive)
   if (excludeFacetKey !== 'search' && filterState.search && filterState.search.trim()) {
-    const q = filterState.search.trim().toLowerCase();
-    const restName = (meal.restaurant?.name || '').toLowerCase();
-    const comment = (meal.comment || '').toLowerCase();
-    const city = (meal.restaurant?.city?.name || '').toLowerCase();
-    const country = (meal.restaurant?.city?.country?.name || '').toLowerCase();
+    const q = stripAccents(filterState.search.trim());
+    const restName = stripAccents(meal.restaurant?.name || '');
+    const comment = stripAccents(meal.comment || '');
+    const city = stripAccents(meal.restaurant?.city?.name || '');
+    const country = stripAccents(meal.restaurant?.city?.country?.name || '');
 
     let matchDish = false;
     if (meal.mains && meal.mains.length > 0) {
       for (const m of meal.mains) {
-        const dishName = (m.food?.name || '').toLowerCase();
-        const ingName = (m.food?.ingredient?.name || '').toLowerCase();
-        const style = (m.food?.foodType?.name || '').toLowerCase();
+        const dishName = stripAccents(m.food?.name || '');
+        const ingName = stripAccents(m.food?.ingredient?.name || '');
+        const style = stripAccents(m.food?.foodType?.name || '');
         if (dishName.includes(q) || ingName.includes(q) || style.includes(q)) {
           matchDish = true;
           break;

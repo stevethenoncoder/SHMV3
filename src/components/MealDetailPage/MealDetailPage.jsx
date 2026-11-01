@@ -36,7 +36,7 @@ function getRatingBadgeStyle(rating) {
   return { bg: '#f1f5f9', text: '#64748b', border: '#e2e8f0' };
 }
 
-export default function MealDetailPage({ meal, onBack, onSelectRestaurant }) {
+export default function MealDetailPage({ meal, onBack, onSelectRestaurant, backLabel }) {
   if (!meal) {
     return (
       <div className="meal-detail-container">
@@ -44,7 +44,7 @@ export default function MealDetailPage({ meal, onBack, onSelectRestaurant }) {
           <h2>Meal Not Found</h2>
           <p>The requested dining record could not be found.</p>
           <button type="button" className="btn-back" onClick={onBack}>
-            <ArrowLeft size={16} /> Back to Chronicle
+            <ArrowLeft size={16} /> {backLabel || 'Back to Chronicle'}
           </button>
         </div>
       </div>
@@ -67,7 +67,7 @@ export default function MealDetailPage({ meal, onBack, onSelectRestaurant }) {
       <nav className="detail-nav-bar">
         <button type="button" className="btn-back" onClick={onBack}>
           <ArrowLeft size={16} />
-          <span>Back to Chronicle</span>
+          <span>{backLabel || 'Back to Chronicle'}</span>
         </button>
       </nav>
 
