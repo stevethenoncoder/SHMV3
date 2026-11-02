@@ -12,6 +12,7 @@ import {
   Shield,
   ArrowUpDown,
   Clock,
+  Navigation,
 } from 'lucide-react';
 import { formatRatingLabel } from '../../utils/restaurantsFilter.js';
 import './RestaurantDetailPage.css';
@@ -42,6 +43,7 @@ export default function RestaurantDetailPage({
   onSelectMeal,
 }) {
   const [chronologyOrder, setChronologyOrder] = useState('desc'); // 'desc' = newest first, 'asc' = oldest first
+  const [googleViewMode, setGoogleViewMode] = useState('map'); // 'map' | 'details'
 
   if (!restaurant) {
     return (
@@ -83,6 +85,21 @@ export default function RestaurantDetailPage({
       ? `https://www.google.com/maps/search/?api=1&query=${restaurant.latitude},${restaurant.longitude}`
       : null;
 
+  const mapEmbedUrl =
+    restaurant.latitude && restaurant.longitude
+      ? `https://maps.google.com/maps?q=${restaurant.latitude},${restaurant.longitude}&hl=en&z=15&output=embed`
+      : restaurant.googleAddress || restaurant.address
+      ? `https://maps.google.com/maps?q=${encodeURIComponent(
+          [
+            restaurant.googleAddress || restaurant.address,
+            restaurant.city?.name,
+            restaurant.city?.country?.name,
+          ]
+            .filter(Boolean)
+            .join(', ')
+        )}&hl=en&z=15&output=embed`
+      : null;
+
   // Sorted visits according to user toggle
   const sortedMeals = [...(restaurant.meals || [])].sort((a, b) => {
     return chronologyOrder === 'desc'
@@ -103,73 +120,211 @@ export default function RestaurantDetailPage({
       <article className="restaurant-detail-content">
         {/* 2. Hero Header */}
         <header className="restaurant-hero-header">
-          {locationBreadcrumb && (
-            <div className="detail-breadcrumb">
-              <MapPin size={13} />
-              <span>{locationBreadcrumb}</span>
-            </div>
-          )}
-
-          <div className="restaurant-title-row">
-            <h1 className="restaurant-title">{restaurant.name}</h1>
-            {restaurant.type?.name && (
-              <span className="restaurant-cuisine-tag">{restaurant.type.name}</span>
-            )}
-          </div>
-
-          {/* Address & Meta */}
-          <div className="restaurant-meta-row">
-            {(restaurant.address || restaurant.city?.name) && (
-              <div className="meta-item location-address">
-                <MapPin size={15} />
-                <span>
-                  {[restaurant.address, restaurant.city?.name, restaurant.city?.country?.name]
-                    .filter(Boolean)
-                    .join(', ')}
-                </span>
+          <div className="restaurant-hero-main">
+            {locationBreadcrumb && (
+              <div className="detail-breadcrumb">
+                <MapPin size={13} />
+                <span>{locationBreadcrumb}</span>
               </div>
             )}
 
-            {hasValidGoogleRating && (
-              <div
-                className="meta-item google-rating-pill"
-                title="Google Places rating score"
-              >
-                <Star size={13} fill="currentColor" />
-                <span>Google: {restaurant.googleRating.toFixed(1)}</span>
+            <div className="restaurant-title-row">
+              <h1 className="restaurant-title">{restaurant.name}</h1>
+              {restaurant.type?.name && (
+                <span className="restaurant-cuisine-tag">{restaurant.type.name}</span>
+              )}
+            </div>
+
+            {/* Address & Meta */}
+            <div className="restaurant-meta-row">
+              {(restaurant.address || restaurant.city?.name) && (
+                <div className="meta-item location-address">
+                  <MapPin size={15} />
+                  <span>
+                    {[restaurant.address, restaurant.city?.name, restaurant.city?.country?.name]
+                      .filter(Boolean)
+                      .join(', ')}
+                  </span>
+                </div>
+              )}
+
+              {hasValidGoogleRating && (
+                <div
+                  className="meta-item google-rating-pill"
+                  title="Google Places rating score"
+                >
+                  <Star size={13} fill="currentColor" />
+                  <span>Google: {restaurant.googleRating.toFixed(1)}</span>
+                </div>
+              )}
+            </div>
+
+            {/* External Action Links */}
+            {(validWebsite || validMapUrl) && (
+              <div className="restaurant-external-actions">
+                {validWebsite && (
+                  <a
+                    href={validWebsite}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-external-link website"
+                  >
+                    <Globe size={14} />
+                    <span>Official Website</span>
+                    <ExternalLink size={12} />
+                  </a>
+                )}
+                {validMapUrl && (
+                  <a
+                    href={validMapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-external-link maps"
+                  >
+                    <MapPin size={14} />
+                    <span>Google Maps</span>
+                    <ExternalLink size={12} />
+                  </a>
+                )}
               </div>
             )}
           </div>
 
-          {/* External Action Links */}
-          {(validWebsite || validMapUrl) && (
-            <div className="restaurant-external-actions">
-              {validWebsite && (
-                <a
-                  href={validWebsite}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-external-link website"
+          {/* Right Column: Google Place Box */}
+          <div className="restaurant-google-place-box">
+            <div className="google-place-header">
+              <div className="google-place-title-wrap">
+                <span className="google-badge-icon">G</span>
+                <span className="google-place-title-text">Google Place</span>
+                {hasValidGoogleRating && (
+                  <span className="google-place-chip-rating">
+                    <Star size={11} fill="#f59e0b" color="#f59e0b" />
+                    {restaurant.googleRating.toFixed(1)}
+                  </span>
+                )}
+              </div>
+              <div className="google-place-tab-switch">
+                <button
+                  type="button"
+                  className={`place-tab-toggle ${googleViewMode === 'map' ? 'active' : ''}`}
+                  onClick={() => setGoogleViewMode('map')}
+                  title="Show map view"
                 >
-                  <Globe size={14} />
-                  <span>Official Website</span>
-                  <ExternalLink size={12} />
-                </a>
-              )}
-              {validMapUrl && (
-                <a
-                  href={validMapUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-external-link maps"
+                  Map
+                </button>
+                <button
+                  type="button"
+                  className={`place-tab-toggle ${googleViewMode === 'details' ? 'active' : ''}`}
+                  onClick={() => setGoogleViewMode('details')}
+                  title="Show Google Place details"
                 >
-                  <MapPin size={14} />
-                  <span>Google Maps</span>
-                  <ExternalLink size={12} />
-                </a>
+                  Details
+                </button>
+              </div>
+            </div>
+
+            <div className="google-place-content">
+              {googleViewMode === 'map' ? (
+                mapEmbedUrl ? (
+                  <div className="google-place-map-wrap">
+                    <iframe
+                      title={`Google Place map location for ${restaurant.googleName || restaurant.name}`}
+                      src={mapEmbedUrl}
+                      className="google-place-iframe"
+                      loading="lazy"
+                      allowFullScreen
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                    <div className="google-place-map-overlay">
+                      <span
+                        className="overlay-place-name"
+                        title={restaurant.googleName || restaurant.name}
+                      >
+                        {restaurant.googleName || restaurant.name}
+                      </span>
+                      {validMapUrl && (
+                        <a
+                          href={validMapUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="overlay-maps-link"
+                          title="Open in Google Maps"
+                        >
+                          <Navigation size={11} />
+                          <span>Open</span>
+                          <ExternalLink size={10} />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="google-place-empty">
+                    <MapPin size={22} className="empty-pin-icon" />
+                    <span>Coordinates not available for this venue</span>
+                  </div>
+                )
+              ) : (
+                <div className="google-place-details-card">
+                  <div className="place-detail-line place-name-line">
+                    <span className="place-detail-label">Place:</span>
+                    <strong
+                      className="place-name-val"
+                      title={restaurant.googleName || restaurant.name}
+                    >
+                      {restaurant.googleName || restaurant.name}
+                    </strong>
+                  </div>
+
+                  {(restaurant.googleType || restaurant.type?.name) && (
+                    <div className="place-detail-line">
+                      <span className="place-detail-label">Category:</span>
+                      <span className="place-type-pill">
+                        {restaurant.googleType || restaurant.type?.name}
+                      </span>
+                    </div>
+                  )}
+
+                  {(restaurant.googleAddress || restaurant.address) && (
+                    <div className="place-detail-line">
+                      <span className="place-detail-label">Address:</span>
+                      <span
+                        className="place-address-val"
+                        title={restaurant.googleAddress || restaurant.address}
+                      >
+                        {restaurant.googleAddress || restaurant.address}
+                      </span>
+                    </div>
+                  )}
+
+                  {hasValidGoogleRating && (
+                    <div className="place-detail-line">
+                      <span className="place-detail-label">Rating:</span>
+                      <div className="place-rating-val">
+                        <Star size={13} fill="#f59e0b" color="#f59e0b" />
+                        <strong>{restaurant.googleRating.toFixed(1)}</strong>
+                        <span className="rating-scale">/ 5.0 (Google Places)</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {validMapUrl && (
+                    <div className="place-detail-action-line">
+                      <a
+                        href={validMapUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="place-maps-btn"
+                      >
+                        <MapPin size={13} />
+                        <span>View on Google Maps</span>
+                        <ExternalLink size={11} />
+                      </a>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
-          )}
+          </div>
         </header>
 
         {/* 3. Personal Dining History Summary Card */}
