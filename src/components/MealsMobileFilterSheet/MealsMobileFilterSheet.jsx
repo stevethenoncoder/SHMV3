@@ -33,6 +33,7 @@ export default function MealsMobileFilterSheet({
   onApplyFilters,
   onClearFilters,
   counts = {},
+  initialSection = null,
 }) {
   if (!isOpen) return null;
 
@@ -54,6 +55,22 @@ export default function MealsMobileFilterSheet({
     ingredients: false,
     foodTypes: false,
   });
+
+  useEffect(() => {
+    if (initialSection) {
+      setOpenSections({
+        decades: initialSection === 'decades',
+        ratings: initialSection === 'ratings',
+        countries: initialSection === 'countries',
+        cities: initialSection === 'cities',
+        cuisines: initialSection === 'cuisines',
+        people: initialSection === 'people',
+        toggles: false,
+        ingredients: initialSection === 'ingredients',
+        foodTypes: initialSection === 'foodTypes',
+      });
+    }
+  }, [initialSection, isOpen]);
 
   const toggleSection = (key) => {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));

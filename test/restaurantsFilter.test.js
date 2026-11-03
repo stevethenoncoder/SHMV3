@@ -303,6 +303,25 @@ assert(sortedDefault[0].id === 1 && sortedDefault[0].mealCount === 3, '15b. Defa
 const matchingMealsOrder = janeFilter[0].matchingMeals;
 assert(matchingMealsOrder[0].timestamp >= matchingMealsOrder[1].timestamp, '16. Matching meals are strictly Date descending');
 
+// 17. Accent-insensitive search helper verifies normalized matching
+import { stripAccents } from '../src/utils/restaurantsFilter.js';
+assert(stripAccents('Café Le Rouge') === 'cafe le rouge', '17a. stripAccents removes accents correctly');
+assert(stripAccents('München') === 'munchen', '17b. stripAccents removes umlauts correctly');
+assert(stripAccents('Côte d’Azur') === 'cote d’azur', '17c. stripAccents removes circumflex correctly');
+
+// 18. Facet option ordering logic (Popular vs A-Z)
+const testFacetItems = [
+  { id: 'France', label: 'France', count: 182 },
+  { id: 'England', label: 'England', count: 3240 },
+  { id: 'Spain', label: 'Spain', count: 94 },
+  { id: 'Australia', label: 'Australia', count: 12 },
+];
+const popularSorted = [...testFacetItems].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+assert(popularSorted[0].id === 'England' && popularSorted[1].id === 'France', '18a. Popular sort orders highest count first');
+
+const azSorted = [...testFacetItems].sort((a, b) => a.label.localeCompare(b.label));
+assert(azSorted[0].id === 'Australia' && azSorted[1].id === 'England', '18b. A-Z sort orders alphabetically');
+
 console.log(`\nResults: ${passedTests}/${totalTests} tests passed.`);
 if (passedTests !== totalTests) {
   process.exit(1);

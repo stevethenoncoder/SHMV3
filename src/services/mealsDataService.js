@@ -160,10 +160,17 @@ export async function loadMealsData(options = {}) {
   for (const row of rawIngredient) {
     const id = parseInt(row.Ingredient_ID, 10);
     if (!isNaN(id)) {
+      const icon =
+        row.Ing_Icon?.trim() ||
+        row.ING_ICON?.trim() ||
+        row.ing_icon?.trim() ||
+        row.IngIcon?.trim() ||
+        null;
       ingredientsById.set(id, {
         id,
         name: row.Food_Ingredient?.trim() || '',
         category: row.Ingredient_Category?.trim() || '',
+        icon: icon || null,
       });
     }
   }

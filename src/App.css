@@ -75,6 +75,53 @@
   }
 }
 
+/* Mobile Chronicle Layout (<= 768px) */
+@media (max-width: 768px) {
+  .desktop-chronicle-container {
+    display: none !important;
+  }
+
+  .mobile-chronicle-container {
+    display: block;
+    padding: 0.65rem 0.85rem 5.5rem;
+  }
+
+  .mobile-chronicle-container.is-map-view {
+    padding: 0 !important;
+  }
+
+  .chronicle-view {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .meals-main-content,
+  .restaurants-page-view,
+  .food-page-root,
+  .stats-page-container,
+  .overview-page,
+  .meal-detail-page,
+  .restaurant-detail-page {
+    padding-bottom: 75px !important;
+  }
+
+  .mobile-pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 12px 0 16px;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-chronicle-container {
+    display: none !important;
+  }
+
+  .desktop-chronicle-container {
+    display: block;
+  }
+}
+
 .meals-pagination-container {
   display: flex;
   justify-content: center;

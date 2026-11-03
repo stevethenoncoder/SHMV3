@@ -3,7 +3,7 @@
   inset: 0;
   background-color: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(2px);
-  z-index: 1000;
+  z-index: 100002 !important;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -112,6 +112,151 @@
   font-size: 0.92rem;
   font-weight: 700;
   color: var(--text-primary);
+}
+
+.sheet-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.sheet-option-label {
+  display: flex;
+  align-items: center;
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 3px 0;
+}
+
+.sheet-option-label input {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+  margin-right: 10px;
+}
+
+.option-name {
+  flex: 1;
+}
+
+.option-count {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  background-color: #f1f5f9;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  margin-left: 8px;
+}
+
+/* Mobile Facet Search & Order Toolbar */
+.mobile-facet-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.mobile-facet-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.mobile-facet-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.mobile-facet-search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--text-muted, #94a3b8);
+  pointer-events: none;
+}
+
+.mobile-facet-search-input {
+  width: 100%;
+  padding: 7px 30px 7px 30px;
+  font-size: 0.84rem;
+  border: 1px solid var(--border, #cbd5e1);
+  border-radius: var(--radius-md, 6px);
+  background: var(--bg-surface, #ffffff);
+  color: var(--text-primary, #0f172a);
+}
+
+.mobile-facet-search-input:focus {
+  outline: none;
+  border-color: var(--accent, #0284c7);
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+}
+
+.mobile-facet-search-clear {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-facet-sort-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-facet-sort-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted, #64748b);
+}
+
+.mobile-facet-sort-pills {
+  display: inline-flex;
+  background: #f1f5f9;
+  padding: 2px;
+  border-radius: 6px;
+  gap: 2px;
+}
+
+.mobile-facet-sort-btn {
+  border: none;
+  background: transparent;
+  padding: 3px 10px;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--text-secondary, #64748b);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mobile-facet-sort-btn.active {
+  background: #ffffff;
+  color: var(--accent, #0284c7);
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-facet-no-results {
+  font-size: 0.82rem;
+  color: var(--text-muted, #94a3b8);
+  font-style: italic;
+  padding: 8px 0;
 }
 
 .sheet-checkbox-list {

@@ -1,21 +1,41 @@
 import React from 'react';
-import { Compass, BarChart2, MapPin, Tag, Info } from 'lucide-react';
+import { Compass, Utensils, UtensilsCrossed, BarChart2 } from 'lucide-react';
 import './MobileBottomNav.css';
 
-export default function MobileBottomNav({ activeNav, onSelectNav, locationLabel, locationLabelPlural }) {
-  const locTitle = locationLabelPlural || (locationLabel ? `${locationLabel}s` : 'Counties');
-
+export default function MobileBottomNav({ activeNav, onSelectNav }) {
   return (
-    <nav className="mobile-bottom-nav">
+    <nav className="mobile-bottom-nav" aria-label="Mobile Bottom Navigation">
       <button
         type="button"
-        className={`bottom-nav-item ${activeNav === 'explorer' ? 'active' : ''}`}
-        onClick={() => onSelectNav('explorer')}
+        className={`bottom-nav-item ${activeNav === 'chronicle' ? 'active' : ''}`}
+        onClick={() => onSelectNav('chronicle')}
       >
         <div className="icon-wrapper">
           <Compass size={18} />
         </div>
-        <span>Blogs</span>
+        <span>Chronicle</span>
+      </button>
+
+      <button
+        type="button"
+        className={`bottom-nav-item ${activeNav === 'restaurants' ? 'active' : ''}`}
+        onClick={() => onSelectNav('restaurants')}
+      >
+        <div className="icon-wrapper">
+          <Utensils size={18} />
+        </div>
+        <span>Restaurants</span>
+      </button>
+
+      <button
+        type="button"
+        className={`bottom-nav-item ${activeNav === 'food' ? 'active' : ''}`}
+        onClick={() => onSelectNav('food')}
+      >
+        <div className="icon-wrapper">
+          <UtensilsCrossed size={18} />
+        </div>
+        <span>Food</span>
       </button>
 
       <button
@@ -27,39 +47,6 @@ export default function MobileBottomNav({ activeNav, onSelectNav, locationLabel,
           <BarChart2 size={18} />
         </div>
         <span>Stats</span>
-      </button>
-
-      <button
-        type="button"
-        className={`bottom-nav-item ${activeNav === 'locations' ? 'active' : ''}`}
-        onClick={() => onSelectNav('locations')}
-      >
-        <div className="icon-wrapper">
-          <MapPin size={18} />
-        </div>
-        <span>{locTitle}</span>
-      </button>
-
-      <button
-        type="button"
-        className={`bottom-nav-item ${activeNav === 'categories' ? 'active' : ''}`}
-        onClick={() => onSelectNav('categories')}
-      >
-        <div className="icon-wrapper">
-          <Tag size={18} />
-        </div>
-        <span>Categories</span>
-      </button>
-
-      <button
-        type="button"
-        className={`bottom-nav-item ${activeNav === 'about' ? 'active' : ''}`}
-        onClick={() => onSelectNav('about')}
-      >
-        <div className="icon-wrapper">
-          <Info size={18} />
-        </div>
-        <span>About</span>
       </button>
     </nav>
   );

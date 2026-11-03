@@ -1,0 +1,235 @@
+.meals-mobile-header-toolbar {
+  background: var(--bg-surface, #ffffff);
+  border-bottom: 1px solid var(--border-light, #e2e8f0);
+  padding: 0.5rem 0.85rem 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  position: sticky;
+  top: 0;
+  z-index: 950;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.meals-mobile-header-toolbar.is-hidden {
+  transform: translateY(-100%);
+}
+
+@media (min-width: 769px) {
+  .meals-mobile-header-toolbar {
+    display: none !important;
+  }
+}
+
+/* 1. Top Brand Bar */
+.mobile-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  min-height: 32px;
+}
+
+.mobile-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.mobile-brand .brand-logo-badge {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mobile-app-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-primary, #0f172a);
+  margin: 0;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-top-right {
+  display: flex;
+  align-items: center;
+}
+
+.mobile-count-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  background-color: var(--bg-surface-secondary, #f1f5f9);
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.mobile-count-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #10b981;
+}
+
+/* 2. Horizontally Scrollable Filter Chips Row */
+.mobile-filter-chips-scroll {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+
+.mobile-filter-chips-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background-color: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.mobile-filter-chip:hover {
+  background-color: var(--bg-surface-secondary, #f8fafc);
+  border-color: #cbd5e1;
+}
+
+.mobile-filter-chip.active {
+  background-color: rgba(2, 132, 199, 0.08);
+  border-color: var(--color-primary, #0284c7);
+  color: var(--color-primary, #0284c7);
+}
+
+.mobile-filter-chip.search-chip {
+  padding: 5px 8px;
+  position: relative;
+}
+
+.chip-active-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--color-primary, #0284c7);
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+
+.chip-badge {
+  background-color: var(--color-primary, #0284c7);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0 4px;
+  border-radius: 9999px;
+  min-width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 3. Inline Search Row */
+.mobile-inline-search-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.inline-search-icon {
+  position: absolute;
+  left: 10px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.mobile-inline-search-input {
+  width: 100%;
+  padding: 6px 28px 6px 30px;
+  font-size: 0.82rem;
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 8px;
+  background-color: var(--bg-surface-secondary, #f8fafc);
+  color: var(--text-primary, #0f172a);
+}
+
+.mobile-inline-search-input:focus {
+  outline: none;
+  background-color: #ffffff;
+  border-color: var(--color-primary, #0284c7);
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.12);
+}
+
+.inline-search-clear {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px;
+}
+
+/* 4. Subheader Row */
+.mobile-subheader-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 2px;
+}
+
+.mobile-results-count {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary, #475569);
+}
+
+.mobile-view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background-color: var(--bg-surface-secondary, #0f172a);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.mobile-view-toggle-btn:hover {
+  opacity: 0.9;
+}

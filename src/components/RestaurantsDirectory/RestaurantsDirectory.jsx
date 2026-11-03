@@ -213,7 +213,17 @@ export default function RestaurantsDirectory({
 
                   {/* Restaurant Name */}
                   <div className="col-cell col-restaurant">
-                    <span className="restaurant-name-text">{restaurant.name}</span>
+                    <button
+                      type="button"
+                      className="restaurant-name-link"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onSelectRestaurant) onSelectRestaurant(restaurant.id);
+                      }}
+                      title={`View restaurant overview for ${restaurant.name}`}
+                    >
+                      {restaurant.name}
+                    </button>
                   </div>
 
                   {/* Location */}

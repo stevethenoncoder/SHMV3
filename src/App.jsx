@@ -9,6 +9,13 @@ import MealGridCard from './components/MealGridCard/MealGridCard.jsx';
 import MealDetailPage from './components/MealDetailPage/MealDetailPage.jsx';
 import MealCommentBar from './components/MealCommentBar/MealCommentBar.jsx';
 
+import MobileBottomNav from './components/MobileBottomNav/MobileBottomNav.jsx';
+import MealsMobileHeaderToolbar from './components/MealsMobileHeaderToolbar/MealsMobileHeaderToolbar.jsx';
+import MealsMobileCard from './components/MealsMobileCard/MealsMobileCard.jsx';
+import MealsMobileMap from './components/MealsMobileMap/MealsMobileMap.jsx';
+import MealsMobileSortSheet from './components/MealsMobileSortSheet/MealsMobileSortSheet.jsx';
+import MealsMobileSingleFilterSheet from './components/MealsMobileSingleFilterSheet/MealsMobileSingleFilterSheet.jsx';
+
 import RestaurantKpiStrip from './components/RestaurantKpiStrip/RestaurantKpiStrip.jsx';
 import RestaurantsFilterBar from './components/RestaurantsFilterBar/RestaurantsFilterBar.jsx';
 import RestaurantsDirectory from './components/RestaurantsDirectory/RestaurantsDirectory.jsx';
@@ -19,6 +26,7 @@ import OverviewPage from './components/OverviewPage/OverviewPage.jsx';
 import RelationshipsPage from './components/RelationshipsPage/RelationshipsPage.jsx';
 import StatsPage from './components/StatsPage/StatsPage.jsx';
 import SentimentPage from './components/SentimentPage/SentimentPage.jsx';
+import FoodPage from './components/FoodPage/FoodPage.jsx';
 
 import Pagination from './components/Pagination/Pagination.jsx';
 import {
@@ -27,6 +35,9 @@ import {
   computeFacetCounts,
   sortMeals,
   countActiveFilters,
+  CANONICAL_DECADES,
+  CANONICAL_RATINGS,
+  formatRatingLabel,
 } from './utils/mealsFilter.js';
 
 import {
@@ -52,20 +63,24 @@ export default function App() {
 
   // Section Navigation: 'overview' | 'chronicle' | 'restaurants' | 'relationships' | 'sentiment' | 'stats'
   const [activeSection, setActiveSection] = useState(() => {
-    if (typeof window === 'undefined') return 'overview';
+    if (typeof window === 'undefined') return 'chronicle';
     const path = window.location.pathname;
+    if (path.startsWith('/overview')) return 'overview';
     if (path.startsWith('/sentiment')) return 'sentiment';
+    if (path.startsWith('/food')) return 'food';
     if (path.startsWith('/stats')) return 'stats';
     if (path.startsWith('/relationships')) return 'relationships';
     if (path.startsWith('/restaurants')) return 'restaurants';
     if (path.startsWith('/chronicle')) return 'chronicle';
     const params = new URLSearchParams(window.location.search);
+    if (params.get('section') === 'overview') return 'overview';
     if (params.get('section') === 'sentiment') return 'sentiment';
+    if (params.get('section') === 'food') return 'food';
     if (params.get('section') === 'stats') return 'stats';
     if (params.get('section') === 'relationships') return 'relationships';
     if (params.get('section') === 'restaurants' || params.get('restaurant')) return 'restaurants';
     if (params.get('section') === 'chronicle' || params.get('meal')) return 'chronicle';
-    return 'overview';
+    return 'chronicle';
   });
 
   // Track if user jumped to Chronicle with a preselection from another area
@@ -116,6 +131,10 @@ export default function App() {
   });
 
   const [isMobileMealsFilterOpen, setIsMobileMealsFilterOpen] = useState(false);
+  const [activeMobileFilterKey, setActiveMobileFilterKey] = useState(null);
+  const [chronicleViewMode, setChronicleViewMode] = useState('list'); // 'list' | 'map'
+  const [isMobileSortOpen, setIsMobileSortOpen] = useState(false);
+  const [mobileFilterInitialSection, setMobileFilterInitialSection] = useState(null);
   const [mealsSortOption, setMealsSortOption] = useState('date_desc');
   const [mealsCurrentPage, setMealsCurrentPage] = useState(1);
   const [mealsPageSize, setMealsPageSize] = useState(18);
@@ -263,6 +282,117 @@ export default function App() {
     return countActiveFilters(mealsFilterState);
   }, [mealsFilterState]);
 
+  // Mobile dedicated single filter drawer configuration
+  const singleFilterConfig = useMemo(() => {
+    if (!activeMobileFilterKey) return null;
+
+    if (activeMobileFilterKey === 'decades') {
+      const counts = mealFacetCounts.decadeCounts || {};
+      return {
+        key: 'decades',
+        title: 'Filter by Decade',
+        selectedValues: mealsFilterState.decades || [],
+        options: CANONICAL_DECADES.map((d) => ({
+          value: d,
+          label: d,
+          count: counts[d] || 0,
+        })),
+      };
+    }
+
+    if (activeMobileFilterKey === 'ratings') {
+      const counts = mealFacetCounts.ratingCounts || {};
+      return {
+        key: 'ratings',
+        title: 'Filter by Meal Rating',
+        selectedValues: mealsFilterState.ratings || [],
+        options: CANONICAL_RATINGS.map((r) => ({
+          value: r,
+          label: formatRatingLabel(r),
+          count: counts[r] || 0,
+        })),
+      };
+    }
+
+    if (activeMobileFilterKey === 'countries') {
+      const counts = mealFacetCounts.countryCounts || {};
+      const keysSet = new Set([...Object.keys(counts), ...(mealsFilterState.countries || [])]);
+      const sortedKeys = Array.from(keysSet).sort((a, b) => {
+        const diff = (counts[b] || 0) - (counts[a] || 0);
+        return diff !== 0 ? diff : a.localeCompare(b);
+      });
+      return {
+        key: 'countries',
+        title: 'Filter by Country',
+        selectedValues: mealsFilterState.countries || [],
+        options: sortedKeys.map((c) => ({
+          value: c,
+          label: c,
+          count: counts[c] || 0,
+        })),
+      };
+    }
+
+    if (activeMobileFilterKey === 'cities') {
+      const counts = mealFacetCounts.cityCounts || {};
+      const keysSet = new Set([...Object.keys(counts), ...(mealsFilterState.cities || [])]);
+      const sortedKeys = Array.from(keysSet).sort((a, b) => {
+        const diff = (counts[b] || 0) - (counts[a] || 0);
+        return diff !== 0 ? diff : a.localeCompare(b);
+      });
+      return {
+        key: 'cities',
+        title: 'Filter by City',
+        selectedValues: mealsFilterState.cities || [],
+        options: sortedKeys.map((c) => ({
+          value: c,
+          label: c,
+          count: counts[c] || 0,
+        })),
+      };
+    }
+
+    if (activeMobileFilterKey === 'cuisines') {
+      const counts = mealFacetCounts.cuisineCounts || {};
+      const keysSet = new Set([...Object.keys(counts), ...(mealsFilterState.cuisines || [])]);
+      const sortedKeys = Array.from(keysSet).sort((a, b) => {
+        const diff = (counts[b] || 0) - (counts[a] || 0);
+        return diff !== 0 ? diff : a.localeCompare(b);
+      });
+      return {
+        key: 'cuisines',
+        title: 'Filter by Type',
+        selectedValues: mealsFilterState.cuisines || [],
+        options: sortedKeys.map((c) => ({
+          value: c,
+          label: c,
+          count: counts[c] || 0,
+        })),
+      };
+    }
+
+    if (activeMobileFilterKey === 'people') {
+      const counts = mealFacetCounts.peopleCounts || {};
+      const keysSet = new Set([...Object.keys(counts), ...(mealsFilterState.people || [])]);
+      const sortedKeys = Array.from(keysSet).sort((a, b) => {
+        const diff = (counts[b] || 0) - (counts[a] || 0);
+        return diff !== 0 ? diff : a.localeCompare(b);
+      });
+      return {
+        key: 'people',
+        title: 'Filter by Companion',
+        selectedValues: mealsFilterState.people || [],
+        options: sortedKeys.map((p) => ({
+          value: p,
+          label: p,
+          count: counts[p] || 0,
+        })),
+      };
+    }
+
+    return null;
+  }, [activeMobileFilterKey, mealsFilterState, mealFacetCounts]);
+
   // --- COMPUTED RESTAURANTS DERIVATIONS ---
   const restaurantFacetCounts = useMemo(() => {
     return computeRestaurantFacetCounts(restaurants, restaurantFilterState);
@@ -327,6 +457,7 @@ export default function App() {
     else if (section === 'restaurants') targetUrl = '/restaurants';
     else if (section === 'relationships') targetUrl = '/relationships';
     else if (section === 'sentiment') targetUrl = '/sentiment';
+    else if (section === 'food') targetUrl = '/food';
     else if (section === 'stats') targetUrl = '/stats';
     window.history.pushState(null, '', targetUrl);
     window.scrollTo(0, 0);
@@ -336,6 +467,8 @@ export default function App() {
     const origin =
       activeSection === 'relationships'
         ? { section: 'relationships', label: 'Return to Relationships' }
+        : activeSection === 'food'
+        ? { section: 'food', label: 'Return to Food' }
         : { section: 'overview', label: 'Return to Overview' };
     setChronicleOrigin(origin);
     setActiveSection('chronicle');
@@ -558,7 +691,7 @@ export default function App() {
   }, [activeSection, activeMealId, chronicleOrigin, activeMealsFiltersCount]);
 
   return (
-    <div className="meals-app-layout">
+    <div className={`meals-app-layout ${activeSection === 'chronicle' ? 'chronicle-active' : ''}`}>
       {/* Primary Header */}
       <MealsHeader
         activeNav={activeSection}
@@ -710,86 +843,166 @@ export default function App() {
         ) : activeSection === 'chronicle' ? (
           /* 4. Meal Chronicle Browse View */
           <div className="chronicle-view">
-            <div className="chronicle-layout">
-              {/* Desktop Filter Sidebar */}
-              <div className="desktop-sidebar-column">
-                <MealsFilterSidebar
-                  filterState={mealsFilterState}
-                  onUpdateFilter={handleUpdateMealFilter}
-                  onClearFilters={handleClearAllMealFilters}
-                  counts={mealFacetCounts}
-                />
-              </div>
+            {/* Mobile Header Toolbar (visible only on <=768px, sticky with hide-on-scroll) */}
+            <MealsMobileHeaderToolbar
+              totalCount={meals.length}
+              filteredCount={totalFilteredMealsCount}
+              searchQuery={mealsFilterState.search}
+              onSearchChange={(q) => handleUpdateMealFilter('search', q)}
+              onOpenSort={() => setIsMobileSortOpen(true)}
+              onOpenFilter={(filterKey) => {
+                setActiveMobileFilterKey(filterKey);
+              }}
+              filterState={mealsFilterState}
+              viewMode={chronicleViewMode}
+              onToggleViewMode={(mode) => setChronicleViewMode(mode)}
+            />
 
-              {/* Main Feed Column */}
-              <div className="chronicle-main-col">
-                <MealsActiveFilterChips
-                  filterState={mealsFilterState}
-                  onRemoveFilter={handleUpdateMealFilter}
-                  onClearFilters={handleClearAllMealFilters}
-                />
-
-                <MealsResultsToolbar
-                  totalCount={meals.length}
-                  filteredCount={totalFilteredMealsCount}
-                  searchQuery={mealsFilterState.search}
-                  onSearchChange={(q) => handleUpdateMealFilter('search', q)}
-                  sortOption={mealsSortOption}
-                  onSortChange={(s) => {
-                    setMealsSortOption(s);
-                    setMealsCurrentPage(1);
-                  }}
-                  pageSize={mealsPageSize}
-                  onPageSizeChange={(sz) => {
-                    setMealsPageSize(sz);
-                    setMealsCurrentPage(1);
-                  }}
-                  activeFilterCount={activeMealsFiltersCount}
-                  onOpenMobileFilters={() => setIsMobileMealsFilterOpen(true)}
-                />
-
-                {paginatedMeals.length > 0 ? (
-                  <>
-                    <div className="meals-grid">
+            {/* Mobile Chronicle View (<=768px): List vs Map */}
+            <div
+              className={`mobile-chronicle-container ${
+                chronicleViewMode === 'map' ? 'is-map-view' : ''
+              }`}
+            >
+              {chronicleViewMode === 'map' ? (
+                <MealsMobileMap meals={sortedMeals} onSelectMeal={handleOpenMeal} />
+              ) : (
+                <div className="mobile-meals-list">
+                  {paginatedMeals.length > 0 ? (
+                    <>
                       {paginatedMeals.map((meal) => (
-                        <MealGridCard
+                        <MealsMobileCard
                           key={meal.id}
                           meal={meal}
                           onSelectMeal={handleOpenMeal}
-                          onAddFilter={handleAddMealFilter}
+                          onShowOnMap={() => {
+                            setChronicleViewMode('map');
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
                         />
                       ))}
-                    </div>
 
-                    <div className="meals-pagination-container">
-                      <Pagination
-                        currentPage={safeMealsCurrentPage}
-                        totalPages={totalMealsPages}
-                        pageSize={mealsPageSize}
-                        totalItems={totalFilteredMealsCount}
-                        onPageChange={(p) => {
-                          setMealsCurrentPage(p);
-                          window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
-                        onPageSizeChange={(sz) => {
-                          setMealsPageSize(sz);
-                          setMealsCurrentPage(1);
-                        }}
-                      />
+                      {totalFilteredMealsCount > mealsPageSize && (
+                        <div className="mobile-pagination-wrapper">
+                          <Pagination
+                            currentPage={safeMealsCurrentPage}
+                            totalPages={totalMealsPages}
+                            pageSize={mealsPageSize}
+                            totalItems={totalFilteredMealsCount}
+                            onPageChange={(p) => {
+                              setMealsCurrentPage(p);
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            onPageSizeChange={(sz) => {
+                              setMealsPageSize(sz);
+                              setMealsCurrentPage(1);
+                            }}
+                          />
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="meals-empty-search">
+                      <p>No dining records match your current filter selections.</p>
+                      <button
+                        type="button"
+                        className="btn-clear-search"
+                        onClick={handleClearAllMealFilters}
+                      >
+                        Clear all filters
+                      </button>
                     </div>
-                  </>
-                ) : (
-                  <div className="meals-empty-search">
-                    <p>No dining records match your current filter selections.</p>
-                    <button
-                      type="button"
-                      className="btn-clear-search"
-                      onClick={handleClearAllMealFilters}
-                    >
-                      Clear all filters
-                    </button>
-                  </div>
-                )}
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Desktop Chronicle Layout (min-width: 769px) */}
+            <div className="desktop-chronicle-container">
+              <div className="chronicle-layout">
+                {/* Desktop Filter Sidebar */}
+                <div className="desktop-sidebar-column">
+                  <MealsFilterSidebar
+                    filterState={mealsFilterState}
+                    onUpdateFilter={handleUpdateMealFilter}
+                    onClearFilters={handleClearAllMealFilters}
+                    counts={mealFacetCounts}
+                  />
+                </div>
+
+                {/* Main Feed Column */}
+                <div className="chronicle-main-col">
+                  <MealsActiveFilterChips
+                    filterState={mealsFilterState}
+                    onRemoveFilter={handleUpdateMealFilter}
+                    onClearFilters={handleClearAllMealFilters}
+                  />
+
+                  <MealsResultsToolbar
+                    totalCount={meals.length}
+                    filteredCount={totalFilteredMealsCount}
+                    searchQuery={mealsFilterState.search}
+                    onSearchChange={(q) => handleUpdateMealFilter('search', q)}
+                    sortOption={mealsSortOption}
+                    onSortChange={(s) => {
+                      setMealsSortOption(s);
+                      setMealsCurrentPage(1);
+                    }}
+                    pageSize={mealsPageSize}
+                    onPageSizeChange={(sz) => {
+                      setMealsPageSize(sz);
+                      setMealsCurrentPage(1);
+                    }}
+                    activeFilterCount={activeMealsFiltersCount}
+                    onOpenMobileFilters={() => {
+                      setMobileFilterInitialSection(null);
+                      setIsMobileMealsFilterOpen(true);
+                    }}
+                  />
+
+                  {paginatedMeals.length > 0 ? (
+                    <>
+                      <div className="meals-grid">
+                        {paginatedMeals.map((meal) => (
+                          <MealGridCard
+                            key={meal.id}
+                            meal={meal}
+                            onSelectMeal={handleOpenMeal}
+                            onAddFilter={handleAddMealFilter}
+                          />
+                        ))}
+                      </div>
+
+                      <div className="meals-pagination-container">
+                        <Pagination
+                          currentPage={safeMealsCurrentPage}
+                          totalPages={totalMealsPages}
+                          pageSize={mealsPageSize}
+                          totalItems={totalFilteredMealsCount}
+                          onPageChange={(p) => {
+                            setMealsCurrentPage(p);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                          onPageSizeChange={(sz) => {
+                            setMealsPageSize(sz);
+                            setMealsCurrentPage(1);
+                          }}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="meals-empty-search">
+                      <p>No dining records match your current filter selections.</p>
+                      <button
+                        type="button"
+                        className="btn-clear-search"
+                        onClick={handleClearAllMealFilters}
+                      >
+                        Clear all filters
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -801,6 +1014,33 @@ export default function App() {
               onApplyFilters={handleApplyMobileMealFilters}
               onClearFilters={handleClearAllMealFilters}
               counts={mealFacetCounts}
+              initialSection={mobileFilterInitialSection}
+            />
+
+            {/* Dedicated Single Filter Sheet matching Screenshot 1 */}
+            {singleFilterConfig && (
+              <MealsMobileSingleFilterSheet
+                isOpen={Boolean(activeMobileFilterKey)}
+                onClose={() => setActiveMobileFilterKey(null)}
+                filterKey={singleFilterConfig.key}
+                title={singleFilterConfig.title}
+                selectedValues={singleFilterConfig.selectedValues}
+                options={singleFilterConfig.options}
+                onApply={(newValues) => {
+                  handleUpdateMealFilter(singleFilterConfig.key, newValues);
+                }}
+              />
+            )}
+
+            {/* Mobile Sort Sheet */}
+            <MealsMobileSortSheet
+              isOpen={isMobileSortOpen}
+              onClose={() => setIsMobileSortOpen(false)}
+              sortOption={mealsSortOption}
+              onSelectSort={(s) => {
+                setMealsSortOption(s);
+                setMealsCurrentPage(1);
+              }}
             />
           </div>
         ) : activeSection === 'relationships' ? (
@@ -817,8 +1057,15 @@ export default function App() {
               handleOpenMeal(id, { section: 'sentiment', label: 'Back to Sentiment' })
             }
           />
+        ) : activeSection === 'food' ? (
+          /* 7. Culinary & Food Intelligence */
+          <FoodPage
+            meals={meals}
+            restaurants={restaurants}
+            onNavigateToChronicle={handleApplyChronicleFilter}
+          />
         ) : activeSection === 'stats' ? (
-          /* 7. Dining Intelligence & Archive KPIs */
+          /* 8. Dining Intelligence & Archive KPIs */
           <StatsPage
             meals={meals}
             restaurants={restaurants}
@@ -837,6 +1084,12 @@ export default function App() {
           />
         )}
       </main>
+
+      {/* Mobile Bottom Navigation Bar (Fixed 4 Tabs: Chronicle, Restaurants, Food, Stats) */}
+      <MobileBottomNav
+        activeNav={activeSection}
+        onSelectNav={handleSelectNav}
+      />
     </div>
   );
 }

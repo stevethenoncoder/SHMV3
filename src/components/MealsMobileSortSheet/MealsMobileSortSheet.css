@@ -1,0 +1,138 @@
+.meals-sort-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 100002 !important;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.18s ease-out;
+}
+
+.meals-sort-panel {
+  background: var(--bg-surface, #ffffff);
+  width: 100%;
+  max-height: 80vh;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.meals-sort-handle {
+  width: 36px;
+  height: 4px;
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+  margin: 10px auto 4px;
+}
+
+.meals-sort-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px 12px;
+  border-bottom: 1px solid var(--border-light, #e2e8f0);
+}
+
+.meals-sort-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  margin: 0;
+}
+
+.meals-sort-close-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.meals-sort-body {
+  padding: 10px 14px 24px;
+  overflow-y: auto;
+}
+
+.meals-sort-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meals-sort-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.meals-sort-row:hover {
+  background-color: var(--bg-surface-secondary, #f8fafc);
+}
+
+.meals-sort-row.selected {
+  background-color: rgba(2, 132, 199, 0.08);
+}
+
+.meals-sort-radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.meals-sort-radio.checked {
+  border-color: #0284c7;
+}
+
+.meals-sort-radio-inner {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: #0284c7;
+}
+
+.meals-sort-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.meals-sort-opt-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+}
+
+.meals-sort-opt-desc {
+  font-size: 0.74rem;
+  color: var(--text-tertiary, #64748b);
+}
+
+.meals-sort-check {
+  color: #0284c7;
+  flex-shrink: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   Search,
   X,
@@ -16,6 +16,7 @@ import {
   CANONICAL_DECADES,
   countActiveRestaurantFilters,
   formatRatingLabel,
+  stripAccents,
 } from '../../utils/restaurantsFilter.js';
 import './RestaurantsFilterBar.css';
 
@@ -67,7 +68,7 @@ function FilterPopover({
 }
 
 /**
- * Filter list with optional search and dynamic counts
+ * Filter list with accent-insensitive search, popular / A-Z ordering, and dynamic counts
  */
 function CheckboxFilterList({
   options = [],
@@ -75,52 +76,123 @@ function CheckboxFilterList({
   counts = {},
   onToggleValue,
   searchable = false,
+  sortable = false,
+  defaultSortMode = 'count_desc',
   searchPlaceholder = 'Search options...',
 }) {
   const [query, setQuery] = useState('');
+  const [sortMode, setSortMode] = useState(defaultSortMode);
 
-  const filteredOptions = searchable && query.trim()
-    ? options.filter((opt) => opt.toLowerCase().includes(query.trim().toLowerCase()))
-    : options;
+  // Normalize options into { id, label, count } objects
+  const normalizedItems = useMemo(() => {
+    return options.map((opt) => {
+      if (opt && typeof opt === 'object') {
+        const id = opt.id !== undefined ? opt.id : opt.name;
+        const label = opt.name || opt.label || String(id);
+        const count = opt.count !== undefined ? opt.count : (counts[id] || 0);
+        return { id, label, count };
+      }
+      return {
+        id: opt,
+        label: String(opt),
+        count: counts[opt] || 0,
+      };
+    });
+  }, [options, counts]);
+
+  // Search filter (accent-insensitive)
+  const filteredItems = useMemo(() => {
+    const q = stripAccents(query.trim());
+    if (!q) return normalizedItems;
+    return normalizedItems.filter((item) => stripAccents(item.label).includes(q));
+  }, [normalizedItems, query]);
+
+  // Sort: pinned selected items first, then by sortMode (count_desc for Popular, name_asc for A-Z)
+  const sortedItems = useMemo(() => {
+    return [...filteredItems].sort((a, b) => {
+      const aSel = selectedValues.includes(a.id);
+      const bSel = selectedValues.includes(b.id);
+      if (aSel !== bSel) return aSel ? -1 : 1;
+
+      if (sortMode === 'count_desc') {
+        if (b.count !== a.count) return b.count - a.count;
+        return a.label.localeCompare(b.label);
+      }
+      return a.label.localeCompare(b.label);
+    });
+  }, [filteredItems, selectedValues, sortMode]);
+
+  const showToolbar = searchable || sortable;
 
   return (
     <div className="checkbox-filter-list-wrapper">
-      {searchable && options.length > 7 && (
-        <div className="popover-search-container">
-          <Search size={13} className="popover-search-icon" />
-          <input
-            type="text"
-            className="popover-search-input"
-            placeholder={searchPlaceholder}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          {query && (
-            <button
-              type="button"
-              className="popover-search-clear"
-              onClick={() => setQuery('')}
-            >
-              <X size={12} />
-            </button>
+      {showToolbar && (
+        <div className="popover-toolbar">
+          {searchable && (
+            <div className="popover-search-container">
+              <Search size={13} className="popover-search-icon" />
+              <input
+                type="text"
+                className="popover-search-input"
+                placeholder={searchPlaceholder}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              {query && (
+                <button
+                  type="button"
+                  className="popover-search-clear"
+                  onClick={() => setQuery('')}
+                  title="Clear search"
+                  aria-label="Clear search"
+                >
+                  <X size={12} />
+                </button>
+              )}
+            </div>
+          )}
+
+          {sortable && (
+            <div className="popover-sort-bar">
+              <span className="popover-sort-label">Order:</span>
+              <div className="popover-sort-pills">
+                <button
+                  type="button"
+                  className={`popover-sort-btn ${sortMode === 'count_desc' ? 'active' : ''}`}
+                  onClick={() => setSortMode('count_desc')}
+                  title="Sort by Most Popular (Highest count first)"
+                >
+                  Popular
+                </button>
+                <button
+                  type="button"
+                  className={`popover-sort-btn ${sortMode === 'name_asc' ? 'active' : ''}`}
+                  onClick={() => setSortMode('name_asc')}
+                  title="Sort Alphabetically (A to Z)"
+                >
+                  A–Z
+                </button>
+              </div>
+            </div>
           )}
         </div>
       )}
 
       <div className="popover-options-scroll">
-        {filteredOptions.length > 0 ? (
-          filteredOptions.map((opt) => {
-            const count = counts[opt] || 0;
-            const isSelected = selectedValues.includes(opt);
+        {sortedItems.length > 0 ? (
+          sortedItems.map((item) => {
+            const isSelected = selectedValues.includes(item.id);
             return (
-              <label key={opt} className={`popover-option-item ${isSelected ? 'selected' : ''}`}>
+              <label key={item.id} className={`popover-option-item ${isSelected ? 'selected' : ''}`}>
                 <input
                   type="checkbox"
                   checked={isSelected}
-                  onChange={() => onToggleValue(opt)}
+                  onChange={() => onToggleValue(item.id)}
                 />
-                <span className="popover-option-label">{opt}</span>
-                {count > 0 && <span className="popover-option-count">({count.toLocaleString()})</span>}
+                <span className="popover-option-label">{item.label}</span>
+                {item.count > 0 && (
+                  <span className="popover-option-count">({item.count.toLocaleString()})</span>
+                )}
               </label>
             );
           })
@@ -337,6 +409,7 @@ export default function RestaurantsFilterBar({
             counts={counts.countryCounts || {}}
             onToggleValue={(v) => handleToggleArrayItem('countries', v)}
             searchable={true}
+            sortable={true}
             searchPlaceholder="Search countries..."
           />
         </FilterPopover>
@@ -355,6 +428,7 @@ export default function RestaurantsFilterBar({
             counts={counts.cityCounts || {}}
             onToggleValue={(v) => handleToggleArrayItem('cities', v)}
             searchable={true}
+            sortable={true}
             searchPlaceholder="Search cities..."
           />
         </FilterPopover>
@@ -373,6 +447,7 @@ export default function RestaurantsFilterBar({
             counts={counts.cuisineCounts || {}}
             onToggleValue={(v) => handleToggleArrayItem('cuisines', v)}
             searchable={true}
+            sortable={true}
             searchPlaceholder="Search cuisines..."
           />
         </FilterPopover>
@@ -449,28 +524,14 @@ export default function RestaurantsFilterBar({
           onToggle={() => toggleDropdown('companion')}
           onClose={closeDropdown}
         >
-          <div className="checkbox-filter-list-wrapper">
-            <div className="popover-options-scroll">
-              {availablePeople.length > 0 ? (
-                availablePeople.map((p) => {
-                  const isSelected = (filterState.people || []).includes(p.id);
-                  return (
-                    <label key={p.id} className={`popover-option-item ${isSelected ? 'selected' : ''}`}>
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => handleToggleArrayItem('people', p.id)}
-                      />
-                      <span className="popover-option-label">{p.name}</span>
-                      {p.count > 0 && <span className="popover-option-count">({p.count})</span>}
-                    </label>
-                  );
-                })
-              ) : (
-                <div className="popover-no-results">No public companions found</div>
-              )}
-            </div>
-          </div>
+          <CheckboxFilterList
+            options={availablePeople}
+            selectedValues={filterState.people || []}
+            onToggleValue={(v) => handleToggleArrayItem('people', v)}
+            searchable={true}
+            sortable={true}
+            searchPlaceholder="Search companions..."
+          />
         </FilterPopover>
 
         {/* More Filters (Business, Arsenal) */}

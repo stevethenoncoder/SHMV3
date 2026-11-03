@@ -126,4 +126,8 @@
   .desktop-nav {
     display: none;
   }
+
+  .meals-app-layout.chronicle-active .meals-header {
+    display: none !important;
+  }
 }

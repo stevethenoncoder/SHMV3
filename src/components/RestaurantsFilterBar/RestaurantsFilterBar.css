@@ -173,13 +173,20 @@
   flex-direction: column;
 }
 
+.popover-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 0.45rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--border-light, #e2e8f0);
+}
+
 .popover-search-container {
   position: relative;
   display: flex;
   align-items: center;
-  margin-bottom: 0.4rem;
-  padding-bottom: 0.4rem;
-  border-bottom: 1px solid var(--border-light, #e2e8f0);
+  width: 100%;
 }
 
 .popover-search-icon {
@@ -191,15 +198,18 @@
 
 .popover-search-input {
   width: 100%;
-  padding: 0.35rem 1.5rem 0.35rem 1.65rem;
+  padding: 0.35rem 1.6rem 0.35rem 1.7rem;
   font-size: 0.8rem;
   border: 1px solid var(--border-light, #e2e8f0);
-  border-radius: 4px;
+  border-radius: 6px;
+  background-color: var(--bg-surface, #ffffff);
+  color: var(--text-primary, #0f172a);
 }
 
 .popover-search-input:focus {
   outline: none;
   border-color: var(--color-primary, #0284c7);
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
 }
 
 .popover-search-clear {
@@ -210,6 +220,63 @@
   color: var(--text-tertiary, #94a3b8);
   cursor: pointer;
   padding: 0.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.popover-search-clear:hover {
+  color: var(--text-primary, #0f172a);
+  background-color: var(--bg-surface-secondary, #f1f5f9);
+}
+
+.popover-sort-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.1rem;
+}
+
+.popover-sort-label {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.68rem;
+  color: var(--text-tertiary, #64748b);
+}
+
+.popover-sort-pills {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-surface-secondary, #f1f5f9);
+  padding: 2px;
+  border-radius: 6px;
+  gap: 2px;
+}
+
+.popover-sort-btn {
+  border: none;
+  background: transparent;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-secondary, #64748b);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.25;
+}
+
+.popover-sort-btn:hover {
+  color: var(--text-primary, #0f172a);
+}
+
+.popover-sort-btn.active {
+  background: #ffffff;
+  color: var(--color-primary, #0284c7);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .popover-options-scroll {
