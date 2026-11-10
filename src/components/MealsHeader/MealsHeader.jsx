@@ -88,7 +88,7 @@ export default function MealsHeader({
             className={`nav-link ${activeNav === 'journey' ? 'active' : ''}`}
             onClick={() => onSelectNav && onSelectNav('journey')}
           >
-            My Journey
+            Journeys
           </button>
         </nav>
 

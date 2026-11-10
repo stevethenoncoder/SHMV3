@@ -95,17 +95,18 @@ export default function MyJourneyPage({ mealsData }) {
     return [steve, ...others];
   }, [mealsData]);
 
-  // Read person parameter from URL (?person=slug-or-id)
+  // Read person parameter from URL (?person=slug-or-id). Nobody selected if URL has no person.
   const getInitialSlug = () => {
-    if (typeof window === 'undefined') return 'steve-holland';
+    if (typeof window === 'undefined') return null;
     const params = new URLSearchParams(window.location.search);
-    return params.get('person') || 'steve-holland';
+    return params.get('person') || null;
   };
 
   const [selectedSlug, setSelectedSlug] = useState(() => {
     const slug = getInitialSlug();
+    if (!slug) return null;
     const match = peopleList.find((p) => p.slug === slug);
-    return match ? match.slug : 'steve-holland';
+    return match ? match.slug : null;
   });
 
   // Search input state for person picker dropdown
@@ -120,11 +121,7 @@ export default function MyJourneyPage({ mealsData }) {
     setSearchTerm('');
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      if (person.slug === 'steve-holland') {
-        params.delete('person');
-      } else {
-        params.set('person', person.slug);
-      }
+      params.set('person', person.slug);
       const q = params.toString();
       const newUrl = `${window.location.pathname}${q ? `?${q}` : ''}${window.location.hash}`;
       window.history.pushState(null, '', newUrl);
@@ -138,16 +135,14 @@ export default function MyJourneyPage({ mealsData }) {
       const pParam = params.get('person');
       if (pParam) {
         const match = peopleList.find((p) => p.slug === pParam);
-        if (match && match.slug !== selectedSlug) {
-          setSelectedSlug(match.slug);
-        }
-      } else if (selectedSlug !== 'steve-holland') {
-        setSelectedSlug('steve-holland');
+        setSelectedSlug(match ? match.slug : null);
+      } else {
+        setSelectedSlug(null);
       }
     };
     window.addEventListener('popstate', handleUrlChange);
     return () => window.removeEventListener('popstate', handleUrlChange);
-  }, [peopleList, selectedSlug]);
+  }, [peopleList]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -164,17 +159,10 @@ export default function MyJourneyPage({ mealsData }) {
     };
   }, [dropdownOpen]);
 
-  // Current selected person object
+  // Current selected person object (null if nobody selected)
   const currentPerson = useMemo(() => {
-    return (
-      peopleList.find((p) => p.slug === selectedSlug) ||
-      peopleList[0] || {
-        id: null,
-        slug: 'steve-holland',
-        name: 'Steve Holland',
-        mealCount: 0,
-      }
-    );
+    if (!selectedSlug) return null;
+    return peopleList.find((p) => p.slug === selectedSlug) || null;
   }, [peopleList, selectedSlug]);
 
   // Filtered list of people for the search picker
@@ -184,10 +172,21 @@ export default function MyJourneyPage({ mealsData }) {
     return peopleList.filter((p) => p.name.toLowerCase().includes(q));
   }, [peopleList, searchTerm]);
 
-  // Start the meal film in an effect keyed on the selected person
+  // Start the meal film only when a person is selected
   useEffect(() => {
     const container = filmContainerRef.current;
-    if (!container || !mealsData) return;
+    if (!container || !mealsData || !currentPerson) {
+      // Clean up running film if person is cleared
+      if (filmInstanceRef.current && typeof filmInstanceRef.current.stop === 'function') {
+        try {
+          filmInstanceRef.current.stop();
+        } catch (err) {
+          console.warn('Error stopping previous film:', err);
+        }
+        filmInstanceRef.current = null;
+      }
+      return;
+    }
 
     // Stop and clean up any existing film before starting a new one
     if (filmInstanceRef.current && typeof filmInstanceRef.current.stop === 'function') {
@@ -207,7 +206,7 @@ export default function MyJourneyPage({ mealsData }) {
     preloadFilmImages(summary);
 
     // Mount and start the film engine
-    const film = startMealFilm(container, summary, { THREE, geo });
+    const film = startMealFilm(container, summary, { THREE, geo, maxPixels: 20000000 });
     filmInstanceRef.current = film;
 
     // Cleanup: always call stop() when unmounting or switching person
@@ -221,91 +220,125 @@ export default function MyJourneyPage({ mealsData }) {
       }
       filmInstanceRef.current = null;
     };
-  }, [mealsData, currentPerson.id]);
+  }, [mealsData, currentPerson]);
 
   return (
     <div className="my-journey-page">
       {/* Top Controls: Searchable Person Picker */}
       <div className="journey-top-bar">
-        <div className="journey-picker-wrapper" ref={pickerRef}>
-          <button
-            type="button"
-            className={`journey-picker-trigger ${dropdownOpen ? 'open' : ''}`}
-            onClick={() => setDropdownOpen((prev) => !prev)}
-            aria-haspopup="listbox"
-            aria-expanded={dropdownOpen}
-          >
-            <div className="trigger-left">
-              <Film size={17} className="journey-film-icon" />
-              <span className="trigger-label">Journey for</span>
-              <span className="trigger-name">{currentPerson.name}</span>
-              <span className="trigger-badge">
-                {currentPerson.mealCount}{' '}
-                {currentPerson.mealCount === 1 ? 'meal' : 'meals'}
-              </span>
-            </div>
-            <ChevronDown size={16} className={`chevron-icon ${dropdownOpen ? 'rotated' : ''}`} />
-          </button>
-
-          {/* Searchable Dropdown Popover */}
-          {dropdownOpen && (
-            <div className="journey-picker-popover" role="listbox">
-              <div className="picker-search-row">
-                <Search size={14} className="picker-search-icon" />
-                <input
-                  type="text"
-                  placeholder="Search dining companion..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  autoFocus
-                  className="picker-search-input"
-                />
-                {searchTerm && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchTerm('')}
-                    className="picker-search-clear"
-                    aria-label="Clear search"
-                  >
-                    <X size={13} />
-                  </button>
+        <div className="journey-top-bar-inner">
+          <div className="journey-picker-wrapper" ref={pickerRef}>
+            <button
+              type="button"
+              className={`journey-picker-trigger ${dropdownOpen ? 'open' : ''}`}
+              onClick={() => setDropdownOpen((prev) => !prev)}
+              aria-haspopup="listbox"
+              aria-expanded={dropdownOpen}
+            >
+              <div className="trigger-left">
+                <Film size={17} className="journey-film-icon" />
+                {currentPerson ? (
+                  <>
+                    <span className="trigger-label">Journey for</span>
+                    <span className="trigger-name">{currentPerson.name}</span>
+                    <span className="trigger-badge">
+                      {currentPerson.mealCount}{' '}
+                      {currentPerson.mealCount === 1 ? 'meal' : 'meals'}
+                    </span>
+                  </>
+                ) : (
+                  <span className="trigger-prompt">Choose whose journey to play</span>
                 )}
               </div>
+              <ChevronDown
+                size={16}
+                className={`chevron-icon ${dropdownOpen ? 'rotated' : ''}`}
+              />
+            </button>
 
-              <div className="picker-options-list">
-                {filteredPeople.map((person) => {
-                  const isSelected = person.slug === currentPerson.slug;
-                  return (
+            {/* Searchable Dropdown Popover */}
+            {dropdownOpen && (
+              <div className="journey-picker-popover" role="listbox">
+                <div className="picker-search-row">
+                  <Search size={14} className="picker-search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search dining companion..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    autoFocus
+                    className="picker-search-input"
+                  />
+                  {searchTerm && (
                     <button
-                      key={person.slug}
                       type="button"
-                      className={`picker-option ${isSelected ? 'selected' : ''}`}
-                      onClick={() => handleSelectPerson(person)}
-                      role="option"
-                      aria-selected={isSelected}
+                      onClick={() => setSearchTerm('')}
+                      className="picker-search-clear"
+                      aria-label="Clear search"
                     >
-                      <div className="option-info">
-                        <span className="option-name">{person.name}</span>
-                        <span className="option-meals">
-                          {person.mealCount}{' '}
-                          {person.mealCount === 1 ? 'meal' : 'meals'}
-                        </span>
-                      </div>
-                      {isSelected && <Check size={15} className="option-check" />}
+                      <X size={13} />
                     </button>
-                  );
-                })}
-                {filteredPeople.length === 0 && (
-                  <div className="picker-empty">No companions found</div>
-                )}
+                  )}
+                </div>
+
+                <div className="picker-options-list">
+                  {filteredPeople.map((person) => {
+                    const isSelected = currentPerson && person.slug === currentPerson.slug;
+                    return (
+                      <button
+                        key={person.slug}
+                        type="button"
+                        className={`picker-option ${isSelected ? 'selected' : ''}`}
+                        onClick={() => handleSelectPerson(person)}
+                        role="option"
+                        aria-selected={isSelected}
+                      >
+                        <div className="option-info">
+                          <span className="option-name">{person.name}</span>
+                          <span className="option-meals">
+                            {person.mealCount}{' '}
+                            {person.mealCount === 1 ? 'meal' : 'meals'}
+                          </span>
+                        </div>
+                        {isSelected && <Check size={15} className="option-check" />}
+                      </button>
+                    );
+                  })}
+                  {filteredPeople.length === 0 && (
+                    <div className="picker-empty">No companions found</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Stage Area: Centred Box with 16:9 Aspect Ratio on Desktop */}
+      <div className="journey-stage-area">
+        <div className="journey-window-wrapper">
+          {currentPerson ? (
+            <div className="journey-film-container" ref={filmContainerRef} id="film" />
+          ) : (
+            <div className="journey-empty-prompt">
+              <div className="journey-prompt-card">
+                <Film size={44} className="prompt-icon" />
+                <h2 className="prompt-title">Choose whose journey to play</h2>
+                <p className="prompt-text">
+                  Select Steve Holland or a dining companion from the picker above to watch their animated 3D meal film.
+                </p>
+                <button
+                  type="button"
+                  className="prompt-picker-btn"
+                  onClick={() => setDropdownOpen(true)}
+                >
+                  Choose a Person
+                </button>
               </div>
             </div>
           )}
         </div>
       </div>
-
-      {/* 3D Film Container: fills the rest of the screen without scrolling */}
-      <div className="journey-film-container" ref={filmContainerRef} id="film" />
     </div>
   );
 }

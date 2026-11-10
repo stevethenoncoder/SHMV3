@@ -57,7 +57,7 @@ export default function MobileBottomNav({ activeNav, onSelectNav }) {
         <div className="icon-wrapper">
           <Film size={18} />
         </div>
-        <span>My Journey</span>
+        <span>Journeys</span>
       </button>
     </nav>
   );

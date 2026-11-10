@@ -1094,12 +1094,12 @@ export default function App() {
             onApplyChronicleFilter={handleApplyChronicleFilter}
           />
         ) : activeSection === 'journey' ? (
-          /* 9. My Journey 3D Meal Film */
+          /* 9. Journeys 3D Meal Film */
           <React.Suspense
             fallback={
               <div className="meals-loading-center">
                 <Loader2 className="spinner-icon" size={36} />
-                <p>Loading My Journey...</p>
+                <p>Loading Journeys...</p>
               </div>
             }
           >
