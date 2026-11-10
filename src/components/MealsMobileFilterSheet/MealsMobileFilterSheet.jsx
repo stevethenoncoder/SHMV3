@@ -1,20 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
   X,
-  Check,
   ChevronDown,
   ChevronUp,
   Camera,
   Shield,
   Briefcase,
-  Search,
-  Filter,
+  RotateCcw,
 } from 'lucide-react';
-import {
-  CANONICAL_DECADES,
-  CANONICAL_RATINGS,
-  countActiveFilters,
-} from '../../utils/mealsFilter.js';
+import { CANONICAL_DECADES, CANONICAL_RATINGS } from '../../utils/mealsFilter.js';
 import './MealsMobileFilterSheet.css';
 
 function getRatingDotColor(rating) {
@@ -35,39 +29,37 @@ export default function MealsMobileFilterSheet({
   counts = {},
   initialSection = null,
 }) {
-  if (!isOpen) return null;
-
-  // Local draft state for mobile
   const [draft, setDraft] = useState({ ...filterState });
 
   useEffect(() => {
     setDraft({ ...filterState });
   }, [filterState, isOpen]);
 
+  // ALL SECTIONS COLLAPSED BY DEFAULT
   const [openSections, setOpenSections] = useState({
-    decades: true,
-    ratings: true,
-    toggles: true,
     countries: false,
     cities: false,
     people: false,
     cuisines: false,
-    ingredients: false,
     foodTypes: false,
+    ratings: false,
+    decades: false,
+    ingredients: false,
+    toggles: true,
   });
 
   useEffect(() => {
     if (initialSection) {
       setOpenSections({
-        decades: initialSection === 'decades',
-        ratings: initialSection === 'ratings',
         countries: initialSection === 'countries',
         cities: initialSection === 'cities',
-        cuisines: initialSection === 'cuisines',
         people: initialSection === 'people',
-        toggles: false,
-        ingredients: initialSection === 'ingredients',
+        cuisines: initialSection === 'cuisines',
         foodTypes: initialSection === 'foodTypes',
+        ratings: initialSection === 'ratings',
+        decades: initialSection === 'decades',
+        ingredients: initialSection === 'ingredients',
+        toggles: false,
       });
     }
   }, [initialSection, isOpen]);
@@ -94,36 +86,34 @@ export default function MealsMobileFilterSheet({
     onClose();
   };
 
-  const activeDraftCount = countActiveFilters(draft);
+  if (!isOpen) return null;
 
   return (
-    <div className="mobile-filter-backdrop" onClick={onClose}>
+    <div className="meals-mobile-filter-sheet-backdrop" onClick={onClose}>
       <div
-        className="mobile-filter-sheet"
+        className="meals-mobile-filter-sheet"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="Filter meals"
+        aria-label="Filter Meals"
       >
         {/* Header */}
         <div className="sheet-header">
-          <div className="sheet-title-left">
-            <Filter size={18} className="sheet-icon" />
-            <h2 className="sheet-title">Filter Meals</h2>
-            {activeDraftCount > 0 && (
-              <span className="sheet-active-badge">{activeDraftCount}</span>
-            )}
-          </div>
-          <button type="button" className="sheet-close-btn" onClick={onClose} aria-label="Close">
+          <h2 className="sheet-title">Filters</h2>
+          <button
+            type="button"
+            className="btn-sheet-close"
+            onClick={onClose}
+            aria-label="Close filters sheet"
+          >
             <X size={20} />
           </button>
         </div>
 
-        {/* Scrollable Body */}
-        <div className="sheet-body">
+        {/* Scrollable Filter Sections */}
+        <div className="sheet-content">
           {/* Quick Toggles */}
           <div className="sheet-group">
-            <h3 className="sheet-group-heading">Quick Filters</h3>
             <div className="sheet-toggle-list">
               <label className="sheet-toggle-row">
                 <span className="toggle-label-wrap">
@@ -172,84 +162,17 @@ export default function MealsMobileFilterSheet({
             </div>
           </div>
 
-          {/* Decades */}
-          <div className="sheet-group">
-            <button
-              type="button"
-              className="sheet-section-btn"
-              onClick={() => toggleSection('decades')}
-            >
-              <span>Decade</span>
-              {openSections.decades ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </button>
-            {openSections.decades && (
-              <div className="sheet-checkbox-list">
-                {CANONICAL_DECADES.map((dec) => {
-                  const count = counts.decadeCounts?.[dec] || 0;
-                  const isSelected = (draft.decades || []).includes(dec);
-                  return (
-                    <label key={dec} className="sheet-check-item">
-                      <div className="check-left">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => handleToggleArray('decades', dec)}
-                        />
-                        <span>{dec}</span>
-                      </div>
-                      <span className="count-pill">{count}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Ratings */}
-          <div className="sheet-group">
-            <button
-              type="button"
-              className="sheet-section-btn"
-              onClick={() => toggleSection('ratings')}
-            >
-              <span>Meal Rating</span>
-              {openSections.ratings ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </button>
-            {openSections.ratings && (
-              <div className="sheet-checkbox-list">
-                {CANONICAL_RATINGS.map((rating) => {
-                  const count = counts.ratingCounts?.[rating] || 0;
-                  const isSelected = (draft.ratings || []).includes(rating);
-                  return (
-                    <label key={rating} className="sheet-check-item">
-                      <div className="check-left">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => handleToggleArray('ratings', rating)}
-                        />
-                        <span
-                          className="rating-dot"
-                          style={{ backgroundColor: getRatingDotColor(rating) }}
-                        />
-                        <span>{rating}</span>
-                      </div>
-                      <span className="count-pill">{count}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Country */}
+          {/* 1. Country */}
           <div className="sheet-group">
             <button
               type="button"
               className="sheet-section-btn"
               onClick={() => toggleSection('countries')}
             >
-              <span>Country</span>
+              <span>
+                Country
+                {(draft.countries || []).length > 0 && ` (${draft.countries.length})`}
+              </span>
               {openSections.countries ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
             {openSections.countries && (
@@ -277,14 +200,17 @@ export default function MealsMobileFilterSheet({
             )}
           </div>
 
-          {/* City */}
+          {/* 2. City */}
           <div className="sheet-group">
             <button
               type="button"
               className="sheet-section-btn"
               onClick={() => toggleSection('cities')}
             >
-              <span>City</span>
+              <span>
+                City
+                {(draft.cities || []).length > 0 && ` (${draft.cities.length})`}
+              </span>
               {openSections.cities ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
             {openSections.cities && (
@@ -312,7 +238,7 @@ export default function MealsMobileFilterSheet({
             )}
           </div>
 
-          {/* Dining Companions */}
+          {/* 3. Dining Companion */}
           <div className="sheet-group">
             <button
               type="button"
@@ -320,7 +246,7 @@ export default function MealsMobileFilterSheet({
               onClick={() => toggleSection('people')}
             >
               <span>
-                Dining Companions
+                Dining Companion
                 {(draft.people || []).length > 0 && ` (${draft.people.length})`}
               </span>
               {openSections.people ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -358,14 +284,17 @@ export default function MealsMobileFilterSheet({
             )}
           </div>
 
-          {/* Cuisines */}
+          {/* 4. Cuisine Type */}
           <div className="sheet-group">
             <button
               type="button"
               className="sheet-section-btn"
               onClick={() => toggleSection('cuisines')}
             >
-              <span>Cuisine / Type</span>
+              <span>
+                Cuisine Type
+                {(draft.cuisines || []).length > 0 && ` (${draft.cuisines.length})`}
+              </span>
               {openSections.cuisines ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
             {openSections.cuisines && (
@@ -384,6 +313,158 @@ export default function MealsMobileFilterSheet({
                             onChange={() => handleToggleArray('cuisines', cuisine)}
                           />
                           <span>{cuisine}</span>
+                        </div>
+                        <span className="count-pill">{count}</span>
+                      </label>
+                    );
+                  })}
+              </div>
+            )}
+          </div>
+
+          {/* 5. Dish Style */}
+          <div className="sheet-group">
+            <button
+              type="button"
+              className="sheet-section-btn"
+              onClick={() => toggleSection('foodTypes')}
+            >
+              <span>
+                Dish Style
+                {(draft.foodTypes || []).length > 0 && ` (${draft.foodTypes.length})`}
+              </span>
+              {openSections.foodTypes ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+            {openSections.foodTypes && (
+              <div className="sheet-checkbox-list">
+                {Object.entries(counts.foodTypeCounts || {})
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 15)
+                  .map(([style, count]) => {
+                    const isSelected = (draft.foodTypes || []).includes(style);
+                    return (
+                      <label key={style} className="sheet-check-item">
+                        <div className="check-left">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleToggleArray('foodTypes', style)}
+                          />
+                          <span>{style}</span>
+                        </div>
+                        <span className="count-pill">{count}</span>
+                      </label>
+                    );
+                  })}
+              </div>
+            )}
+          </div>
+
+          {/* 6. Meal Rating */}
+          <div className="sheet-group">
+            <button
+              type="button"
+              className="sheet-section-btn"
+              onClick={() => toggleSection('ratings')}
+            >
+              <span>
+                Meal Rating
+                {(draft.ratings || []).length > 0 && ` (${draft.ratings.length})`}
+              </span>
+              {openSections.ratings ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+            {openSections.ratings && (
+              <div className="sheet-checkbox-list">
+                {CANONICAL_RATINGS.map((rating) => {
+                  const count = counts.ratingCounts?.[rating] || 0;
+                  const isSelected = (draft.ratings || []).includes(rating);
+                  return (
+                    <label key={rating} className="sheet-check-item">
+                      <div className="check-left">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => handleToggleArray('ratings', rating)}
+                        />
+                        <span
+                          className="rating-dot"
+                          style={{ backgroundColor: getRatingDotColor(rating) }}
+                        />
+                        <span>{rating}</span>
+                      </div>
+                      <span className="count-pill">{count}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* 7. Decade */}
+          <div className="sheet-group">
+            <button
+              type="button"
+              className="sheet-section-btn"
+              onClick={() => toggleSection('decades')}
+            >
+              <span>
+                Decade
+                {(draft.decades || []).length > 0 && ` (${draft.decades.length})`}
+              </span>
+              {openSections.decades ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+            {openSections.decades && (
+              <div className="sheet-checkbox-list">
+                {CANONICAL_DECADES.map((dec) => {
+                  const count = counts.decadeCounts?.[dec] || 0;
+                  const isSelected = (draft.decades || []).includes(dec);
+                  return (
+                    <label key={dec} className="sheet-check-item">
+                      <div className="check-left">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => handleToggleArray('decades', dec)}
+                        />
+                        <span>{dec}</span>
+                      </div>
+                      <span className="count-pill">{count}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* 8. Ingredient */}
+          <div className="sheet-group">
+            <button
+              type="button"
+              className="sheet-section-btn"
+              onClick={() => toggleSection('ingredients')}
+            >
+              <span>
+                Ingredient
+                {(draft.ingredients || []).length > 0 && ` (${draft.ingredients.length})`}
+              </span>
+              {openSections.ingredients ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+            {openSections.ingredients && (
+              <div className="sheet-checkbox-list">
+                {Object.entries(counts.ingredientCounts || {})
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 15)
+                  .map(([ing, count]) => {
+                    const isSelected = (draft.ingredients || []).includes(ing);
+                    return (
+                      <label key={ing} className="sheet-check-item">
+                        <div className="check-left">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleToggleArray('ingredients', ing)}
+                          />
+                          <span>{ing}</span>
                         </div>
                         <span className="count-pill">{count}</span>
                       </label>

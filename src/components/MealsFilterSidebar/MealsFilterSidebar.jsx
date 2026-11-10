@@ -32,17 +32,16 @@ export default function MealsFilterSidebar({
   onClearFilters,
   counts = {},
 }) {
-  // Collapsible section open/close state
+  // Collapsible section open/close state - ALL COLLAPSED BY DEFAULT
   const [openSections, setOpenSections] = useState({
-    decades: true,
-    ratings: true,
-    toggles: true,
-    countries: true,
+    countries: false,
     cities: false,
     people: false,
     cuisines: false,
-    ingredients: false,
     foodTypes: false,
+    ratings: false,
+    decades: false,
+    ingredients: false,
   });
 
   // Local search inputs within facets
@@ -50,8 +49,8 @@ export default function MealsFilterSidebar({
   const [citySearch, setCitySearch] = useState('');
   const [peopleSearch, setPeopleSearch] = useState('');
   const [cuisineSearch, setCuisineSearch] = useState('');
-  const [ingredientSearch, setIngredientSearch] = useState('');
   const [foodTypeSearch, setFoodTypeSearch] = useState('');
+  const [ingredientSearch, setIngredientSearch] = useState('');
 
   // Expand "show all" vs "show top 6" within facets
   const [expandedFacets, setExpandedFacets] = useState({});
@@ -106,8 +105,8 @@ export default function MealsFilterSidebar({
   const cityFacet = getFacetItems(counts.cityCounts, citySearch, 'cities');
   const peopleFacet = getFacetItems(counts.peopleCounts, peopleSearch, 'people');
   const cuisineFacet = getFacetItems(counts.cuisineCounts, cuisineSearch, 'cuisines');
-  const ingredientFacet = getFacetItems(counts.ingredientCounts, ingredientSearch, 'ingredients');
   const foodTypeFacet = getFacetItems(counts.foodTypeCounts, foodTypeSearch, 'foodTypes');
+  const ingredientFacet = getFacetItems(counts.ingredientCounts, ingredientSearch, 'ingredients');
 
   return (
     <aside className="meals-filter-sidebar">
@@ -189,101 +188,17 @@ export default function MealsFilterSidebar({
         </div>
       </div>
 
-      {/* 2. Decades */}
-      <div className="filter-group-section">
-        <button
-          type="button"
-          className="section-header-btn"
-          onClick={() => toggleSection('decades')}
-        >
-          <span className="section-title">Decade</span>
-          {openSections.decades ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-
-        {openSections.decades && (
-          <div className="checkbox-list">
-            {CANONICAL_DECADES.map((decade) => {
-              const count = counts.decadeCounts?.[decade] || 0;
-              const isSelected = (filterState.decades || []).includes(decade);
-              if (count === 0 && !isSelected) return null;
-
-              return (
-                <label key={decade} className="checkbox-row">
-                  <div className="checkbox-left">
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => handleToggleArray('decades', decade)}
-                      className="checkbox-native"
-                    />
-                    <span className="checkbox-visual">
-                      {isSelected && <Check size={12} strokeWidth={3} />}
-                    </span>
-                    <span className="checkbox-label">{decade}</span>
-                  </div>
-                  <span className="facet-count-badge">{count}</span>
-                </label>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* 3. Meal Rating (Ordered Best to Worst) */}
-      <div className="filter-group-section">
-        <button
-          type="button"
-          className="section-header-btn"
-          onClick={() => toggleSection('ratings')}
-        >
-          <span className="section-title">Meal Rating</span>
-          {openSections.ratings ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-
-        {openSections.ratings && (
-          <div className="checkbox-list">
-            {CANONICAL_RATINGS.map((rating) => {
-              const count = counts.ratingCounts?.[rating] || 0;
-              const isSelected = (filterState.ratings || []).includes(rating);
-              if (count === 0 && !isSelected) return null;
-
-              const dotColor = getRatingDotColor(rating);
-
-              return (
-                <label key={rating} className="checkbox-row">
-                  <div className="checkbox-left">
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => handleToggleArray('ratings', rating)}
-                      className="checkbox-native"
-                    />
-                    <span className="checkbox-visual">
-                      {isSelected && <Check size={12} strokeWidth={3} />}
-                    </span>
-                    <span
-                      className="rating-dot"
-                      style={{ backgroundColor: dotColor }}
-                      aria-hidden="true"
-                    />
-                    <span className="checkbox-label">{rating}</span>
-                  </div>
-                  <span className="facet-count-badge">{count}</span>
-                </label>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* 4. Country */}
+      {/* 2. Country */}
       <div className="filter-group-section">
         <button
           type="button"
           className="section-header-btn"
           onClick={() => toggleSection('countries')}
         >
-          <span className="section-title">Country</span>
+          <span className="section-title">
+            Country
+            {(filterState.countries || []).length > 0 && ` (${filterState.countries.length})`}
+          </span>
           {openSections.countries ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
 
@@ -347,14 +262,17 @@ export default function MealsFilterSidebar({
         )}
       </div>
 
-      {/* 5. City (Dynamic: Narrowed by Country) */}
+      {/* 3. City (Dynamic: Narrowed by Country) */}
       <div className="filter-group-section">
         <button
           type="button"
           className="section-header-btn"
           onClick={() => toggleSection('cities')}
         >
-          <span className="section-title">City</span>
+          <span className="section-title">
+            City
+            {(filterState.cities || []).length > 0 && ` (${filterState.cities.length})`}
+          </span>
           {openSections.cities ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
 
@@ -422,7 +340,7 @@ export default function MealsFilterSidebar({
         )}
       </div>
 
-      {/* 6. Dining Companions (Public Only) */}
+      {/* 4. Dining Companion (Public Only) */}
       <div className="filter-group-section">
         <button
           type="button"
@@ -430,7 +348,7 @@ export default function MealsFilterSidebar({
           onClick={() => toggleSection('people')}
         >
           <span className="section-title">
-            Dining Companions
+            Dining Companion
             {(filterState.people || []).length > 0 && ` (${filterState.people.length})`}
           </span>
           {openSections.people ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -496,14 +414,17 @@ export default function MealsFilterSidebar({
         )}
       </div>
 
-      {/* 7. Restaurant Type / Cuisine */}
+      {/* 5. Cuisine Type */}
       <div className="filter-group-section">
         <button
           type="button"
           className="section-header-btn"
           onClick={() => toggleSection('cuisines')}
         >
-          <span className="section-title">Cuisine / Type</span>
+          <span className="section-title">
+            Cuisine Type
+            {(filterState.cuisines || []).length > 0 && ` (${filterState.cuisines.length})`}
+          </span>
           {openSections.cuisines ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
 
@@ -567,85 +488,17 @@ export default function MealsFilterSidebar({
         )}
       </div>
 
-      {/* 7. Key Ingredient */}
-      <div className="filter-group-section">
-        <button
-          type="button"
-          className="section-header-btn"
-          onClick={() => toggleSection('ingredients')}
-        >
-          <span className="section-title">Main Ingredient</span>
-          {openSections.ingredients ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-
-        {openSections.ingredients && (
-          <div className="facet-content-block">
-            {ingredientFacet.entries.length > 5 && (
-              <div className="facet-search-box">
-                <Search size={13} className="facet-search-icon" />
-                <input
-                  type="text"
-                  placeholder="Filter ingredients..."
-                  value={ingredientSearch}
-                  onChange={(e) => setIngredientSearch(e.target.value)}
-                  className="facet-search-input"
-                />
-                {ingredientSearch && (
-                  <button
-                    type="button"
-                    onClick={() => setIngredientSearch('')}
-                    className="facet-search-clear"
-                  >
-                    <X size={12} />
-                  </button>
-                )}
-              </div>
-            )}
-
-            <div className="checkbox-list">
-              {ingredientFacet.visibleEntries.map(([ingredient, count]) => {
-                const isSelected = (filterState.ingredients || []).includes(ingredient);
-                return (
-                  <label key={ingredient} className="checkbox-row">
-                    <div className="checkbox-left">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => handleToggleArray('ingredients', ingredient)}
-                        className="checkbox-native"
-                      />
-                      <span className="checkbox-visual">
-                        {isSelected && <Check size={12} strokeWidth={3} />}
-                      </span>
-                      <span className="checkbox-label">{ingredient}</span>
-                    </div>
-                    <span className="facet-count-badge">{count}</span>
-                  </label>
-                );
-              })}
-            </div>
-
-            {ingredientFacet.hasMore && (
-              <button
-                type="button"
-                className="btn-show-more"
-                onClick={() => toggleExpanded('ingredients')}
-              >
-                {expandedFacets['ingredients'] ? 'Show less' : `Show all (${ingredientFacet.entries.length})`}
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* 8. Food Type / Dish Style */}
+      {/* 6. Dish Style */}
       <div className="filter-group-section">
         <button
           type="button"
           className="section-header-btn"
           onClick={() => toggleSection('foodTypes')}
         >
-          <span className="section-title">Dish Style</span>
+          <span className="section-title">
+            Dish Style
+            {(filterState.foodTypes || []).length > 0 && ` (${filterState.foodTypes.length})`}
+          </span>
           {openSections.foodTypes ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
 
@@ -703,6 +556,173 @@ export default function MealsFilterSidebar({
                 onClick={() => toggleExpanded('foodTypes')}
               >
                 {expandedFacets['foodTypes'] ? 'Show less' : `Show all (${foodTypeFacet.entries.length})`}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* 7. Meal Rating (Ordered Best to Worst) */}
+      <div className="filter-group-section">
+        <button
+          type="button"
+          className="section-header-btn"
+          onClick={() => toggleSection('ratings')}
+        >
+          <span className="section-title">
+            Meal Rating
+            {(filterState.ratings || []).length > 0 && ` (${filterState.ratings.length})`}
+          </span>
+          {openSections.ratings ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+
+        {openSections.ratings && (
+          <div className="checkbox-list">
+            {CANONICAL_RATINGS.map((rating) => {
+              const count = counts.ratingCounts?.[rating] || 0;
+              const isSelected = (filterState.ratings || []).includes(rating);
+              if (count === 0 && !isSelected) return null;
+
+              const dotColor = getRatingDotColor(rating);
+
+              return (
+                <label key={rating} className="checkbox-row">
+                  <div className="checkbox-left">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleToggleArray('ratings', rating)}
+                      className="checkbox-native"
+                    />
+                    <span className="checkbox-visual">
+                      {isSelected && <Check size={12} strokeWidth={3} />}
+                    </span>
+                    <span
+                      className="rating-dot"
+                      style={{ backgroundColor: dotColor }}
+                      aria-hidden="true"
+                    />
+                    <span className="checkbox-label">{rating}</span>
+                  </div>
+                  <span className="facet-count-badge">{count}</span>
+                </label>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 8. Decade */}
+      <div className="filter-group-section">
+        <button
+          type="button"
+          className="section-header-btn"
+          onClick={() => toggleSection('decades')}
+        >
+          <span className="section-title">
+            Decade
+            {(filterState.decades || []).length > 0 && ` (${filterState.decades.length})`}
+          </span>
+          {openSections.decades ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+
+        {openSections.decades && (
+          <div className="checkbox-list">
+            {CANONICAL_DECADES.map((decade) => {
+              const count = counts.decadeCounts?.[decade] || 0;
+              const isSelected = (filterState.decades || []).includes(decade);
+              if (count === 0 && !isSelected) return null;
+
+              return (
+                <label key={decade} className="checkbox-row">
+                  <div className="checkbox-left">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleToggleArray('decades', decade)}
+                      className="checkbox-native"
+                    />
+                    <span className="checkbox-visual">
+                      {isSelected && <Check size={12} strokeWidth={3} />}
+                    </span>
+                    <span className="checkbox-label">{decade}</span>
+                  </div>
+                  <span className="facet-count-badge">{count}</span>
+                </label>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 9. Ingredient */}
+      <div className="filter-group-section">
+        <button
+          type="button"
+          className="section-header-btn"
+          onClick={() => toggleSection('ingredients')}
+        >
+          <span className="section-title">
+            Ingredient
+            {(filterState.ingredients || []).length > 0 && ` (${filterState.ingredients.length})`}
+          </span>
+          {openSections.ingredients ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+
+        {openSections.ingredients && (
+          <div className="facet-content-block">
+            {ingredientFacet.entries.length > 5 && (
+              <div className="facet-search-box">
+                <Search size={13} className="facet-search-icon" />
+                <input
+                  type="text"
+                  placeholder="Filter ingredients..."
+                  value={ingredientSearch}
+                  onChange={(e) => setIngredientSearch(e.target.value)}
+                  className="facet-search-input"
+                />
+                {ingredientSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setIngredientSearch('')}
+                    className="facet-search-clear"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+            )}
+
+            <div className="checkbox-list">
+              {ingredientFacet.visibleEntries.map(([ingredient, count]) => {
+                const isSelected = (filterState.ingredients || []).includes(ingredient);
+                return (
+                  <label key={ingredient} className="checkbox-row">
+                    <div className="checkbox-left">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleToggleArray('ingredients', ingredient)}
+                        className="checkbox-native"
+                      />
+                      <span className="checkbox-visual">
+                        {isSelected && <Check size={12} strokeWidth={3} />}
+                      </span>
+                      <span className="checkbox-label">{ingredient}</span>
+                    </div>
+                    <span className="facet-count-badge">{count}</span>
+                  </label>
+                );
+              })}
+            </div>
+
+            {ingredientFacet.hasMore && (
+              <button
+                type="button"
+                className="btn-show-more"
+                onClick={() => toggleExpanded('ingredients')}
+              >
+                {expandedFacets['ingredients'] ? 'Show less' : `Show all (${ingredientFacet.entries.length})`}
               </button>
             )}
           </div>

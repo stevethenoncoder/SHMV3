@@ -67,7 +67,7 @@ export default function App() {
 
   // Section Navigation: 'overview' | 'chronicle' | 'restaurants' | 'relationships' | 'sentiment' | 'stats' | 'journey'
   const [activeSection, setActiveSection] = useState(() => {
-    if (typeof window === 'undefined') return 'chronicle';
+    if (typeof window === 'undefined') return 'overview';
     const path = window.location.pathname;
     if (path.startsWith('/journey') || path.startsWith('/my-journey')) return 'journey';
     if (path.startsWith('/places')) return 'places';
@@ -88,7 +88,7 @@ export default function App() {
     if (params.get('section') === 'relationships') return 'relationships';
     if (params.get('section') === 'restaurants' || params.get('restaurant')) return 'restaurants';
     if (params.get('section') === 'chronicle' || params.get('meal')) return 'chronicle';
-    return 'chronicle';
+    return 'overview';
   });
 
   // Track if user jumped to Chronicle with a preselection from another area
@@ -171,7 +171,7 @@ export default function App() {
       setPublicPeopleById(data.publicPeopleById || new Map());
     } catch (err) {
       console.error('Failed to load Meals data:', err);
-      setError(err.message || 'Error connecting to published Google Sheets feeds');
+      setError(err.message || 'Error loading meals archive');
     } finally {
       setLoading(false);
     }
@@ -749,9 +749,9 @@ export default function App() {
         {loading ? (
           <div className="meals-state-container loading-state">
             <Loader2 size={36} className="state-spinner" />
-            <h2 className="state-title">Loading 32 Years of Dining History...</h2>
+            <h2 className="state-title">Loading Meals Archive...</h2>
             <p className="state-subtext">
-              Ingesting and joining live published records from Google Sheets.
+              Preparing dining history and records.
             </p>
           </div>
         ) : error ? (
