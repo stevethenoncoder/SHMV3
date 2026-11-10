@@ -29,6 +29,7 @@ import SentimentPage from './components/SentimentPage/SentimentPage.jsx';
 import FoodPage from './components/FoodPage/FoodPage.jsx';
 
 const MyJourneyPage = React.lazy(() => import('./components/MyJourneyPage/MyJourneyPage.jsx'));
+const PlacesPage = React.lazy(() => import('./components/PlacesPage/PlacesPage.jsx'));
 
 import Pagination from './components/Pagination/Pagination.jsx';
 import {
@@ -69,6 +70,7 @@ export default function App() {
     if (typeof window === 'undefined') return 'chronicle';
     const path = window.location.pathname;
     if (path.startsWith('/journey') || path.startsWith('/my-journey')) return 'journey';
+    if (path.startsWith('/places')) return 'places';
     if (path.startsWith('/overview')) return 'overview';
     if (path.startsWith('/sentiment')) return 'sentiment';
     if (path.startsWith('/food')) return 'food';
@@ -78,6 +80,7 @@ export default function App() {
     if (path.startsWith('/chronicle')) return 'chronicle';
     const params = new URLSearchParams(window.location.search);
     if (params.get('section') === 'journey' || params.get('person')) return 'journey';
+    if (params.get('section') === 'places') return 'places';
     if (params.get('section') === 'overview') return 'overview';
     if (params.get('section') === 'sentiment') return 'sentiment';
     if (params.get('section') === 'food') return 'food';
@@ -190,6 +193,14 @@ export default function App() {
         params.get('person')
       ) {
         setActiveSection('journey');
+        setActiveRestaurantId(null);
+        setActiveMealId(null);
+        return;
+      }
+
+      // 0b. Match /places browse
+      if (path.startsWith('/places') || params.get('section') === 'places') {
+        setActiveSection('places');
         setActiveRestaurantId(null);
         setActiveMealId(null);
         return;
@@ -479,6 +490,7 @@ export default function App() {
     else if (section === 'food') targetUrl = '/food';
     else if (section === 'stats') targetUrl = '/stats';
     else if (section === 'journey') targetUrl = '/journey';
+    else if (section === 'places') targetUrl = '/places';
     window.history.pushState(null, '', targetUrl);
     window.scrollTo(0, 0);
   };
@@ -712,7 +724,7 @@ export default function App() {
 
   return (
     <div
-      className={`meals-app-layout ${activeSection === 'chronicle' ? 'chronicle-active' : ''} ${activeSection === 'journey' ? 'journey-active' : ''}`}
+      className={`meals-app-layout ${activeSection === 'chronicle' ? 'chronicle-active' : ''} ${activeSection === 'journey' ? 'journey-active' : ''} ${activeSection === 'places' ? 'places-active' : ''}`}
     >
       {/* Primary Header */}
       <MealsHeader
@@ -723,7 +735,7 @@ export default function App() {
       />
 
       {/* Random Meal Memory Banner directly underneath Header */}
-      {!loading && !error && meals.length > 0 && activeSection !== 'journey' && (
+      {!loading && !error && meals.length > 0 && activeSection !== 'journey' && activeSection !== 'places' && (
         <MealCommentBar
           meals={meals}
           actionTrigger={actionTrigger}
@@ -1104,6 +1116,18 @@ export default function App() {
             }
           >
             <MyJourneyPage mealsData={mealsDataPayload} />
+          </React.Suspense>
+        ) : activeSection === 'places' ? (
+          /* 10. Places 3D Globe */
+          <React.Suspense
+            fallback={
+              <div className="meals-loading-center">
+                <Loader2 className="spinner-icon" size={36} />
+                <p>Loading Places...</p>
+              </div>
+            }
+          >
+            <PlacesPage mealsData={mealsDataPayload} />
           </React.Suspense>
         ) : (
           /* 7. Overview Landing Page (Default) */

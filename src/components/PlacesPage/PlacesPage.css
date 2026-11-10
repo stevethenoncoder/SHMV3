@@ -1,0 +1,636 @@
+/* Places 3D Globe Page Styles */
+
+.places-page-layout {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 20px 60px;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* ==============================================================
+   1. Left Filter Sidebar (Chronicle Style)
+   ============================================================== */
+.places-sidebar {
+  width: 270px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 84px;
+  max-height: calc(100vh - 104px);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+  z-index: 20;
+}
+
+.places-sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.places-sidebar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: var(--radius-full);
+}
+
+.places-sidebar-inner {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.places-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.places-sidebar-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.places-btn-clear {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.places-btn-clear:hover {
+  text-decoration: underline;
+}
+
+.places-mobile-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.places-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.places-filter-group label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.places-filter-group select {
+  width: 100%;
+  padding: 7px 10px;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.84rem;
+  font-weight: 600;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.places-filter-group select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.places-years-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.places-years-dash {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* ==============================================================
+   2. Main Area (Right Column)
+   ============================================================== */
+.places-main-area {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Mobile filter trigger bar (hidden on desktop) */
+.places-mobile-toolbar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.places-mobile-filter-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.places-active-filter-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--accent);
+}
+
+.places-mobile-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Top: 4 Compact KPIs Strip */
+.places-kpis-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.places-kpi-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px 10px;
+}
+
+.places-kpi-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.places-kpi-lbl {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+
+.places-kpi-divider {
+  width: 1px;
+  height: 26px;
+  background-color: var(--border);
+}
+
+/* Slim Controls Row */
+.places-control-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Segmented Level Toggle */
+.places-seg-group {
+  display: inline-flex;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  padding: 2px;
+  box-shadow: var(--shadow-sm);
+}
+
+.places-seg-btn {
+  background: transparent;
+  border: none;
+  padding: 5px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--text-secondary);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.places-seg-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-subtle);
+}
+
+.places-seg-btn.active {
+  background-color: var(--brand-green);
+  color: #ffffff;
+}
+
+/* Top N Control */
+.places-topn-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.places-topn-control input[type='range'] {
+  width: 110px;
+  accent-color: var(--brand-green);
+  cursor: pointer;
+}
+
+.places-topn-output {
+  min-width: 4.2em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.places-desktop-clear-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.places-desktop-clear-btn:hover {
+  text-decoration: underline;
+}
+
+/* ==============================================================
+   3. Middle Stage: 3D Globe + Ranked List Grid
+   ============================================================== */
+.places-stage-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* 3D Globe Viewport */
+.places-globe-panel {
+  position: relative;
+  height: min(68vh, 620px);
+  min-height: 360px;
+  background-color: #0d1330;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.places-globe-container {
+  position: absolute;
+  inset: 0;
+}
+
+/* Floating Breadcrumbs in Top-Left */
+.places-crumbs {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.places-crumb-back {
+  pointer-events: auto;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #fffaf0;
+  background-color: #1d2440;
+  border: 1.5px solid #fffaf0;
+  border-radius: var(--radius-full);
+  padding: 4px 11px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.places-crumb-back:hover {
+  background-color: #e4572e;
+}
+
+.places-crumb-link {
+  pointer-events: auto;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #1d2440;
+  background-color: #fffaf0;
+  border: 1.5px solid #1d2440;
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.places-crumb-link:hover {
+  background-color: #f2b632;
+}
+
+.places-crumb-sep {
+  color: rgba(255, 250, 240, 0.75);
+  font-weight: 800;
+  font-size: 0.82rem;
+  user-select: none;
+}
+
+.places-crumb-here {
+  pointer-events: none;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #fffaf0;
+  background: rgba(13, 19, 48, 0.7);
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
+  backdrop-filter: blur(4px);
+}
+
+/* Globe Interaction Hint */
+.places-globe-hint {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 250, 240, 0.7);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ==============================================================
+   4. Ranked List (Right Column)
+   ============================================================== */
+.places-ranked-panel {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: min(68vh, 620px);
+  box-shadow: var(--shadow-sm);
+}
+
+.places-ranked-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 10px 4px;
+}
+
+.places-ranked-subcount {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.places-ranked-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  scrollbar-width: thin;
+}
+
+.places-ranked-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.places-ranked-list::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: var(--radius-full);
+}
+
+.places-ranked-item {
+  margin: 0;
+  padding: 0;
+}
+
+.places-ranked-btn {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.8em minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 5px 6px;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.12s ease;
+}
+
+.places-ranked-btn:hover {
+  background-color: var(--bg-subtle);
+}
+
+.places-ranked-btn.selected {
+  background-color: #1f8a7d;
+  color: #ffffff;
+}
+
+.places-ranked-rank {
+  color: var(--text-light);
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.places-ranked-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.places-ranked-sub {
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-left: 5px;
+  font-size: 0.74rem;
+}
+
+.places-ranked-btn.selected .places-ranked-rank,
+.places-ranked-btn.selected .places-ranked-sub {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.places-ranked-count {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.places-ranked-btn.selected .places-ranked-count {
+  color: #ffffff;
+}
+
+.places-ranked-bar {
+  grid-column: 2 / 4;
+  height: 3px;
+  border-radius: 2px;
+  background-color: #e4572e;
+  opacity: 0.8;
+  margin-top: 1px;
+}
+
+.places-ranked-btn.selected .places-ranked-bar {
+  background-color: #ffffff;
+}
+
+.places-ranked-empty {
+  padding: 24px 12px;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.places-ranked-note {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+/* ==============================================================
+   5. Responsive Breakpoints (Phone Layout)
+   ============================================================== */
+@media (max-width: 768px) {
+  .places-page-layout {
+    padding: 12px;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Hide Desktop Sidebar on Phone */
+  .places-sidebar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: none;
+    z-index: 10000;
+    border-radius: 0;
+    border: none;
+  }
+
+  .places-sidebar.mobile-open {
+    display: flex;
+  }
+
+  .places-mobile-close-btn {
+    display: block;
+  }
+
+  /* Show mobile toolbar */
+  .places-mobile-toolbar {
+    display: flex;
+  }
+
+  /* Stack KPIs, controls, globe, then list on phone */
+  .places-stage-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .places-globe-panel {
+    height: 52vh;
+    min-height: 300px;
+  }
+
+  .places-ranked-panel {
+    height: auto;
+    max-height: 360px;
+  }
+
+  .places-desktop-clear-btn {
+    display: none;
+  }
+
+  .places-kpis-strip {
+    padding: 6px 10px;
+  }
+
+  .places-kpi-val {
+    font-size: 1rem;
+  }
+
+  .places-kpi-lbl {
+    font-size: 0.65rem;
+  }
+}
