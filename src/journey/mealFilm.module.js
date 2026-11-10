@@ -4,6 +4,10 @@
  *   film.stop();                       // call before starting another, and when the page is left
  *   film.go('years');                  // optional: jump to an act
  *
+ * Options: autoplay (default true; false shows the door paused until Play is pressed),
+ *          maxPixels (default 1.5 million; the most pixels drawn per frame).
+ * Starting a film stops any film already running. Quality steps down by itself if frames are slow.
+ *
  * container  an element with a set height; the film fills it and replaces its contents.
  * data       one person's film summary (see HANDOVER.md, "The film summary").
  * THREE      three.js r128 (npm: three@0.128.0). Falls back to window.THREE.
@@ -15,7 +19,7 @@
 'use strict';
 var CSS=".mealfilm{--sky:#0d1330;\n  --ink:#1d2440;\n  --paper:#fffaf0;\n  --accent:#e4572e;\n  --gold:#f2b632;\n  --teal:#1f8a7d;\n  --shade:rgba(29,36,64,.22);\n  --display:'Fredoka','Trebuchet MS','Segoe UI',sans-serif;\n  --body:'Nunito','Segoe UI',system-ui,sans-serif;\n  color-scheme:light;;position:relative;overflow:hidden;background:var(--sky);color:var(--ink);font-family:var(--body);-webkit-tap-highlight-color:transparent;line-height:normal}\n.mealfilm *{box-sizing:border-box}\n.mealfilm #stage{position:absolute;inset:0;touch-action:none;cursor:grab}\n.mealfilm #stage:active{cursor:grabbing}\n.mealfilm #stage canvas{display:block;width:100%;height:100%}\n.mealfilm #overlay{position:absolute;inset:0;overflow:hidden;pointer-events:none}\n.mealfilm .label{position:absolute;left:0;top:0;will-change:transform;white-space:nowrap}\n.mealfilm .label span{display:inline-block;transform:scale(0);opacity:0;transition:transform .28s cubic-bezier(.3,1.7,.5,1),opacity .18s}\n.mealfilm .label.on span{transform:scale(1);opacity:1}\n.mealfilm .card span{background:var(--paper);border:2px solid var(--ink);border-radius:8px;padding:2px 8px;font-family:var(--display);font-weight:600;font-size:14px;box-shadow:0 2px 0 var(--ink)}\n.mealfilm .card b{color:var(--accent);font-variant-numeric:tabular-nums}\n.mealfilm .val span{background:var(--paper);border-radius:999px;padding:0 7px;font-weight:800;font-size:14px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--shade)}\n.mealfilm .yr span{font-weight:800;font-size:11px;color:var(--ink);font-variant-numeric:tabular-nums}\n.mealfilm .big span{display:flex;flex-direction:column;align-items:center;background:var(--paper);border:3px solid var(--ink);border-radius:16px;padding:3px 16px 6px;box-shadow:0 5px 0 var(--ink);transform-origin:50% 100%}\n.mealfilm .big b{font-family:var(--display);font-weight:700;font-size:48px;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}\n.mealfilm .big i{font-style:normal;font-weight:800;font-size:14px;letter-spacing:.08em;text-transform:uppercase}\n.mealfilm .big.win span{background:var(--gold)}\n.mealfilm .big.win b{color:var(--ink);font-size:60px}\n.mealfilm .bubble span{background:var(--ink);color:var(--paper);border-radius:14px;padding:6px 11px;font-weight:700;font-size:13px;max-width:200px;white-space:normal;transform-origin:50% 100%}\n.mealfilm .dock{position:absolute;left:16px;right:16px;bottom:16px;display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none}\n.mealfilm #caption{font-family:var(--display);font-weight:600;font-size:17px;line-height:1.2;text-align:center;text-wrap:balance;max-width:26em;min-height:2.4em;display:flex;align-items:flex-end;justify-content:center;color:var(--ink)}\n.mealfilm #caption:not(:empty){background:var(--paper);border:3px solid var(--ink);border-radius:16px;padding:8px 14px;box-shadow:0 4px 0 var(--ink);min-height:0}\n.mealfilm .controls{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;pointer-events:auto}\n.mealfilm .big.flash b{font-size:56px}\n.mealfilm .icon span{display:block}\n.mealfilm .icon img{display:block;border-radius:50%;background:var(--paper);border:3px solid var(--gold)}\n@media (max-width:700px){}\n.mealfilm .bar{display:flex;align-items:center;gap:8px;max-width:100%;pointer-events:auto}\n.mealfilm #controls{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}\n.mealfilm #controls::-webkit-scrollbar{display:none}\n.mealfilm #controls button,.mealfilm #play{flex:0 0 auto}\n.mealfilm #album{position:absolute;left:0;right:0;top:10px;bottom:122px;display:none;pointer-events:none;padding:4px 14px;align-items:center;justify-content:center}\n.mealfilm #album.on{display:flex}\n.mealfilm .book{position:relative;width:100%;max-width:600px;background:#efe4c9;border-left:20px solid #6a1f2a;border-radius:4px 10px 10px 4px;padding:8px 10px 10px;\n  box-shadow:3px 3px 0 #dccfae,6px 6px 0 #cdbf9a,9px 9px 0 #bfb08a,0 18px 30px rgba(0,0,0,.55);transform:translateY(120vh) rotate(-2deg);transition:transform .6s cubic-bezier(.2,1.1,.4,1)}\n.mealfilm .book.in{transform:rotate(-1deg)}\n.mealfilm .book::before{content:\"\";position:absolute;left:-15px;top:14px;bottom:14px;width:10px;background:radial-gradient(circle,#e6c25a 0 3.2px,transparent 3.6px) 0 0/10px 26px repeat-y}\n.mealfilm .book h2{margin:0 0 6px;font-family:var(--display);font-weight:600;font-size:15px;color:#6a1f2a;text-align:center}\n.mealfilm .page{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 7px;transform-origin:left center;transition:transform .32s ease-in,opacity .32s}\n.mealfilm .page.turn{transform:perspective(900px) rotateY(-80deg);opacity:.15}\n.mealfilm .snap{margin:0;min-width:0;background:var(--paper);padding:4px 4px 5px;box-shadow:0 2px 5px rgba(0,0,0,.4);transform:rotate(var(--r,0deg)) scale(0);transition:transform .35s cubic-bezier(.3,1.5,.5,1)}\n.mealfilm .snap.in{transform:rotate(var(--r,0deg)) scale(1)}\n.mealfilm .snap .ph{position:relative;aspect-ratio:4/3;background:#d9d2c0;overflow:hidden}\n.mealfilm .snap img{display:none;width:100%;height:100%;object-fit:cover}\n.mealfilm .snap .ph.ok img{display:block}\n.mealfilm .snap .ph.ok .miss{display:none}\n.mealfilm .snap .miss{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:4px;font-size:9px;font-weight:700;color:#6f6a5c;line-height:1.15}\n.mealfilm .snap figcaption{padding-top:4px;color:var(--ink);line-height:1.15}\n.mealfilm .snap b{display:block;font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n.mealfilm .snap i{display:block;font-style:normal;font-size:9px;font-weight:700;color:var(--teal)}\n.mealfilm .snap q{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;quotes:none;font-size:9.5px;font-style:italic;font-weight:600;min-height:2.3em}\n.mealfilm .book .foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;font-size:11px;font-weight:700;color:#6a1f2a}\n.mealfilm #shuffle{pointer-events:auto;padding:5px 12px;font-size:12px}\n@media (min-width:700px){.mealfilm .book{padding:14px 18px 16px}\n.mealfilm .book h2{font-size:19px}\n.mealfilm .page{gap:14px}\n.mealfilm .snap b{font-size:13px}\n.mealfilm .snap i{font-size:11px}\n.mealfilm .snap q{font-size:12px}\n.mealfilm .snap .miss{font-size:11px}}\n@media (prefers-reduced-motion: reduce){.mealfilm .book,.mealfilm .snap,.mealfilm .page{transition:none}}\n.mealfilm #fade{position:absolute;inset:0;pointer-events:none;opacity:0}\n.mealfilm .controls button{padding:6px 10px;font-size:13px}\n.mealfilm button{font:inherit;font-weight:800;font-size:14px;color:var(--ink);background:var(--paper);border:3px solid var(--ink);border-radius:999px;padding:8px 14px;box-shadow:0 3px 0 var(--ink);cursor:pointer}\n.mealfilm button:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}\n.mealfilm button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}\n.mealfilm button[aria-pressed=\"true\"]{background:var(--ink);color:var(--paper)}\n.mealfilm #play{background:var(--accent);color:var(--paper);min-width:6.5em}\n.mealfilm #fail{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:24px;text-align:center;font-weight:700}\n@media (prefers-reduced-motion: reduce){.mealfilm .label span{transition:none}}";
 var SHELL="<div id=\"stage\" aria-label=\"3D film of meal numbers. Drag to look around.\"></div><div id=\"fade\"></div><div id=\"overlay\"></div><div id=\"album\" aria-label=\"Photos from these meals\"></div><div class=\"dock\"><div id=\"caption\" aria-live=\"polite\"></div><div class=\"bar\"><div class=\"controls\" id=\"controls\"></div><button type=\"button\" id=\"play\">Pause</button></div></div><div id=\"fail\">This film needs WebGL, and this browser would not start it.</div>";
-var NOOP={stop:function(){},go:function(){}};
+var NOOP={stop:function(){},go:function(){}},current=null;
 function ensureHead(){
   if(document.getElementById('mealfilm-css'))return;
   var st=document.createElement('style');st.id='mealfilm-css';st.textContent=CSS;document.head.appendChild(st);
@@ -24,6 +28,7 @@ function ensureHead(){
 function start(container,DATA,opts){
 opts=opts||{};var THREE=opts.THREE||root.THREE,GEO=opts.geo||{};
 DATA=JSON.parse(JSON.stringify(DATA));
+if(current){try{current();}catch(e){}}
 ensureHead();container.classList.add('mealfilm');container.innerHTML=SHELL;
 
 'use strict';
@@ -50,7 +55,7 @@ var DISP="Fredoka,'Trebuchet MS',sans-serif", BODY="Nunito,'Segoe UI',sans-serif
 
 var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var FOV=50, TAN=Math.tan(FOV*Math.PI/360);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+var OPTS=(typeof opts!=='undefined'&&opts)||{},DPR=Math.min(window.devicePixelRatio||1,2),quality=1,MAXPX=OPTS.maxPixels||1.5e6;
 renderer.outputEncoding=THREE.sRGBEncoding;
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -62,6 +67,8 @@ var camera=new THREE.PerspectiveCamera(FOV,1,0.1,300);
 var W=1,H=1,aspect=1;
 function resize(){
   W=stage.clientWidth||1;H=stage.clientHeight||1;aspect=W/H;
+  /* cap the number of pixels drawn: big or high-density screens are where the film slows down */
+  renderer.setPixelRatio(Math.max(0.5,Math.min(DPR,Math.sqrt(MAXPX/Math.max(1,W*H)))*quality));
   renderer.setSize(W,H,false);camera.aspect=aspect;camera.updateProjectionMatrix();
 }
 window.addEventListener('resize',resize);resize();var dead=false;
@@ -70,7 +77,7 @@ function kill(){if(dead)return;dead=true;window.removeEventListener('resize',res
 var hemi=new THREE.HemisphereLight(0xffffff,0x7fa7c4,0.95);scene.add(hemi);
 scene.fog=new THREE.Fog(0x3a2414,500,1000);var sunOff=new THREE.Vector3(7,16,9);
 var sun=new THREE.DirectionalLight(0xfff1d8,1.25);
-sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);
 var sc=sun.shadow.camera;sc.left=-16;sc.right=16;sc.top=16;sc.bottom=-16;sc.near=1;sc.far=60;
 sun.shadow.bias=-0.0006;
 scene.add(sun);scene.add(sun.target);
@@ -1072,10 +1079,12 @@ function hud(s,t){
   headPos.project(camera);bubble.anchor=headPos.x>0.15?'-95%,-100%':(headPos.x<-0.15?'-5%,-100%':'-50%,-100%');
 }
 
-var clock=new THREE.Clock();
+var clock=new THREE.Clock(),slowMs=16,slowN=0;
 function frame(){
   if(dead)return;
-  var dt=Math.min(clock.getDelta(),0.05), s=scenes[st.name];
+  var raw=clock.getDelta(),dt=Math.min(raw,0.1), s=scenes[st.name];
+  /* if frames are slow, step the quality down: first resolution, then shadows */
+  if(raw<0.5){slowMs=slowMs*0.92+raw*1000*0.08;if(++slowN>45&&slowMs>30){slowN=0;if(quality>0.55){quality*=0.8;resize();}else if(sun.castShadow){sun.castShadow=false;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;}slowMs=20;}}
   if(st.playing){
     st.t+=dt;
     if(st.t>=s.duration){
@@ -1108,11 +1117,13 @@ function frame(){
   renderer.render(scene,camera);
   requestAnimationFrame(frame);
 }
-go('front',!reduce);
-if(reduce){st.t=4.5;syncBtn();}
+var AUTO=OPTS.autoplay!==false&&!reduce;
+go(ORDER[0],AUTO);
+if(!AUTO){st.t=Math.min(3.6,scenes[ORDER[0]].duration-0.1);syncBtn();}
 
 requestAnimationFrame(frame);
-return {stop:kill,go:function(name){if(scenes[name])go(name);},acts:ORDER.slice()};
+current=kill;
+return {stop:kill,go:function(name){if(scenes[name])go(name);},play:function(){st.playing=true;syncBtn();},pause:function(){st.playing=false;syncBtn();},acts:ORDER.slice()};
 }
 root.MealFilm={start:start};
 })(typeof window!=='undefined'?window:this);
