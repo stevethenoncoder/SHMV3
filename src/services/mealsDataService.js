@@ -2,23 +2,23 @@ import { fetchCsvFeed, clearCsvCache } from '../data/fetchFeeds.js';
 import { RATING_RANK } from '../utils/mealsFilter.js';
 
 const BASE_URL =
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vS5zY2-4h1TBiHM1bgJ4NiFiBgngiFNAozE-NWNStZOmSW8BT7UuYBBut9WhpJeKutRaUk3DkDZFNlH/pub?output=csv&gid=';
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjGewh82LkHf_8dme1GhC8IwHwpUQjmjE7J54zxuNCJXn4PkF7HjSVUFWENFUAUlK9iZ_zIxyDSiN7/pub?output=csv&gid=';
 
 export const MEALS_FEED_URLS = {
-  Meals: `${BASE_URL}489348868`,
-  Rest: `${BASE_URL}0`,
-  City: `${BASE_URL}763089517`,
-  Country: `${BASE_URL}172877059`,
-  Type: `${BASE_URL}61815367`,
-  Meals_Main: `${BASE_URL}786291206`,
-  Food: `${BASE_URL}377846928`,
-  Ingredient: `${BASE_URL}1459651357`,
-  FoodType: `${BASE_URL}1922827128`,
-  FoodCat: `${BASE_URL}249100290`,
-  Meals_Photo: `${BASE_URL}153241932`,
-  Meals_People: `${BASE_URL}668079142`,
-  People_Public: `${BASE_URL}2108210132`,
-  RatingMeal: `${BASE_URL}1413438668`,
+  Meals: `${BASE_URL}0`,
+  Rest: `${BASE_URL}1054725272`,
+  City: `${BASE_URL}132054024`,
+  Country: `${BASE_URL}405635437`,
+  Type: `${BASE_URL}2049296393`,
+  Meals_Main: `${BASE_URL}97094625`,
+  Food: `${BASE_URL}69122046`,
+  Ingredient: `${BASE_URL}1928822565`,
+  FoodType: `${BASE_URL}238808052`,
+  FoodCat: `${BASE_URL}2138611121`,
+  Meals_Photo: `${BASE_URL}914264621`,
+  Meals_People: `${BASE_URL}870936870`,
+  People_Public: `${BASE_URL}1228085967`,
+  RatingMeal: `${BASE_URL}1589301622`,
 };
 
 const INVALID_GNAME_LITERALS = new Set(['no results found', 'not looked up']);
@@ -308,8 +308,11 @@ export async function loadMealsData(options = {}) {
     // Row filtering: ignore trailing empty template rows (People_ID > 1009)
     if (isNaN(id) || id > 1009) continue;
 
-    const isPublic = (row['Public?'] || '').trim().toUpperCase() === 'Y';
-    const publicName = (row.Public_Name || '').trim();
+    const hasPublicCol = 'Public?' in row || 'public?' in row || 'Public' in row;
+    const isPublic = hasPublicCol
+      ? (row['Public?'] || row['public?'] || row['Public'] || '').trim().toUpperCase() === 'Y'
+      : true;
+    const publicName = (row.Public_Name || row.public_name || '').trim();
 
     // Must never fall back to raw People table; must never expose "Hidden name"
     if (isPublic && publicName && publicName.toLowerCase() !== 'hidden name') {
