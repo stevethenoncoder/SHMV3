@@ -987,15 +987,13 @@ function buildPeople(){
 var album=document.getElementById('album'),bookEl,pageEl,snapEls=[];
 (function(){
   bookEl=document.createElement('div');bookEl.className='book';
-  var h=document.createElement('h2');h.textContent=PAIR+': the photo book';bookEl.appendChild(h);
+  var h=document.createElement('h2');h.textContent='A random selection of photos';bookEl.appendChild(h);
   pageEl=document.createElement('div');pageEl.className='page';bookEl.appendChild(pageEl);
   for(var i=0;i<9;i++){var f=document.createElement('figure');f.className='snap';f.innerHTML='<div class="ph"><img alt=""><span class="miss">Photo shows on your own site</span></div><figcaption><b></b><i></i><q></q></figcaption>';
     (function(f){var im=f.querySelector('img');im.onload=function(){f.querySelector('.ph').classList.add('ok');};im.onerror=function(){f.querySelector('.ph').classList.remove('ok');};})(f);
     pageEl.appendChild(f);snapEls.push(f);}
   var foot=document.createElement('div');foot.className='foot';foot.innerHTML='<span>'+Math.min(9,DATA.photos.length)+' of '+DATA.photos.length+' photos</span>';
-  var b=document.createElement('button');b.type='button';b.id='shuffle';b.textContent='Turn the page';foot.appendChild(b);bookEl.appendChild(foot);album.appendChild(bookEl);
-  b.addEventListener('click',function(){st.playing=false;syncBtn();pageEl.classList.add('turn');
-    setTimeout(function(){dealPhotos();snapEls.forEach(function(f){f.classList.add('in');});pageEl.classList.remove('turn');},340);});
+  foot.style.justifyContent='center';bookEl.appendChild(foot);album.appendChild(bookEl);
 })();
 function dealPhotos(){
   var pool=DATA.photos.slice(),pick=[];while(pick.length<9&&pool.length){pick.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);}
