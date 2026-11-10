@@ -19,6 +19,7 @@ export const MEALS_FEED_URLS = {
   Meals_People: `${BASE_URL}870936870`,
   People_Public: `${BASE_URL}1228085967`,
   RatingMeal: `${BASE_URL}1589301622`,
+  London: `${BASE_URL}898057641`,
 };
 
 const INVALID_GNAME_LITERALS = new Set(['no results found', 'not looked up']);
@@ -79,6 +80,7 @@ export async function loadMealsData(options = {}) {
     MEALS_FEED_URLS.Meals_People,
     MEALS_FEED_URLS.People_Public,
     MEALS_FEED_URLS.RatingMeal,
+    MEALS_FEED_URLS.London,
   ];
 
   const [
@@ -96,6 +98,7 @@ export async function loadMealsData(options = {}) {
     rawMealsPeople,
     rawPeoplePublic,
     rawRatingMeal,
+    rawLondon,
   ] = await fetchFeedsWithConcurrency(feedUrlList, 4, bypassCache);
 
   // 1. Countries Lookup
@@ -113,6 +116,16 @@ export async function loadMealsData(options = {}) {
     }
   }
 
+  // 1b. London Areas Lookup
+  const londonAreasById = new Map();
+  for (const row of rawLondon || []) {
+    const id = parseInt(row.London_ID, 10);
+    const text = row.London_Text?.trim();
+    if (!isNaN(id) && text) {
+      londonAreasById.set(id, text);
+    }
+  }
+
   // 2. Cities Lookup
   const citiesById = new Map();
   for (const row of rawCity) {
@@ -120,10 +133,12 @@ export async function loadMealsData(options = {}) {
     if (!isNaN(id)) {
       const countryId = parseInt(row.Country_ID, 10);
       const country = countriesById.get(countryId) || null;
+      const countryName = (row.Country_Text?.trim() || country?.name || '').trim();
       citiesById.set(id, {
         id,
         name: row.City_Text?.trim() || '',
         countryId,
+        countryName,
         country,
       });
     }
@@ -201,6 +216,12 @@ export async function loadMealsData(options = {}) {
 
     const cityId = parseInt(row.City_ID, 10);
     const typeId = parseInt(row.Type_ID, 10);
+    const typeObj = restaurantTypesById.get(typeId) || null;
+    const londonId =
+      row.London_ID && !isNaN(parseInt(row.London_ID, 10))
+        ? parseInt(row.London_ID, 10)
+        : null;
+    const londonArea = londonId ? (londonAreasById.get(londonId) || null) : null;
 
     const lat = parseFloat(row['Rest X Cords']);
     const lng = parseFloat(row['Rest Y Cords']);
@@ -224,8 +245,11 @@ export async function loadMealsData(options = {}) {
       name: row.Rest_Name?.trim() || 'Unnamed Restaurant',
       address: row.Rest_Address?.trim() || null,
       city: citiesById.get(cityId) || null,
-      type: restaurantTypesById.get(typeId) || null,
-      typeIcon: restaurantTypesById.get(typeId)?.typeIcon || null,
+      type: typeObj,
+      typeIcon: typeObj?.typeIcon || null,
+      typeGroup: typeObj?.typeGroup || null,
+      londonId,
+      londonArea,
       latitude: !isNaN(lat) ? lat : null,
       longitude: !isNaN(lng) ? lng : null,
       googleName,
@@ -324,6 +348,7 @@ export async function loadMealsData(options = {}) {
   }
 
   // 11. Meals_People Junction (Deduplicating runtime (Meal_ID, People_ID) pairs)
+  const allPeopleIdsByMealId = new Map();
   const publicCompanionsByMealId = new Map();
   const seenMealPeoplePairs = new Set();
   let totalMealsPeopleLoaded = 0;
@@ -343,6 +368,11 @@ export async function loadMealsData(options = {}) {
       continue;
     }
     seenMealPeoplePairs.add(pairKey);
+
+    if (!allPeopleIdsByMealId.has(mealId)) {
+      allPeopleIdsByMealId.set(mealId, []);
+    }
+    allPeopleIdsByMealId.get(mealId).push(peopleId);
 
     const publicPerson = publicPeopleById.get(peopleId);
     if (publicPerson) {
@@ -444,6 +474,7 @@ export async function loadMealsData(options = {}) {
     const mains = mainDishesByMealId.get(id) || [];
     const photos = photosByMealId.get(id) || [];
     const companions = publicCompanionsByMealId.get(id) || [];
+    const allPeopleIds = allPeopleIdsByMealId.get(id) || [];
     if (photos.length > 0) mealsWithPhotosCount++;
 
     const ratingText = row.Meal_Rating?.trim() || 'Unrated';
@@ -470,6 +501,7 @@ export async function loadMealsData(options = {}) {
       photos,
       hasPhoto: photos.length > 0,
       companions,
+      allPeopleIds,
     };
 
     enrichedMeals.push(meal);
@@ -653,7 +685,9 @@ export async function loadMealsData(options = {}) {
     restaurantsById,
     citiesById,
     countriesById,
+    londonAreasById,
     publicPeopleById,
+    rawPeoplePublic,
     ratingMealById,
     ratingMealByText,
     counts: {

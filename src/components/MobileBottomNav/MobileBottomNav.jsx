@@ -1,5 +1,5 @@
 import React from 'react';
-import { Compass, Utensils, UtensilsCrossed, BarChart2 } from 'lucide-react';
+import { Compass, Utensils, UtensilsCrossed, BarChart2, Film } from 'lucide-react';
 import './MobileBottomNav.css';
 
 export default function MobileBottomNav({ activeNav, onSelectNav }) {
@@ -47,6 +47,17 @@ export default function MobileBottomNav({ activeNav, onSelectNav }) {
           <BarChart2 size={18} />
         </div>
         <span>Stats</span>
+      </button>
+
+      <button
+        type="button"
+        className={`bottom-nav-item ${activeNav === 'journey' ? 'active' : ''}`}
+        onClick={() => onSelectNav('journey')}
+      >
+        <div className="icon-wrapper">
+          <Film size={18} />
+        </div>
+        <span>My Journey</span>
       </button>
     </nav>
   );

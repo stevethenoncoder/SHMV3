@@ -226,3 +226,28 @@
 .btn-clear-search:hover {
   background-color: #e2e8f0;
 }
+
+/* My Journey Layout: full viewport height without outer scrolling */
+.meals-app-layout.journey-active {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.meals-app-layout.journey-active .meals-main-content {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .meals-app-layout.journey-active {
+    height: 100dvh;
+  }
+
+  .meals-app-layout.journey-active .meals-main-content {
+    /* Accounting for mobile header (~52px) and fixed bottom nav (~56px) */
+    height: calc(100dvh - 52px - 56px);
+  }
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rich's Meal Film</title>
+<style>
+/* Demo harness only: stands in for the website. The picker below is the site's job, not the film's. */
+html,body{height:100%;margin:0;background:#0d1330;font-family:system-ui,sans-serif}
+.site{height:100%;display:flex;flex-direction:column}
+.site-bar{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fffaf0;border-bottom:3px solid #1d2440}
+.site-bar label{font-weight:700;font-size:13px;color:#1d2440}
+.site-bar select{flex:1 1 auto;min-width:0;max-width:340px;font:inherit;font-size:14px;font-weight:600;padding:6px 8px;border:2px solid #1d2440;border-radius:8px;background:#fff;color:#1d2440}
+#film{flex:1 1 auto;min-height:0}
+</style>
+</head>
+<body>
+<div class="site">
+  <div class="site-bar"><label for="person">My Journey</label><select id="person"></select></div>
+  <div id="film"></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="data.js"></script>
+<script src="mealFilm.js"></script>
+<script>
+(function(){
+  var sel=document.getElementById('person'),film=null,geo={land:window.FILM_LAND,shapes:window.FILM_SHAPES};
+  window.FILM_PEOPLE.forEach(function(p){var o=document.createElement('option');o.value=p[0];o.textContent=p[1]+' · '+p[2]+(p[2]===1?' meal':' meals');sel.appendChild(o);});
+  /* the demo data file stores photos and icons compactly; expand them into the shape the film expects */
+  function summary(slug){var d=JSON.parse(JSON.stringify(window.FILMS[slug]));
+    d.photos=d.photos.map(function(i){var p=window.FILM_PHOTOS[i];return [window.FILM_PHOTO_BASE+p[0],p[1],p[2],p[3]];});
+    d.top.forEach(function(r){if(r[6])r[6]=window.FILM_ICON_BASE+r[6];});return d;}
+  function show(slug){if(!window.FILMS[slug])slug=window.FILM_PEOPLE[0][0];sel.value=slug;if(film)film.stop();
+    film=window.MealFilm.start(document.getElementById('film'),summary(slug),{THREE:window.THREE,geo:geo});window.__demo={film:film,summary:summary};}
+  sel.addEventListener('change',function(){show(sel.value);});
+  show(location.hash.slice(1)||window.FILM_PEOPLE[0][0]);window.__show=show;
+})();
+</script>
+</body>
+</html>

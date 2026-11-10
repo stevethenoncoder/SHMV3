@@ -28,6 +28,8 @@ import StatsPage from './components/StatsPage/StatsPage.jsx';
 import SentimentPage from './components/SentimentPage/SentimentPage.jsx';
 import FoodPage from './components/FoodPage/FoodPage.jsx';
 
+const MyJourneyPage = React.lazy(() => import('./components/MyJourneyPage/MyJourneyPage.jsx'));
+
 import Pagination from './components/Pagination/Pagination.jsx';
 import {
   DEFAULT_MEALS_FILTER_STATE,
@@ -60,11 +62,13 @@ export default function App() {
   const [restaurants, setRestaurants] = useState([]);
   const [restaurantsById, setRestaurantsById] = useState(new Map());
   const [publicPeopleById, setPublicPeopleById] = useState(new Map());
+  const [mealsDataPayload, setMealsDataPayload] = useState(null);
 
-  // Section Navigation: 'overview' | 'chronicle' | 'restaurants' | 'relationships' | 'sentiment' | 'stats'
+  // Section Navigation: 'overview' | 'chronicle' | 'restaurants' | 'relationships' | 'sentiment' | 'stats' | 'journey'
   const [activeSection, setActiveSection] = useState(() => {
     if (typeof window === 'undefined') return 'chronicle';
     const path = window.location.pathname;
+    if (path.startsWith('/journey') || path.startsWith('/my-journey')) return 'journey';
     if (path.startsWith('/overview')) return 'overview';
     if (path.startsWith('/sentiment')) return 'sentiment';
     if (path.startsWith('/food')) return 'food';
@@ -73,6 +77,7 @@ export default function App() {
     if (path.startsWith('/restaurants')) return 'restaurants';
     if (path.startsWith('/chronicle')) return 'chronicle';
     const params = new URLSearchParams(window.location.search);
+    if (params.get('section') === 'journey' || params.get('person')) return 'journey';
     if (params.get('section') === 'overview') return 'overview';
     if (params.get('section') === 'sentiment') return 'sentiment';
     if (params.get('section') === 'food') return 'food';
@@ -155,6 +160,7 @@ export default function App() {
       setLoading(true);
       setError(null);
       const data = await loadMealsData({ bypassCache });
+      setMealsDataPayload(data);
       setMeals(data.meals);
       setMealsById(data.mealsById);
       setRestaurants(data.restaurants);
@@ -175,6 +181,19 @@ export default function App() {
     const handlePopState = () => {
       const path = window.location.pathname;
       const params = new URLSearchParams(window.location.search);
+
+      // 0. Match /journey or /my-journey browse
+      if (
+        path.startsWith('/journey') ||
+        path.startsWith('/my-journey') ||
+        params.get('section') === 'journey' ||
+        params.get('person')
+      ) {
+        setActiveSection('journey');
+        setActiveRestaurantId(null);
+        setActiveMealId(null);
+        return;
+      }
 
       // 1. Match /meals/:id
       const mealMatch = path.match(/\/meals\/([0-9]+)/);
@@ -459,6 +478,7 @@ export default function App() {
     else if (section === 'sentiment') targetUrl = '/sentiment';
     else if (section === 'food') targetUrl = '/food';
     else if (section === 'stats') targetUrl = '/stats';
+    else if (section === 'journey') targetUrl = '/journey';
     window.history.pushState(null, '', targetUrl);
     window.scrollTo(0, 0);
   };
@@ -691,7 +711,9 @@ export default function App() {
   }, [activeSection, activeMealId, chronicleOrigin, activeMealsFiltersCount]);
 
   return (
-    <div className={`meals-app-layout ${activeSection === 'chronicle' ? 'chronicle-active' : ''}`}>
+    <div
+      className={`meals-app-layout ${activeSection === 'chronicle' ? 'chronicle-active' : ''} ${activeSection === 'journey' ? 'journey-active' : ''}`}
+    >
       {/* Primary Header */}
       <MealsHeader
         activeNav={activeSection}
@@ -701,7 +723,7 @@ export default function App() {
       />
 
       {/* Random Meal Memory Banner directly underneath Header */}
-      {!loading && !error && meals.length > 0 && (
+      {!loading && !error && meals.length > 0 && activeSection !== 'journey' && (
         <MealCommentBar
           meals={meals}
           actionTrigger={actionTrigger}
@@ -1071,6 +1093,18 @@ export default function App() {
             restaurants={restaurants}
             onApplyChronicleFilter={handleApplyChronicleFilter}
           />
+        ) : activeSection === 'journey' ? (
+          /* 9. My Journey 3D Meal Film */
+          <React.Suspense
+            fallback={
+              <div className="meals-loading-center">
+                <Loader2 className="spinner-icon" size={36} />
+                <p>Loading My Journey...</p>
+              </div>
+            }
+          >
+            <MyJourneyPage mealsData={mealsDataPayload} />
+          </React.Suspense>
         ) : (
           /* 7. Overview Landing Page (Default) */
           <OverviewPage

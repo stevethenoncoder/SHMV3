@@ -83,6 +83,13 @@ export default function MealsHeader({
           >
             Stats
           </button>
+          <button
+            type="button"
+            className={`nav-link ${activeNav === 'journey' ? 'active' : ''}`}
+            onClick={() => onSelectNav && onSelectNav('journey')}
+          >
+            My Journey
+          </button>
         </nav>
 
         {/* Right: Counter Pill */}
