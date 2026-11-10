@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Places Globe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* layout: filter bar on top; globe panel with a ranked list beside it (stacked on phones) */
+  --ink:#1d2440;
+  --paper:#fffaf0;
+  --page:#f4f1e8;
+  --line:#d9d2c0;
+  --accent:#e4572e;
+  --teal:#1f8a7d;
+  --night:#0d1330;
+  --display:'Fredoka','Trebuchet MS','Segoe UI',sans-serif;
+  --body:'Nunito','Segoe UI',system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--page);color:var(--ink);font-family:var(--body)}
+.wrap{max-width:1180px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px}
+h1{font-family:var(--display);font-weight:700;font-size:28px;margin:0;line-height:1}
+.sum{font-weight:700;font-size:14px;color:#4a5068;font-variant-numeric:tabular-nums}
+.sum b{color:var(--ink)}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:10px}
+.f{display:flex;flex-direction:column;gap:3px;min-width:0}
+.f label{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#6a6f86}
+select{font:inherit;font-size:14px;font-weight:700;color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:8px;padding:6px 8px;min-width:0;width:100%}
+.yr{display:flex;gap:6px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.seg{display:inline-flex;border:2px solid var(--ink);border-radius:999px;overflow:hidden;background:#fff}
+.seg button{font:inherit;font-weight:800;font-size:13px;border:0;background:transparent;color:var(--ink);padding:6px 14px;cursor:pointer}
+.seg button[hidden]{display:none}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.seg button:focus-visible,.list button:focus-visible,select:focus-visible,input:focus-visible,.clear:focus-visible{outline:3px solid #f2b632;outline-offset:2px}
+.topn{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px}
+.topn input{width:140px;accent-color:var(--accent)}
+.topn output{min-width:4.2em;font-variant-numeric:tabular-nums}
+.clear{font:inherit;font-weight:800;font-size:13px;color:var(--accent);background:none;border:0;padding:4px;cursor:pointer;margin-left:auto}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:12px}
+.panel{position:relative;height:min(68vh,620px);min-height:340px;border-radius:14px;overflow:hidden;background:var(--night);border:2px solid var(--ink)}
+#globe{position:absolute;inset:0}
+.flat{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:6px;background:#e9eef2;color:#4a5068;font-weight:700;text-align:center;padding:20px}
+.panel.isflat .flat{display:flex}.panel.isflat #globe{visibility:hidden}
+.crumbs{position:absolute;left:10px;top:10px;right:10px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;pointer-events:none;z-index:2}
+.crumbs button{pointer-events:auto;font:inherit;font-weight:800;font-size:13px;color:var(--ink);background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:4px 11px;box-shadow:0 2px 0 var(--ink);cursor:pointer}
+.crumbs button:hover{background:#f2b632}
+.crumbs button:focus-visible{outline:3px solid #f2b632;outline-offset:2px}
+.crumbs .up{background:var(--ink);color:var(--paper)}
+.crumbs .up:hover{background:var(--accent)}
+.crumbs .here{pointer-events:none;font-weight:800;font-size:13px;color:var(--paper);background:rgba(13,19,48,.65);border-radius:999px;padding:4px 11px}
+.crumbs .sep{color:rgba(255,250,240,.7);font-weight:800}
+.hint{position:absolute;left:10px;bottom:8px;font-size:11px;font-weight:700;color:rgba(255,250,240,.7);pointer-events:none}
+.side{background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;min-height:0;height:min(68vh,620px)}
+.side h2{font-family:var(--display);font-weight:600;font-size:16px;margin:2px 4px 8px}
+.list{list-style:none;margin:0;padding:0;overflow:auto;flex:1 1 auto;display:flex;flex-direction:column;gap:2px}
+.list button{width:100%;display:grid;grid-template-columns:1.8em minmax(0,1fr) auto;align-items:center;gap:6px;text-align:left;font:inherit;font-size:13px;font-weight:700;color:var(--ink);background:transparent;border:0;border-radius:8px;padding:5px 6px;cursor:pointer;position:relative}
+.list button:hover{background:#efe8d6}
+.list button.sel{background:var(--teal);color:var(--paper)}
+.list .rk{color:#8a8fa3;font-variant-numeric:tabular-nums;font-size:12px}
+.list .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list .nm small{font-weight:700;color:#8a8fa3;margin-left:4px}
+.list button.sel .rk,.list button.sel small{color:var(--paper)}
+.list .ct{font-family:var(--display);font-weight:600;font-variant-numeric:tabular-nums}
+.list .br{grid-column:2/4;height:4px;border-radius:2px;background:var(--accent);opacity:.75}
+.list button.sel .br{background:var(--paper)}
+.note{font-size:12px;font-weight:700;color:#6a6f86;margin:6px 4px 0}
+@media (max-width:820px){
+  .main{grid-template-columns:1fr}
+  .panel{height:58vh;min-height:300px}
+  .side{height:auto;max-height:360px}
+  .clear{margin-left:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <h1>Places</h1>
+    <div class="sum" id="sum" aria-live="polite"></div>
+  </div>
+
+  <div class="filters">
+    <div class="f"><label for="fCountry">Country</label><select id="fCountry"></select></div>
+    <div class="f"><label for="fCity">City</label><select id="fCity"></select></div>
+    <div class="f"><label for="fType">Restaurant type</label><select id="fType"></select></div>
+    <div class="f"><label for="fFrom">Years</label><div class="yr"><select id="fFrom" aria-label="From year"></select><select id="fTo" aria-label="To year"></select></div></div>
+    <div class="f"><label for="fPerson">Person</label><select id="fPerson"></select></div>
+  </div>
+
+  <div class="bar">
+    <div class="seg" role="group" aria-label="View"><button type="button" id="v3d" aria-pressed="true">3D globe</button><button type="button" id="vFlat" aria-pressed="false">Flat map</button></div>
+    <div class="seg" role="group" aria-label="Group by"><button type="button" id="mCountry" aria-pressed="true">Countries</button><button type="button" id="mCity" aria-pressed="false">Cities</button><button type="button" id="mArea" aria-pressed="false" hidden>London areas</button><button type="button" id="mRest" aria-pressed="false">Restaurants</button></div>
+    <div class="topn"><label for="topN">Show</label><input type="range" id="topN" min="0" max="12" step="1" value="3"><output id="topNv" for="topN">Top 20</output></div>
+    <button type="button" class="clear" id="clear">Clear filters</button>
+  </div>
+
+  <div class="main">
+    <div class="panel" id="panel">
+      <nav class="crumbs" id="crumbs" aria-label="Where you are"></nav>
+      <div id="globe" aria-label="3D globe of meals by place. Drag to turn, scroll or pinch to zoom, click a tower to drill in from country to city to restaurant."></div>
+      <div class="hint">Drag to turn · scroll or pinch to zoom · click a tower to drill in · Esc or Back to go up</div>
+      <div class="flat"><div>The flat map goes here.</div><div style="font-size:13px">Switch back to 3D globe to see it.</div></div>
+    </div>
+    <aside class="side">
+      <h2 id="listTitle">Countries</h2>
+      <ul class="list" id="list"></ul>
+      <div class="note" id="note"></div>
+    </aside>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="places-geo.js"></script>
+<script src="places-data.js"></script>
+<script src="placesGlobe.js"></script>
+<script>
+(function(){
+  'use strict';
+  var P=window.PLACES, $=function(id){return document.getElementById(id);};
+  var S={country:'',city:'',area:'',type:'',from:0,to:0,person:'',mode:'country',topN:20,view:'3d',sel:null};
+  var years=P.meals.map(function(m){return m[2];}),Y0=Math.min.apply(null,years),Y1=Math.max.apply(null,years);S.from=Y0;S.to=Y1;
+  function opt(sel,v,t){var o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o);}
+  function fmt(n){return n.toLocaleString('en-GB');}
+
+  /* static options */
+  function cityOf(m){return P.restaurants[m[0]][1];}
+  var LONDON=P.cities.findIndex(function(c){return c[0]==='London';});
+  function isLondon(){return S.city!==''&&+S.city===LONDON;}
+  var STEPS=[5,10,15,20,30,40,50,75,100,150,200,300,0];
+  opt($('fCountry'),'','All countries');
+  P.countries.map(function(c,i){return i;}).sort(function(a,b){return P.countries[a].name.localeCompare(P.countries[b].name);}).forEach(function(i){opt($('fCountry'),i,P.countries[i].name);});
+  opt($('fType'),'','All types');P.types.map(function(t,i){return i;}).sort(function(a,b){return P.types[a].localeCompare(P.types[b]);}).forEach(function(i){opt($('fType'),i,P.types[i]);});
+  for(var y=Y0;y<=Y1;y++){opt($('fFrom'),y,y);opt($('fTo'),y,y);}
+  opt($('fPerson'),'','Everyone (all meals)');P.people.forEach(function(p,i){opt($('fPerson'),i,p[0]+' · '+fmt(p[1]));});
+  function fillCities(){
+    var s=$('fCity');s.innerHTML='';opt(s,'','All cities');
+    var ids=P.cities.map(function(c,i){return i;}).filter(function(i){return S.country===''||P.cities[i][1]===+S.country;});
+    ids.sort(function(a,b){return P.cities[a][0].localeCompare(P.cities[b][0]);}).forEach(function(i){opt(s,i,P.cities[i][0]+(S.country===''?', '+P.countries[P.cities[i][1]].name:''));});
+    s.value=S.city;
+  }
+
+  /* filtering and counting */
+  function filtered(){
+    var c=S.country===''?-1:+S.country,ci=S.city===''?-1:+S.city,t=S.type===''?-1:+S.type,p=S.person===''?-1:+S.person;
+    return P.meals.filter(function(m){
+      var mc=cityOf(m);
+      if(S.area!==''&&P.restaurants[m[0]][4]!==+S.area)return false;
+      if(ci>=0&&mc!==ci)return false;
+      if(c>=0&&P.cities[mc][1]!==c)return false;
+      if(t>=0&&m[1]!==t)return false;
+      if(m[2]<S.from||m[2]>S.to)return false;
+      if(p>=0&&!(m[3]&&m[3].indexOf(p)>=0))return false;
+      return true;
+    });
+  }
+  function points(ms){
+    var cnt={},nc={},ncity={},nocoord=0,noarea=0;
+    var nrest={};
+    ms.forEach(function(m){var ci=cityOf(m),city=P.cities[ci];nc[city[1]]=1;ncity[ci]=1;nrest[m[0]]=1;
+      if(S.mode==='country'){cnt[city[1]]=(cnt[city[1]]||0)+1;}
+      else if(S.mode==='city'){if(city[2]==null){nocoord++;return;}cnt[ci]=(cnt[ci]||0)+1;}
+      else if(S.mode==='area'){var a=P.restaurants[m[0]][4];if(a==null){noarea++;return;}cnt[a]=(cnt[a]||0)+1;}
+      else{if(P.restaurants[m[0]][2]==null){nocoord++;return;}cnt[m[0]]=(cnt[m[0]]||0)+1;}});
+    var pts=Object.keys(cnt).map(function(k){
+      if(S.mode==='country'){var c=P.countries[k];return {id:'c'+k,key:+k,name:c.name,lat:c.lat,lon:c.lon,n:cnt[k]};}
+      if(S.mode==='area'){var ar=P.areas[k];return {id:'a'+k,key:+k,name:ar[0],lat:ar[1],lon:ar[2],n:cnt[k]};}
+      if(S.mode==='city'){var x=P.cities[k];return {id:'t'+k,key:+k,name:x[0],sub:P.countries[x[1]].name,lat:x[2],lon:x[3],n:cnt[k]};}
+      var r=P.restaurants[k];return {id:'r'+k,key:+k,name:r[0],sub:P.cities[r[1]][0],city:r[1],lat:r[2],lon:r[3],n:cnt[k]};
+    }).filter(function(p){return p.lat!=null;}).sort(function(a,b){return b.n-a.n||a.name.localeCompare(b.name);});
+    return {all:pts,top:S.topN?pts.slice(0,S.topN):pts,countries:Object.keys(nc).length,cities:Object.keys(ncity).length,rests:Object.keys(nrest).length,nocoord:nocoord,noarea:noarea};
+  }
+
+  /* drawing */
+  var globe=null;
+  try{globe=PlacesGlobe.create($('globe'),{THREE:window.THREE,geo:window.PLACES_GEO,onSelect:drill});}
+  catch(e){$('globe').textContent='This browser could not start the 3D globe.';$('globe').style.cssText+='color:#fffaf0;display:flex;align-items:center;justify-content:center;font-weight:700';}
+  var current=[];
+  function render(fit){
+    var ms=filtered(),r=points(ms);current=r.top;
+    $('sum').innerHTML='<b>'+fmt(ms.length)+'</b> meals · <b>'+fmt(r.countries)+'</b> '+(r.countries===1?'country':'countries')+' · <b>'+fmt(r.cities)+'</b> '+(r.cities===1?'city':'cities')+' · <b>'+fmt(r.rests)+'</b> '+(r.rests===1?'restaurant':'restaurants');
+    $('listTitle').textContent=({country:'Countries',city:'Cities',area:'London areas',rest:'Restaurants'})[S.mode]+(r.all.length>r.top.length?' · top '+r.top.length+' of '+r.all.length:'');
+    var L=$('list');L.innerHTML='';var mx=r.top.length?r.top[0].n:1;
+    r.top.forEach(function(p,i){
+      var li=document.createElement('li'),b=document.createElement('button');b.type='button';
+      b.className=S.sel===p.id?'sel':'';
+      b.innerHTML='<span class="rk"></span><span class="nm"></span><span class="ct"></span><span class="br"></span>';
+      b.querySelector('.rk').textContent=i+1;b.querySelector('.nm').textContent=p.name;
+      if(p.sub&&(S.mode==='rest'?S.city==='':S.country==='')){var sm=document.createElement('small');sm.textContent=p.sub;b.querySelector('.nm').appendChild(sm);}
+      b.querySelector('.ct').textContent=fmt(p.n);b.querySelector('.br').style.width=Math.max(2,p.n/mx*100)+'%';
+      b.addEventListener('click',function(){drill(p);});
+      li.appendChild(b);L.appendChild(li);
+    });
+    $('note').textContent=(r.nocoord?fmt(r.nocoord)+' meals are in places with no map position, so they are not shown. ':'')+(r.noarea?fmt(r.noarea)+' London meals have no area set.':'');
+    crumbs();setMode(S.mode,true);
+    if(globe){globe.highlight(S.sel);globe.update(r.top,{fit:fit!==false});}
+  }
+
+  /* where you are, and how to go back up: World > Country > City */
+  var MODE_NAME={country:'countries',city:'cities',area:'areas',rest:'restaurants'};
+  function goWorld(){S.country='';S.city='';S.area='';S.sel=null;$('fCountry').value='';fillCities();setMode('country',true);render();}
+  function goCountry(){S.city='';S.area='';S.sel=null;fillCities();setMode('city',true);render();}
+  function canUp(){return S.city!==''||S.country!==''||S.mode!=='country';}
+  function up(){
+    if(S.sel){S.sel=null;render(false);return;}
+    if(S.area!==''){S.area='';setMode('area');return;}
+    if(S.city!==''){if(S.mode==='rest'&&isLondon()){setMode('area');return;}goCountry();return;}
+    if(S.country!==''){if(S.mode==='rest'){setMode('city');return;}goWorld();return;}
+    if(S.mode!=='country')goWorld();
+  }
+  function crumbs(){
+    var n=$('crumbs');n.innerHTML='';
+    function btn(t,f,cls,label){var b=document.createElement('button');b.type='button';b.textContent=t;if(cls)b.className=cls;if(label)b.setAttribute('aria-label',label);b.addEventListener('click',f);n.appendChild(b);}
+    function sep(){var x=document.createElement('span');x.className='sep';x.textContent='›';x.setAttribute('aria-hidden','true');n.appendChild(x);}
+    if(canUp())btn('‹ Back',up,'up','Go up a level');
+    var trail=[['World',goWorld]];
+    if(S.country!=='')trail.push([P.countries[+S.country].name,goCountry]);
+    if(S.city!=='')trail.push([P.cities[+S.city][0],function(){S.sel=null;S.area='';setMode(isLondon()?'area':'rest',true);render();}]);
+    if(S.area!=='')trail.push([P.areas[+S.area][0],function(){}]);
+    trail.forEach(function(c,i){if(i)sep();if(i===trail.length-1){var h=document.createElement('span');h.className='here';h.textContent=c[0]+' · '+MODE_NAME[S.mode];n.appendChild(h);}else btn(c[0],c[1]);});
+  }
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!/^(SELECT|INPUT)$/.test((e.target||{}).tagName||'')&&canUp()){e.preventDefault();up();}});
+
+  /* clicking a tower or a list row: a country drills down to its cities, a city to its restaurants */
+  function drill(p){
+    if(S.mode==='country'){S.country=String(p.key);S.city='';S.sel=null;setMode('city',true);$('fCountry').value=S.country;fillCities();render();}
+    else if(S.mode==='city'){S.city=String(p.key);S.area='';S.country=String(P.cities[p.key][1]);S.sel=null;$('fCountry').value=S.country;fillCities();setMode(p.key===LONDON?'area':'rest',true);render();}
+    else if(S.mode==='area'){S.area=String(p.key);S.sel=null;setMode('rest',true);render();}
+    else{S.sel=S.sel===p.id?null:p.id;render(false);}
+  }
+  function setMode(m,quiet){S.mode=m;S.sel=null;$('mCountry').setAttribute('aria-pressed',m==='country');$('mCity').setAttribute('aria-pressed',m==='city');$('mRest').setAttribute('aria-pressed',m==='rest');$('mArea').setAttribute('aria-pressed',m==='area');$('mArea').hidden=!isLondon();if(!quiet)render();}
+
+  $('fCountry').addEventListener('change',function(e){S.country=e.target.value;S.city='';S.area='';if(S.mode==='area')S.mode='city';S.sel=null;fillCities();render();});
+  $('fCity').addEventListener('change',function(e){S.city=e.target.value;S.area='';S.sel=null;if(S.mode==='area'&&!(S.city!==''&&+S.city===LONDON))S.mode='city';if(S.city!==''){S.country=String(P.cities[+S.city][1]);$('fCountry').value=S.country;}render();});
+  $('fType').addEventListener('change',function(e){S.type=e.target.value;S.sel=null;render();});
+  $('fFrom').addEventListener('change',function(e){S.from=+e.target.value;if(S.from>S.to){S.to=S.from;$('fTo').value=S.to;}render();});
+  $('fTo').addEventListener('change',function(e){S.to=+e.target.value;if(S.to<S.from){S.from=S.to;$('fFrom').value=S.from;}render();});
+  $('fPerson').addEventListener('change',function(e){S.person=e.target.value;S.sel=null;render();});
+  $('mCountry').addEventListener('click',function(){setMode('country');});
+  $('mCity').addEventListener('click',function(){setMode('city');});
+  $('mRest').addEventListener('click',function(){setMode('rest');});
+  $('mArea').addEventListener('click',function(){S.area='';setMode('area');});
+  var tN=$('topN');tN.addEventListener('input',function(){S.topN=STEPS[+tN.value];$('topNv').textContent=S.topN?'Top '+S.topN:'All';render();});
+  function setView(v){S.view=v;$('v3d').setAttribute('aria-pressed',v==='3d');$('vFlat').setAttribute('aria-pressed',v==='flat');$('panel').classList.toggle('isflat',v==='flat');}
+  $('v3d').addEventListener('click',function(){setView('3d');});$('vFlat').addEventListener('click',function(){setView('flat');});
+  $('clear').addEventListener('click',function(){S.country='';S.city='';S.area='';if(S.mode==='area')S.mode='city';S.type='';S.person='';S.from=Y0;S.to=Y1;S.sel=null;
+    ['fCountry','fType','fPerson'].forEach(function(id){$(id).value='';});$('fFrom').value=Y0;$('fTo').value=Y1;fillCities();render();});
+
+  $('fFrom').value=Y0;$('fTo').value=Y1;fillCities();render();
+  window.__places={S:S,render:render,setMode:setMode,drill:drill};
+})();
+</script>
+</body>
+</html>
