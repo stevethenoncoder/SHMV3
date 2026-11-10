@@ -180,15 +180,42 @@ export function filterPlacesMeals(meals, filters, londonCityId) {
     city = '',
     area = '',
     type = '',
+    types = [],
     from = 0,
     to = 9999,
+    decades = [],
     person = '',
+    people = [],
   } = filters || {};
 
-  const targetCountryId = country !== '' ? parseInt(country, 10) : null;
-  const targetCityId = city !== '' ? parseInt(city, 10) : null;
-  const targetAreaId = area !== '' ? parseInt(area, 10) : null;
-  const targetPersonId = person !== '' && person !== 'all' ? parseInt(person, 10) : null;
+  const targetCountryId = country !== '' && country != null ? parseInt(country, 10) : null;
+  const targetCityId = city !== '' && city != null ? parseInt(city, 10) : null;
+  const targetAreaId = area !== '' && area != null ? parseInt(area, 10) : null;
+
+  // Single person or multi-select people
+  const targetPeopleIds = new Set();
+  if (Array.isArray(people) && people.length > 0) {
+    people.forEach((p) => {
+      const pid = parseInt(p, 10);
+      if (!isNaN(pid)) targetPeopleIds.add(pid);
+    });
+  } else if (person !== '' && person !== 'all' && person != null) {
+    const pid = parseInt(person, 10);
+    if (!isNaN(pid)) targetPeopleIds.add(pid);
+  }
+
+  // Single type or multi-select types
+  const targetTypes = new Set();
+  if (Array.isArray(types) && types.length > 0) {
+    types.forEach((t) => {
+      if (t) targetTypes.add(t);
+    });
+  } else if (type !== '' && type !== 'all' && type != null) {
+    targetTypes.add(type);
+  }
+
+  const hasDecades = Array.isArray(decades) && decades.length > 0;
+  const decadeSet = hasDecades ? new Set(decades) : null;
 
   return meals.filter((m) => {
     const r = m.restaurant;
@@ -198,16 +225,23 @@ export function filterPlacesMeals(meals, filters, londonCityId) {
     const y = m.year;
     if (y && (y < from || y > to)) return false;
 
-    // Restaurant Type (TypeGroup or Type)
-    if (type !== '') {
+    // Decade filter
+    if (decadeSet) {
+      const d = m.decade || (y ? `${Math.floor(y / 10) * 10}s` : null);
+      if (!d || !decadeSet.has(d)) return false;
+    }
+
+    // Restaurant Type filter
+    if (targetTypes.size > 0) {
       const tg = r.typeGroup || r.type?.typeGroup || r.type?.name;
-      if (tg !== type) return false;
+      if (!tg || !targetTypes.has(tg)) return false;
     }
 
     // Person filter
-    if (targetPersonId != null) {
+    if (targetPeopleIds.size > 0) {
       const attendees = m.allPeopleIds || (m.companions || []).map((c) => c.peopleId);
-      if (!attendees.includes(targetPersonId)) return false;
+      const matches = attendees.some((id) => targetPeopleIds.has(id));
+      if (!matches) return false;
     }
 
     // Country filter
@@ -223,6 +257,103 @@ export function filterPlacesMeals(meals, filters, londonCityId) {
 
     return true;
   });
+}
+
+/**
+ * Calculates dynamic facet counts for the Places filter sidebar.
+ */
+export function calculatePlacesFacetCounts(meals, filters) {
+  if (!Array.isArray(meals)) {
+    return {
+      countryCounts: {},
+      cityCounts: {},
+      typeCounts: {},
+      decadeCounts: {},
+      peopleCounts: {},
+    };
+  }
+
+  const countryCounts = {};
+  const cityCounts = {};
+  const typeCounts = {};
+  const decadeCounts = {};
+  const peopleCounts = {};
+
+  const targetCountryId = filters?.country !== '' && filters?.country != null ? parseInt(filters.country, 10) : null;
+  const targetCityId = filters?.city !== '' && filters?.city != null ? parseInt(filters.city, 10) : null;
+  const targetAreaId = filters?.area !== '' && filters?.area != null ? parseInt(filters.area, 10) : null;
+
+  const targetTypes = new Set(
+    Array.isArray(filters?.types) && filters.types.length > 0
+      ? filters.types
+      : filters?.type && filters.type !== 'all' ? [filters.type] : []
+  );
+
+  const targetPeopleIds = new Set(
+    Array.isArray(filters?.people) && filters.people.length > 0
+      ? filters.people.map((p) => parseInt(p, 10)).filter((p) => !isNaN(p))
+      : filters?.person && filters.person !== 'all' ? [parseInt(filters.person, 10)].filter((p) => !isNaN(p)) : []
+  );
+
+  const from = filters?.from || 0;
+  const to = filters?.to || 9999;
+  const decadeSet = Array.isArray(filters?.decades) && filters.decades.length > 0 ? new Set(filters.decades) : null;
+
+  for (const m of meals) {
+    const r = m.restaurant;
+    if (!r) continue;
+
+    const y = m.year;
+    const d = m.decade || (y ? `${Math.floor(y / 10) * 10}s` : null);
+    const tg = r.typeGroup || r.type?.typeGroup || r.type?.name;
+    const attendees = m.allPeopleIds || (m.companions || []).map((c) => c.peopleId);
+    const cId = r.city?.countryId || r.city?.country?.id;
+    const ciId = r.city?.id;
+    const lId = r.londonId;
+
+    const passYears = (!y || (y >= from && y <= to)) && (!decadeSet || (d && decadeSet.has(d)));
+    const passType = targetTypes.size === 0 || (tg && targetTypes.has(tg));
+    const passPerson = targetPeopleIds.size === 0 || attendees.some((id) => targetPeopleIds.has(id));
+    const passCountry = targetCountryId == null || cId === targetCountryId;
+    const passCity = targetCityId == null || ciId === targetCityId;
+    const passArea = targetAreaId == null || lId === targetAreaId;
+    const passGeo = passCountry && passCity && passArea;
+
+    // 1. Country counts: matches years, type, person
+    if (passYears && passType && passPerson && cId != null) {
+      countryCounts[cId] = (countryCounts[cId] || 0) + 1;
+    }
+
+    // 2. City counts: matches years, type, person, and selected country
+    if (passYears && passType && passPerson && passCountry && ciId != null) {
+      cityCounts[ciId] = (cityCounts[ciId] || 0) + 1;
+    }
+
+    // 3. Type counts: matches geo, years, person
+    if (passGeo && passYears && passPerson && tg) {
+      typeCounts[tg] = (typeCounts[tg] || 0) + 1;
+    }
+
+    // 4. Decade counts: matches geo, type, person, year range
+    if (passGeo && passType && passPerson && (!y || (y >= from && y <= to)) && d) {
+      decadeCounts[d] = (decadeCounts[d] || 0) + 1;
+    }
+
+    // 5. People counts: matches geo, type, years
+    if (passGeo && passType && passYears) {
+      for (const pId of attendees) {
+        peopleCounts[pId] = (peopleCounts[pId] || 0) + 1;
+      }
+    }
+  }
+
+  return {
+    countryCounts,
+    cityCounts,
+    typeCounts,
+    decadeCounts,
+    peopleCounts,
+  };
 }
 
 /**

@@ -1,4 +1,7 @@
-/* Places 3D Globe Page Styles */
+/* ==============================================================
+   Places 3D Globe Page Styles
+   Integrates seamlessly with SHMV3 design system & Chronicle layout
+   ============================================================== */
 
 .places-page-layout {
   max-width: 1400px;
@@ -14,122 +17,77 @@
 /* ==============================================================
    1. Left Filter Sidebar (Chronicle Style)
    ============================================================== */
-.places-sidebar {
-  width: 270px;
-  flex-shrink: 0;
+.places-filter-sidebar {
   position: sticky;
   top: 84px;
   max-height: calc(100vh - 104px);
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
   z-index: 20;
 }
 
-.places-sidebar::-webkit-scrollbar {
-  width: 5px;
-}
-
-.places-sidebar::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: var(--radius-full);
-}
-
-.places-sidebar-inner {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.places-sidebar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-}
-
-.places-sidebar-title {
-  font-size: 1.05rem;
+/* Active filter count pill next to section title */
+.places-active-pill {
+  font-size: 0.72rem;
   font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.places-btn-clear {
-  background: none;
-  border: none;
   color: var(--accent);
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 2px 4px;
+  background-color: var(--accent-light);
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  margin-left: 5px;
 }
 
-.places-btn-clear:hover {
-  text-decoration: underline;
-}
-
-.places-mobile-close-btn {
-  display: none;
-  background: none;
-  border: none;
+/* Subtitle for cities in sidebar */
+.places-facet-sub {
+  font-size: 0.74rem;
+  font-weight: 500;
   color: var(--text-muted);
-  cursor: pointer;
-  padding: 4px;
 }
 
-.places-filter-group {
+/* Year range controls inside Years section */
+.places-years-range-container {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-subtle);
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
-.places-filter-group label {
-  font-size: 0.74rem;
+.places-years-range-title {
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   color: var(--text-muted);
-}
-
-.places-filter-group select {
-  width: 100%;
-  padding: 7px 10px;
-  background-color: var(--bg-surface);
-  color: var(--text-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  font-size: 0.84rem;
-  font-weight: 600;
-  font-family: inherit;
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.places-filter-group select:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .places-years-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+}
+
+.places-year-select {
+  flex: 1;
+  padding: 5px 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.places-year-select:focus {
+  border-color: var(--accent);
 }
 
 .places-years-dash {
   color: var(--text-muted);
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 0.85rem;
 }
 
 /* ==============================================================
@@ -147,42 +105,37 @@
 .places-mobile-toolbar {
   display: none;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  justify-content: flex-start;
+  margin-bottom: 4px;
 }
 
-.places-mobile-filter-trigger {
+.places-mobile-filter-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 14px;
+  gap: 8px;
+  padding: 8px 16px;
   background-color: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  font-size: 0.85rem;
-  font-weight: 600;
+  border-radius: var(--radius-full);
+  font-size: 0.86rem;
+  font-weight: 700;
   color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.places-active-filter-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
+.places-mobile-filter-btn:hover {
+  background-color: var(--bg-subtle);
+}
+
+.places-mobile-filter-badge {
   background-color: var(--accent);
-}
-
-.places-mobile-clear-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 12px;
-  background: none;
-  border: none;
-  color: var(--accent);
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
 }
 
 /* Top: 4 Compact KPIs Strip */
@@ -192,8 +145,8 @@
   justify-content: space-around;
   background-color: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 8px 16px;
+  border-radius: var(--radius-lg);
+  padding: 10px 16px;
   box-shadow: var(--shadow-sm);
 }
 
@@ -205,7 +158,7 @@
 }
 
 .places-kpi-val {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 800;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
@@ -214,16 +167,16 @@
 
 .places-kpi-lbl {
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   margin-top: 2px;
 }
 
 .places-kpi-divider {
   width: 1px;
-  height: 26px;
+  height: 28px;
   background-color: var(--border);
 }
 
@@ -243,14 +196,14 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
   overflow: hidden;
-  padding: 2px;
+  padding: 3px;
   box-shadow: var(--shadow-sm);
 }
 
 .places-seg-btn {
   background: transparent;
   border: none;
-  padding: 5px 14px;
+  padding: 6px 16px;
   font-size: 0.82rem;
   font-weight: 700;
   font-family: inherit;
@@ -281,13 +234,13 @@
 }
 
 .places-topn-control input[type='range'] {
-  width: 110px;
+  width: 120px;
   accent-color: var(--brand-green);
   cursor: pointer;
 }
 
 .places-topn-output {
-  min-width: 4.2em;
+  min-width: 4.4em;
   font-variant-numeric: tabular-nums;
   color: var(--text-primary);
 }
@@ -300,7 +253,7 @@
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
-  padding: 4px;
+  padding: 4px 6px;
 }
 
 .places-desktop-clear-btn:hover {
@@ -321,25 +274,29 @@
 .places-globe-panel {
   position: relative;
   height: min(68vh, 620px);
-  min-height: 360px;
+  min-height: 440px;
   background-color: #0d1330;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-sm);
 }
 
-.places-globe-container {
-  position: absolute;
-  inset: 0;
+/* CRITICAL: Overrides runtime .pg relative styling so canvas fills 100% of panel */
+.places-globe-panel .places-globe-container,
+.places-globe-panel #places-globe-mount.pg {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* Floating Breadcrumbs in Top-Left */
 .places-crumbs {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
+  top: 12px;
+  left: 12px;
+  right: 12px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -357,8 +314,8 @@
   background-color: #1d2440;
   border: 1.5px solid #fffaf0;
   border-radius: var(--radius-full);
-  padding: 4px 11px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  padding: 4px 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
@@ -389,7 +346,7 @@
 .places-crumb-sep {
   color: rgba(255, 250, 240, 0.75);
   font-weight: 800;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   user-select: none;
 }
 
@@ -407,8 +364,8 @@
 /* Globe Interaction Hint */
 .places-globe-hint {
   position: absolute;
-  left: 10px;
-  bottom: 8px;
+  left: 12px;
+  bottom: 10px;
   font-size: 0.72rem;
   font-weight: 600;
   color: rgba(255, 250, 240, 0.7);
@@ -422,13 +379,14 @@
 .places-ranked-panel {
   background-color: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 12px;
+  border-radius: var(--radius-lg);
+  padding: 14px 12px;
   display: flex;
   flex-direction: column;
   min-height: 0;
   height: min(68vh, 620px);
   box-shadow: var(--shadow-sm);
+  box-sizing: border-box;
 }
 
 .places-ranked-title {
@@ -436,11 +394,14 @@
   font-weight: 700;
   color: var(--text-primary);
   margin: 0 0 10px 4px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
 }
 
 .places-ranked-subcount {
   font-size: 0.76rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-muted);
 }
 
@@ -452,8 +413,9 @@
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }
 
 .places-ranked-list::-webkit-scrollbar {
@@ -475,19 +437,19 @@
   display: grid;
   grid-template-columns: 1.8em minmax(0, 1fr) auto;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   text-align: left;
   font-family: inherit;
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-primary);
   background: transparent;
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 5px 6px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 6px 8px;
   cursor: pointer;
   position: relative;
-  transition: background-color 0.12s ease;
+  transition: all 0.12s ease;
 }
 
 .places-ranked-btn:hover {
@@ -495,13 +457,15 @@
 }
 
 .places-ranked-btn.selected {
-  background-color: #1f8a7d;
-  color: #ffffff;
+  background-color: var(--active-nav-bg);
+  border-color: rgba(15, 81, 50, 0.25);
+  color: var(--brand-dark-green);
 }
 
 .places-ranked-rank {
   color: var(--text-light);
   font-size: 0.74rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
@@ -512,7 +476,7 @@
 }
 
 .places-ranked-sub {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-muted);
   margin-left: 5px;
   font-size: 0.74rem;
@@ -520,31 +484,35 @@
 
 .places-ranked-btn.selected .places-ranked-rank,
 .places-ranked-btn.selected .places-ranked-sub {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--brand-green);
 }
 
 .places-ranked-count {
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
+  background-color: var(--bg-subtle);
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
 }
 
 .places-ranked-btn.selected .places-ranked-count {
-  color: #ffffff;
+  background-color: #ffffff;
+  color: var(--brand-dark-green);
 }
 
 .places-ranked-bar {
   grid-column: 2 / 4;
   height: 3px;
   border-radius: 2px;
-  background-color: #e4572e;
-  opacity: 0.8;
-  margin-top: 1px;
+  background-color: var(--brand-green);
+  opacity: 0.85;
+  margin-top: 2px;
 }
 
 .places-ranked-btn.selected .places-ranked-bar {
-  background-color: #ffffff;
+  background-color: var(--brand-dark-green);
 }
 
 .places-ranked-empty {
@@ -558,79 +526,210 @@
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-muted);
-  line-height: 1.4;
   margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--border);
+  padding-top: 6px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 /* ==============================================================
-   5. Responsive Breakpoints (Phone Layout)
+   5. Loading & Error States
    ============================================================== */
+.places-loading-view,
+.places-error-view {
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.places-loading-spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid var(--border);
+  border-top-color: var(--brand-green);
+  border-radius: 50%;
+  animation: places-spin 0.8s linear infinite;
+}
+
+@keyframes places-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.places-loading-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.places-error-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #dc2626;
+}
+
+.places-retry-btn {
+  padding: 8px 18px;
+  background-color: var(--brand-green);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ==============================================================
+   6. Mobile Slide-out Drawer
+   ============================================================== */
+.places-mobile-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 100000;
+  display: flex;
+  justify-content: flex-start;
+  animation: places-fade-in 0.2s ease;
+}
+
+@keyframes places-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.places-mobile-drawer {
+  width: 85%;
+  max-width: 320px;
+  height: 100%;
+  background-color: var(--bg-surface);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  animation: places-slide-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  z-index: 100001;
+}
+
+@keyframes places-slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.places-mobile-drawer-header {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--bg-surface);
+}
+
+.places-mobile-drawer-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.places-mobile-drawer-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.places-mobile-drawer-body {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+
+.places-mobile-drawer-footer {
+  padding: 14px 16px 24px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--bg-surface);
+}
+
+.places-mobile-drawer-clear {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.places-mobile-drawer-apply {
+  flex: 2;
+  padding: 9px 12px;
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--brand-green);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+/* ==============================================================
+   7. Responsive Breakpoints
+   ============================================================== */
+@media (max-width: 900px) {
+  .places-stage-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .places-ranked-panel {
+    height: auto;
+    max-height: 380px;
+  }
+}
+
 @media (max-width: 768px) {
   .places-page-layout {
-    padding: 12px;
     flex-direction: column;
+    padding: 12px 12px 80px;
     gap: 12px;
   }
 
-  /* Hide Desktop Sidebar on Phone */
-  .places-sidebar {
+  /* Hide left sidebar on mobile (opened via mobile drawer) */
+  .places-filter-sidebar {
     display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    max-height: none;
-    z-index: 10000;
-    border-radius: 0;
-    border: none;
   }
 
-  .places-sidebar.mobile-open {
-    display: flex;
-  }
-
-  .places-mobile-close-btn {
-    display: block;
-  }
-
-  /* Show mobile toolbar */
   .places-mobile-toolbar {
     display: flex;
   }
 
-  /* Stack KPIs, controls, globe, then list on phone */
-  .places-stage-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
   .places-globe-panel {
     height: 52vh;
-    min-height: 300px;
+    min-height: 320px;
   }
 
   .places-ranked-panel {
     height: auto;
     max-height: 360px;
-  }
-
-  .places-desktop-clear-btn {
-    display: none;
-  }
-
-  .places-kpis-strip {
-    padding: 6px 10px;
-  }
-
-  .places-kpi-val {
-    font-size: 1rem;
-  }
-
-  .places-kpi-lbl {
-    font-size: 0.65rem;
   }
 }
