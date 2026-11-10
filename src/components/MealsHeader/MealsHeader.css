@@ -127,7 +127,8 @@
     display: none;
   }
 
-  .meals-app-layout.chronicle-active .meals-header {
+  .meals-app-layout.chronicle-active .meals-header,
+  .meals-app-layout.journey-active .meals-header {
     display: none !important;
   }
 }

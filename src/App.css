@@ -247,7 +247,13 @@
   }
 
   .meals-app-layout.journey-active .meals-main-content {
-    /* Accounting for mobile header (~52px) and fixed bottom nav (~56px) */
-    height: calc(100dvh - 52px - 56px);
+    height: calc(100dvh - 64px);
+  }
+}
+
+@media (max-width: 768px) {
+  .meals-app-layout.journey-active .meals-main-content {
+    /* Below 768px: MEALS header is hidden on Journeys; film fills space down to bottom nav */
+    height: calc(100dvh - 56px - env(safe-area-inset-bottom, 0px));
   }
 }
