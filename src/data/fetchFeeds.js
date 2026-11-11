@@ -6,7 +6,7 @@ const memoryCache = new Map();
 
 // Cache validity: 30 minutes in milliseconds
 const CACHE_TTL_MS = 30 * 60 * 1000;
-const CACHE_PREFIX = 'shmv3_csv_v5_';
+const CACHE_PREFIX = 'shmv3_csv_v6_';
 
 // Automatically purge legacy unversioned or stale cache entries on load
 if (typeof window !== 'undefined' && window.sessionStorage) {

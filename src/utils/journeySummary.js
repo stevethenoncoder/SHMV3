@@ -68,7 +68,12 @@ export function buildFilmSummary(mealsData, personId = null) {
     // Resolve person from numeric ID or slug
     if (typeof personId === 'number' || !isNaN(Number(personId))) {
       targetPersonId = Number(personId);
-      const p = mealsData.publicPeopleById?.get(targetPersonId);
+      let p = mealsData.publicPeopleById?.get(targetPersonId);
+      if (!p && mealsData.peopleByHistoricalId?.has(targetPersonId)) {
+        const histPerson = mealsData.peopleByHistoricalId.get(targetPersonId);
+        targetPersonId = histPerson.canonicalId;
+        p = mealsData.publicPeopleById?.get(targetPersonId);
+      }
       if (p) {
         fullName = p.publicName.trim();
         shortName = fullName.split(/\s+/)[0];
@@ -89,11 +94,15 @@ export function buildFilmSummary(mealsData, personId = null) {
       // Fallback check against rawPeoplePublic if not in publicPeopleById
       if (targetPersonId === null && Array.isArray(mealsData.rawPeoplePublic)) {
         for (const row of mealsData.rawPeoplePublic) {
-          const name = (row.Public_Name || '').trim();
-          if (name && slugifyPerson(name) === targetSlug) {
-            targetPersonId = parseInt(row.People_ID, 10);
-            fullName = name;
-            shortName = name.split(/\s+/)[0];
+          const canonicalName = (
+            row.People_Name_Current ||
+            row.Public_Name ||
+            ''
+          ).trim();
+          if (canonicalName && slugifyPerson(canonicalName) === targetSlug) {
+            targetPersonId = parseInt(row.People_ID_Current || row.People_ID, 10);
+            fullName = canonicalName;
+            shortName = canonicalName.split(/\s+/)[0];
             break;
           }
         }
@@ -462,9 +471,9 @@ export function buildFilmSummary(mealsData, personId = null) {
     let pName = pObj?.publicName?.trim();
     if (!pName && Array.isArray(mealsData.rawPeoplePublic)) {
       const match = mealsData.rawPeoplePublic.find(
-        (r) => parseInt(r.People_ID, 10) === pId
+        (r) => parseInt(r.People_ID_Current || r.People_ID, 10) === pId
       );
-      pName = (match?.Public_Name || '').trim();
+      pName = (match?.People_Name_Current || match?.Public_Name || '').trim();
     }
     if (
       pName &&

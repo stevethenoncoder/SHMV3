@@ -2,24 +2,24 @@ import { fetchCsvFeed, clearCsvCache } from '../data/fetchFeeds.js';
 import { RATING_RANK } from '../utils/mealsFilter.js';
 
 const BASE_URL =
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjGewh82LkHf_8dme1GhC8IwHwpUQjmjE7J54zxuNCJXn4PkF7HjSVUFWENFUAUlK9iZ_zIxyDSiN7/pub?output=csv&gid=';
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vTS3lw0h3plfNDcsjYYRC6HZIjLWJ-IgIeYL51dkx4Rk3IpXBIVskYADGNZMR_Eby8D0Wpj0Qm_GM0W/pub?output=csv&gid=';
 
 export const MEALS_FEED_URLS = {
-  Meals: `${BASE_URL}0`,
-  Rest: `${BASE_URL}1054725272`,
-  City: `${BASE_URL}132054024`,
-  Country: `${BASE_URL}405635437`,
-  Type: `${BASE_URL}2049296393`,
-  Meals_Main: `${BASE_URL}97094625`,
-  Food: `${BASE_URL}69122046`,
-  Ingredient: `${BASE_URL}1928822565`,
-  FoodType: `${BASE_URL}238808052`,
-  FoodCat: `${BASE_URL}2138611121`,
-  Meals_Photo: `${BASE_URL}914264621`,
-  Meals_People: `${BASE_URL}870936870`,
-  People_Public: `${BASE_URL}1228085967`,
-  RatingMeal: `${BASE_URL}1589301622`,
-  London: `${BASE_URL}898057641`,
+  Meals: `${BASE_URL}1717286751`,
+  Rest: `${BASE_URL}1429846013`,
+  City: `${BASE_URL}1644875961`,
+  Country: `${BASE_URL}598051381`,
+  Type: `${BASE_URL}1134442791`,
+  Meals_Main: `${BASE_URL}2034165449`,
+  Food: `${BASE_URL}155337229`,
+  Ingredient: `${BASE_URL}1205127897`,
+  FoodType: `${BASE_URL}419988969`,
+  FoodCat: `${BASE_URL}155337229`,
+  Meals_Photo: `${BASE_URL}444350524`,
+  Meals_People: `${BASE_URL}420334047`,
+  People_Public: `${BASE_URL}376434146`,
+  RatingMeal: `${BASE_URL}621945659`,
+  London: `${BASE_URL}2018081609`,
 };
 
 const INVALID_GNAME_LITERALS = new Set(['no results found', 'not looked up']);
@@ -101,6 +101,46 @@ export async function loadMealsData(options = {}) {
     rawLondon,
   ] = await fetchFeedsWithConcurrency(feedUrlList, 4, bypassCache);
 
+  return transformMealsData({
+    rawMeals,
+    rawRest,
+    rawCity,
+    rawCountry,
+    rawType,
+    rawMain,
+    rawFood,
+    rawIngredient,
+    rawFoodType,
+    rawFoodCat,
+    rawPhoto,
+    rawMealsPeople,
+    rawPeoplePublic,
+    rawRatingMeal,
+    rawLondon,
+  });
+}
+
+/**
+ * Pure transformation and enrichment pipeline.
+ * Converts raw CSV rows into normalized, type-safe data entities.
+ */
+export function transformMealsData({
+  rawMeals = [],
+  rawRest = [],
+  rawCity = [],
+  rawCountry = [],
+  rawType = [],
+  rawMain = [],
+  rawFood = [],
+  rawIngredient = [],
+  rawFoodType = [],
+  rawFoodCat = [],
+  rawPhoto = [],
+  rawMealsPeople = [],
+  rawPeoplePublic = [],
+  rawRatingMeal = [],
+  rawLondon = [],
+} = {}) {
   // 1. Countries Lookup
   const countriesById = new Map();
   for (const row of rawCountry) {
@@ -324,33 +364,79 @@ export async function loadMealsData(options = {}) {
     photosByMealId.get(mealId).push(photo);
   }
 
-  // 10. Public People Lookup (Strict Privacy Enforcement)
-  // Only records where Public? === 'Y', Public_Name is non-blank and not "Hidden name"
+  // 10. Public People Lookup & Canonical Identity Normalisation
+  // Data model columns:
+  // - People_ID (historical)
+  // - Public? (Y / N)
+  // - Public_Name
+  // - People_ID_Current (canonical ID)
+  // - People_Name_Current (canonical display name)
+  const peopleByHistoricalId = new Map();
   const publicPeopleById = new Map();
+
   for (const row of rawPeoplePublic) {
-    const id = parseInt(row.People_ID, 10);
+    const historicalId = parseInt(row.People_ID || row.people_id, 10);
     // Row filtering: ignore trailing empty template rows (People_ID > 1009)
-    if (isNaN(id) || id > 1009) continue;
+    if (isNaN(historicalId) || historicalId > 1009) continue;
 
-    const hasPublicCol = 'Public?' in row || 'public?' in row || 'Public' in row;
+    const canonicalIdRaw = row.People_ID_Current ?? row.people_id_current;
+    const canonicalIdParsed =
+      canonicalIdRaw != null && String(canonicalIdRaw).trim() !== ''
+        ? parseInt(canonicalIdRaw, 10)
+        : historicalId;
+    const canonicalId = isNaN(canonicalIdParsed) ? historicalId : canonicalIdParsed;
+
+    const canonicalNameRaw = (
+      row.People_Name_Current ||
+      row.people_name_current ||
+      row.Public_Name ||
+      row.public_name ||
+      ''
+    ).trim();
+
+    const hasPublicCol = 'Public?' in row || 'public?' in row || 'Public' in row || 'public' in row;
     const isPublic = hasPublicCol
-      ? (row['Public?'] || row['public?'] || row['Public'] || '').trim().toUpperCase() === 'Y'
-      : true;
-    const publicName = (row.Public_Name || row.public_name || '').trim();
+      ? (row['Public?'] || row['public?'] || row['Public'] || row['public'] || '').trim().toUpperCase() === 'Y'
+      : Boolean(canonicalNameRaw && canonicalNameRaw.toLowerCase() !== 'hidden name');
 
-    // Must never fall back to raw People table; must never expose "Hidden name"
-    if (isPublic && publicName && publicName.toLowerCase() !== 'hidden name') {
-      publicPeopleById.set(id, {
-        peopleId: id,
-        publicName,
-      });
+    const isHidden = !isPublic || !canonicalNameRaw || canonicalNameRaw.toLowerCase() === 'hidden name';
+
+    const personRecord = {
+      historicalId,
+      canonicalId,
+      canonicalName: isHidden ? 'Hidden name' : canonicalNameRaw,
+      isPublic: !isHidden,
+    };
+    peopleByHistoricalId.set(historicalId, personRecord);
+
+    // Register canonical identity in publicPeopleById if public
+    if (!isHidden) {
+      if (publicPeopleById.has(canonicalId)) {
+        const existing = publicPeopleById.get(canonicalId);
+        if (!existing.historicalIds.includes(historicalId)) {
+          existing.historicalIds.push(historicalId);
+        }
+        if (canonicalNameRaw && (!existing.publicName || existing.publicName === 'Hidden name')) {
+          existing.publicName = canonicalNameRaw;
+          existing.name = canonicalNameRaw;
+        }
+      } else {
+        publicPeopleById.set(canonicalId, {
+          peopleId: canonicalId,
+          publicName: canonicalNameRaw,
+          name: canonicalNameRaw,
+          public: true,
+          historicalIds: [historicalId],
+        });
+      }
     }
   }
 
-  // 11. Meals_People Junction (Deduplicating runtime (Meal_ID, People_ID) pairs)
+  // 11. Meals_People Junction (Deduplicating runtime (Meal_ID, People_ID) pairs & resolving to canonical identity)
   const allPeopleIdsByMealId = new Map();
   const publicCompanionsByMealId = new Map();
-  const seenMealPeoplePairs = new Set();
+  const seenMealHistoricalPairs = new Set();
+  const mealCanonicalPeopleSeen = new Map();
   let totalMealsPeopleLoaded = 0;
   let duplicateRelationshipsRemoved = 0;
   let totalPublicRelationships = 0;
@@ -358,31 +444,66 @@ export async function loadMealsData(options = {}) {
   for (const row of rawMealsPeople) {
     if (!row.Meal_ID || !row.People_ID) continue;
     const mealId = parseInt(row.Meal_ID, 10);
-    const peopleId = parseInt(row.People_ID, 10);
-    if (isNaN(mealId) || isNaN(peopleId)) continue;
+    const historicalPeopleId = parseInt(row.People_ID, 10);
+    if (isNaN(mealId) || isNaN(historicalPeopleId)) continue;
 
     totalMealsPeopleLoaded++;
-    const pairKey = `${mealId}_${peopleId}`;
-    if (seenMealPeoplePairs.has(pairKey)) {
+    const pairKey = `${mealId}_${historicalPeopleId}`;
+    if (seenMealHistoricalPairs.has(pairKey)) {
       duplicateRelationshipsRemoved++;
       continue;
     }
-    seenMealPeoplePairs.add(pairKey);
+    seenMealHistoricalPairs.add(pairKey);
 
+    // Resolve person via historical ID
+    const person = peopleByHistoricalId.get(historicalPeopleId) || {
+      historicalId: historicalPeopleId,
+      canonicalId: historicalPeopleId,
+      canonicalName: 'Hidden name',
+      isPublic: false,
+    };
+
+    const canonicalId = person.canonicalId;
+
+    if (!mealCanonicalPeopleSeen.has(mealId)) {
+      mealCanonicalPeopleSeen.set(mealId, new Set());
+    }
+    const seenCanonicalOnMeal = mealCanonicalPeopleSeen.get(mealId);
+
+    // Deduplication check: if this canonical person already exists on this meal
+    if (seenCanonicalOnMeal.has(canonicalId)) {
+      duplicateRelationshipsRemoved++;
+      // If public companion was already recorded, append this historical ID
+      if (person.isPublic && publicCompanionsByMealId.has(mealId)) {
+        const comps = publicCompanionsByMealId.get(mealId);
+        const comp = comps.find((c) => c.peopleId === canonicalId);
+        if (comp && !comp.historicalIds.includes(historicalPeopleId)) {
+          comp.historicalIds.push(historicalPeopleId);
+        }
+      }
+      continue;
+    }
+    seenCanonicalOnMeal.add(canonicalId);
+
+    // Add to allPeopleIds (for internal aggregate counts)
     if (!allPeopleIdsByMealId.has(mealId)) {
       allPeopleIdsByMealId.set(mealId, []);
     }
-    allPeopleIdsByMealId.get(mealId).push(peopleId);
+    allPeopleIdsByMealId.get(mealId).push(canonicalId);
 
-    const publicPerson = publicPeopleById.get(peopleId);
-    if (publicPerson) {
+    // If person is public, add to public companions
+    if (person.isPublic && person.canonicalName.toLowerCase() !== 'hidden name') {
       totalPublicRelationships++;
       if (!publicCompanionsByMealId.has(mealId)) {
         publicCompanionsByMealId.set(mealId, []);
       }
       publicCompanionsByMealId.get(mealId).push({
-        peopleId: publicPerson.peopleId,
-        publicName: publicPerson.publicName,
+        peopleId: canonicalId,
+        publicName: person.canonicalName,
+        name: person.canonicalName,
+        public: true,
+        historicalPeopleId,
+        historicalIds: [historicalPeopleId],
       });
     }
   }
@@ -687,6 +808,7 @@ export async function loadMealsData(options = {}) {
     countriesById,
     londonAreasById,
     publicPeopleById,
+    peopleByHistoricalId,
     rawPeoplePublic,
     ratingMealById,
     ratingMealByText,
