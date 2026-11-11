@@ -712,6 +712,94 @@
     flex-direction: column;
     padding: 12px 12px 80px;
     gap: 12px;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .places-main-area {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Compact KPI strip to fit comfortably on 360px-412px phones */
+  .places-kpis-strip {
+    padding: 8px 6px;
+    gap: 4px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .places-kpi-item {
+    padding: 2px 4px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .places-kpi-val {
+    font-size: 1.05rem;
+  }
+
+  .places-kpi-lbl {
+    font-size: 0.62rem;
+    letter-spacing: 0.02em;
+  }
+
+  .places-kpi-divider {
+    height: 22px;
+  }
+
+  /* Slim Controls Row wrap cleanly on phones */
+  .places-control-row {
+    gap: 10px;
+    width: 100%;
+  }
+
+  .places-seg-group {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .places-seg-group::-webkit-scrollbar {
+    display: none;
+  }
+
+  .places-seg-btn {
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .places-topn-control {
+    font-size: 0.78rem;
+  }
+
+  .places-topn-control input[type='range'] {
+    width: 100px;
+  }
+
+  .places-stage-grid {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* 3D Globe Viewport */
+  .places-globe-panel {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    height: 52vh;
+    min-height: 320px;
+  }
+
+  .places-globe-hint {
+    right: 12px;
+    white-space: normal;
+    font-size: 0.68rem;
+    line-height: 1.25;
   }
 
   /* Hide left sidebar on mobile (opened via mobile drawer) */
@@ -723,13 +811,26 @@
     display: flex;
   }
 
-  .places-globe-panel {
-    height: 52vh;
-    min-height: 320px;
-  }
-
   .places-ranked-panel {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     height: auto;
     max-height: 360px;
+  }
+}
+
+@media (max-width: 380px) {
+  .places-kpi-val {
+    font-size: 0.95rem;
+  }
+
+  .places-kpi-lbl {
+    font-size: 0.58rem;
+  }
+
+  .places-seg-btn {
+    padding: 4px 8px;
+    font-size: 0.74rem;
   }
 }
