@@ -20,4 +20,5 @@ detailed_inspect.js
 capture_screenshots.js
 test_mobile_sort.js
 *.png
+!src/assets/*.png
 scratch/

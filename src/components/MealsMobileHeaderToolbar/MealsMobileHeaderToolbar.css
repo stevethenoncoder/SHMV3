@@ -34,9 +34,23 @@
 .mobile-brand {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 8px;
   min-width: 0;
   flex: 1;
+}
+
+.mobile-brand-logo-icon {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.mobile-brand-logo-text {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+  display: block;
 }
 
 .mobile-brand .brand-logo-badge {

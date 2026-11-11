@@ -1,5 +1,6 @@
 import React from 'react';
-import { UtensilsCrossed } from 'lucide-react';
+import shmLogoIcon from '../../assets/shm-logo-icon.png';
+import shmLogoText from '../../assets/shm-logo-text.png';
 import './MealsHeader.css';
 
 export default function MealsHeader({
@@ -17,15 +18,19 @@ export default function MealsHeader({
             type="button"
             className="brand-link"
             onClick={() => onSelectNav && onSelectNav('overview')}
-            title="Go to Overview"
+            title="Stevie Holland Meals - Overview"
+            aria-label="Stevie Holland Meals"
           >
-            <div className="brand-logo-badge">
-              <UtensilsCrossed size={18} className="brand-icon" />
-            </div>
-            <div className="brand-text-col">
-              <span className="brand-title">MEALS</span>
-              <span className="brand-subtitle">1994 – 2026 Archive</span>
-            </div>
+            <img
+              src={shmLogoIcon}
+              alt="SHM Logo"
+              className="brand-logo-icon"
+            />
+            <img
+              src={shmLogoText}
+              alt="Stevie Holland Meals"
+              className="brand-logo-text"
+            />
           </button>
         </div>
 

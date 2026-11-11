@@ -13,6 +13,8 @@ import {
   X,
   UtensilsCrossed,
 } from 'lucide-react';
+import shmLogoIcon from '../../assets/shm-logo-icon.png';
+import shmLogoText from '../../assets/shm-logo-text.png';
 import './MealsMobileHeaderToolbar.css';
 
 export default function MealsMobileHeaderToolbar({
@@ -86,10 +88,16 @@ export default function MealsMobileHeaderToolbar({
       {/* 1. Top Row: Brand & Count Pill */}
       <div className="mobile-top-bar">
         <div className="mobile-brand">
-          <div className="brand-logo-badge">
-            <UtensilsCrossed size={16} />
-          </div>
-          <h1 className="mobile-app-title">Meals Chronicle</h1>
+          <img
+            src={shmLogoIcon}
+            alt="SHM Logo"
+            className="mobile-brand-logo-icon"
+          />
+          <img
+            src={shmLogoText}
+            alt="Stevie Holland Meals"
+            className="mobile-brand-logo-text"
+          />
         </div>
 
         <div className="mobile-top-right">

@@ -26,12 +26,26 @@
 .brand-link {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 2px 4px;
   text-align: left;
+}
+
+.brand-logo-icon {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.brand-logo-text {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+  display: block;
 }
 
 .brand-logo-badge {
