@@ -21,4 +21,6 @@ capture_screenshots.js
 test_mobile_sort.js
 *.png
 !src/assets/*.png
+!public/*.png
+dev-dist/
 scratch/
