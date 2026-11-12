@@ -30,6 +30,7 @@ import FoodPage from './components/FoodPage/FoodPage.jsx';
 
 const MyJourneyPage = React.lazy(() => import('./components/MyJourneyPage/MyJourneyPage.jsx'));
 const PlacesPage = React.lazy(() => import('./components/PlacesPage/PlacesPage.jsx'));
+const PeoplePage = React.lazy(() => import('./components/PeoplePage/PeoplePage.jsx'));
 
 import Pagination from './components/Pagination/Pagination.jsx';
 import {
@@ -65,10 +66,12 @@ export default function App() {
   const [publicPeopleById, setPublicPeopleById] = useState(new Map());
   const [mealsDataPayload, setMealsDataPayload] = useState(null);
 
-  // Section Navigation: 'overview' | 'chronicle' | 'restaurants' | 'relationships' | 'sentiment' | 'stats' | 'journey'
+  // Section Navigation: 'overview' | 'chronicle' | 'restaurants' | 'people' | 'relationships' | 'sentiment' | 'stats' | 'journey'
   const [activeSection, setActiveSection] = useState(() => {
     if (typeof window === 'undefined') return 'overview';
     const path = window.location.pathname;
+    const params = new URLSearchParams(window.location.search);
+    if (path.startsWith('/people') || params.get('section') === 'people') return 'people';
     if (path.startsWith('/journey') || path.startsWith('/my-journey')) return 'journey';
     if (path.startsWith('/places')) return 'places';
     if (path.startsWith('/overview')) return 'overview';
@@ -78,8 +81,7 @@ export default function App() {
     if (path.startsWith('/relationships')) return 'relationships';
     if (path.startsWith('/restaurants')) return 'restaurants';
     if (path.startsWith('/chronicle')) return 'chronicle';
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('section') === 'journey' || params.get('person')) return 'journey';
+    if (params.get('section') === 'journey' || (params.get('person') && params.get('section') !== 'people')) return 'journey';
     if (params.get('section') === 'places') return 'places';
     if (params.get('section') === 'overview') return 'overview';
     if (params.get('section') === 'sentiment') return 'sentiment';
@@ -184,6 +186,14 @@ export default function App() {
     const handlePopState = () => {
       const path = window.location.pathname;
       const params = new URLSearchParams(window.location.search);
+
+      // 0a. Match /people browse
+      if (path.startsWith('/people') || params.get('section') === 'people') {
+        setActiveSection('people');
+        setActiveRestaurantId(null);
+        setActiveMealId(null);
+        return;
+      }
 
       // 0. Match /journey or /my-journey browse
       if (
@@ -485,6 +495,7 @@ export default function App() {
     let targetUrl = '/';
     if (section === 'chronicle') targetUrl = '/chronicle';
     else if (section === 'restaurants') targetUrl = '/restaurants';
+    else if (section === 'people') targetUrl = '/people';
     else if (section === 'relationships') targetUrl = '/relationships';
     else if (section === 'sentiment') targetUrl = '/sentiment';
     else if (section === 'food') targetUrl = '/food';
@@ -497,7 +508,9 @@ export default function App() {
 
   const handleApplyChronicleFilter = (filterKey, filterValue, metaName) => {
     const origin =
-      activeSection === 'relationships'
+      activeSection === 'people'
+        ? { section: 'people', label: 'Return to People' }
+        : activeSection === 'relationships'
         ? { section: 'relationships', label: 'Return to Relationships' }
         : activeSection === 'food'
         ? { section: 'food', label: 'Return to Food' }
@@ -724,7 +737,7 @@ export default function App() {
 
   return (
     <div
-      className={`meals-app-layout ${activeSection === 'chronicle' ? 'chronicle-active' : ''} ${activeSection === 'journey' ? 'journey-active' : ''} ${activeSection === 'places' ? 'places-active' : ''}`}
+      className={`meals-app-layout ${activeSection === 'chronicle' ? 'chronicle-active' : ''} ${activeSection === 'journey' ? 'journey-active' : ''} ${activeSection === 'places' ? 'places-active' : ''} ${activeSection === 'people' ? 'people-active' : ''}`}
     >
       {/* Primary Header */}
       <MealsHeader
@@ -1077,6 +1090,32 @@ export default function App() {
               }}
             />
           </div>
+        ) : activeSection === 'people' ? (
+          /* People Social Dining History View */
+          <React.Suspense
+            fallback={
+              <div className="meals-loading-center">
+                <Loader2 className="spinner-icon" size={36} />
+                <p>Loading People...</p>
+              </div>
+            }
+          >
+            <PeoplePage
+              meals={meals}
+              publicPeopleById={publicPeopleById}
+              rawPeoplePublic={mealsDataPayload?.rawPeoplePublic || []}
+              mealsData={mealsDataPayload}
+              onNavigateToJourney={(slug) => {
+                setActiveSection('journey');
+                window.history.pushState(null, '', `/?person=${slug}`);
+              }}
+              onNavigateToChronicle={(name) => {
+                handleApplyChronicleFilter('people', [name]);
+              }}
+              onSelectMeal={handleOpenMeal}
+              onSelectRestaurant={handleOpenRestaurant}
+            />
+          </React.Suspense>
         ) : activeSection === 'relationships' ? (
           /* 5. Dining Relationships Flow View */
           <RelationshipsPage

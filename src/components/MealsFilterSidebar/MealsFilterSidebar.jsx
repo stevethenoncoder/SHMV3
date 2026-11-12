@@ -75,12 +75,16 @@ export default function MealsFilterSidebar({
   // Helper to filter and sort list facets
   const getFacetItems = (countsMap = {}, searchTerm = '', facetKey = '') => {
     const selected = filterState[facetKey] || [];
-    const entries = Object.entries(countsMap)
+    const allMatching = Object.entries(countsMap)
       .filter(([name, count]) => {
         if (!name || name === 'null' || name === 'undefined') return false;
-        const matchesQuery = name.toLowerCase().includes(searchTerm.toLowerCase());
-        const hasCount = count > 0 || selected.includes(name);
-        return matchesQuery && hasCount;
+        return count > 0 || selected.includes(name);
+      });
+    const totalCount = allMatching.length;
+
+    const entries = allMatching
+      .filter(([name]) => {
+        return name.toLowerCase().includes(searchTerm.toLowerCase());
       })
       .sort((a, b) => {
         // Selected items first, then by count desc, then alphabetically
@@ -98,6 +102,7 @@ export default function MealsFilterSidebar({
       entries,
       visibleEntries,
       hasMore: entries.length > 6,
+      totalCount,
     };
   };
 
@@ -204,7 +209,7 @@ export default function MealsFilterSidebar({
 
         {openSections.countries && (
           <div className="facet-content-block">
-            {countryFacet.entries.length > 5 && (
+            {(countryFacet.totalCount > 5 || countrySearch.trim() !== '') && (
               <div className="facet-search-box">
                 <Search size={13} className="facet-search-icon" />
                 <input
@@ -278,7 +283,7 @@ export default function MealsFilterSidebar({
 
         {openSections.cities && (
           <div className="facet-content-block">
-            {cityFacet.entries.length > 5 && (
+            {(cityFacet.totalCount > 5 || citySearch.trim() !== '') && (
               <div className="facet-search-box">
                 <Search size={13} className="facet-search-icon" />
                 <input
@@ -356,7 +361,7 @@ export default function MealsFilterSidebar({
 
         {openSections.people && (
           <div className="facet-content-block">
-            {peopleFacet.entries.length > 5 && (
+            {(peopleFacet.totalCount > 5 || peopleSearch.trim() !== '') && (
               <div className="facet-search-box">
                 <Search size={13} className="facet-search-icon" />
                 <input
@@ -430,7 +435,7 @@ export default function MealsFilterSidebar({
 
         {openSections.cuisines && (
           <div className="facet-content-block">
-            {cuisineFacet.entries.length > 5 && (
+            {(cuisineFacet.totalCount > 5 || cuisineSearch.trim() !== '') && (
               <div className="facet-search-box">
                 <Search size={13} className="facet-search-icon" />
                 <input
@@ -504,7 +509,7 @@ export default function MealsFilterSidebar({
 
         {openSections.foodTypes && (
           <div className="facet-content-block">
-            {foodTypeFacet.entries.length > 5 && (
+            {(foodTypeFacet.totalCount > 5 || foodTypeSearch.trim() !== '') && (
               <div className="facet-search-box">
                 <Search size={13} className="facet-search-icon" />
                 <input
@@ -671,7 +676,7 @@ export default function MealsFilterSidebar({
 
         {openSections.ingredients && (
           <div className="facet-content-block">
-            {ingredientFacet.entries.length > 5 && (
+            {(ingredientFacet.totalCount > 5 || ingredientSearch.trim() !== '') && (
               <div className="facet-search-box">
                 <Search size={13} className="facet-search-icon" />
                 <input

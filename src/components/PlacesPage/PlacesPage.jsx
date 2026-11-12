@@ -175,22 +175,23 @@ export default function PlacesPage() {
 
   // Country facet items
   const countryFacet = useMemo(() => {
-    if (!mealsData?.countriesById) return { entries: [], visibleEntries: [], hasMore: false };
+    if (!mealsData?.countriesById) return { entries: [], visibleEntries: [], hasMore: false, totalCount: 0 };
     const selected = filters.country ? [String(filters.country)] : [];
     const countsMap = facetCounts.countryCounts || {};
     const q = countrySearch.trim().toLowerCase();
 
-    const entries = Array.from(mealsData.countriesById.entries())
+    const allCountryItems = Array.from(mealsData.countriesById.entries())
       .map(([id, country]) => ({
         id: String(id),
         name: country.name || `Country ${id}`,
         count: countsMap[id] || 0,
       }))
-      .filter((c) => {
-        const matches = c.name.toLowerCase().includes(q);
-        const hasCount = c.count > 0 || selected.includes(c.id);
-        return matches && hasCount;
-      })
+      .filter((c) => c.count > 0 || selected.includes(c.id));
+
+    const totalCount = allCountryItems.length;
+
+    const entries = allCountryItems
+      .filter((c) => c.name.toLowerCase().includes(q))
       .sort((a, b) => {
         const aSel = selected.includes(a.id);
         const bSel = selected.includes(b.id);
@@ -205,18 +206,19 @@ export default function PlacesPage() {
       entries,
       visibleEntries: isExpanded ? entries : entries.slice(0, 6),
       hasMore: entries.length > 6,
+      totalCount,
     };
   }, [mealsData, facetCounts.countryCounts, countrySearch, filters.country, expandedFacets.country]);
 
   // City facet items (scoped to country if selected)
   const cityFacet = useMemo(() => {
-    if (!mealsData?.citiesById) return { entries: [], visibleEntries: [], hasMore: false };
+    if (!mealsData?.citiesById) return { entries: [], visibleEntries: [], hasMore: false, totalCount: 0 };
     const selected = filters.city ? [String(filters.city)] : [];
     const countsMap = facetCounts.cityCounts || {};
     const q = citySearch.trim().toLowerCase();
     const countryFilter = filters.country ? parseInt(filters.country, 10) : null;
 
-    const entries = Array.from(mealsData.citiesById.entries())
+    const allCityItems = Array.from(mealsData.citiesById.entries())
       .filter(([id, city]) => {
         if (countryFilter != null) {
           const cId = city.countryId || city.country?.id;
@@ -236,12 +238,16 @@ export default function PlacesPage() {
           count: countsMap[id] || 0,
         };
       })
+      .filter((c) => c.count > 0 || selected.includes(c.id));
+
+    const totalCount = allCityItems.length;
+
+    const entries = allCityItems
       .filter((c) => {
-        const matches =
+        return (
           c.name.toLowerCase().includes(q) ||
-          (c.countryName && c.countryName.toLowerCase().includes(q));
-        const hasCount = c.count > 0 || selected.includes(c.id);
-        return matches && hasCount;
+          (c.countryName && c.countryName.toLowerCase().includes(q))
+        );
       })
       .sort((a, b) => {
         const aSel = selected.includes(a.id);
@@ -257,6 +263,7 @@ export default function PlacesPage() {
       entries,
       visibleEntries: isExpanded ? entries : entries.slice(0, 6),
       hasMore: entries.length > 6,
+      totalCount,
     };
   }, [mealsData, facetCounts.cityCounts, citySearch, filters.city, filters.country, expandedFacets.city]);
 
@@ -275,16 +282,17 @@ export default function PlacesPage() {
       }
     }
 
-    const entries = Array.from(allTypes)
+    const allTypeItems = Array.from(allTypes)
       .map((name) => ({
         name,
         count: countsMap[name] || 0,
       }))
-      .filter((t) => {
-        const matches = t.name.toLowerCase().includes(q);
-        const hasCount = t.count > 0 || selected.includes(t.name);
-        return matches && hasCount;
-      })
+      .filter((t) => t.count > 0 || selected.includes(t.name));
+
+    const totalCount = allTypeItems.length;
+
+    const entries = allTypeItems
+      .filter((t) => t.name.toLowerCase().includes(q))
       .sort((a, b) => {
         const aSel = selected.includes(a.name);
         const bSel = selected.includes(b.name);
@@ -299,17 +307,18 @@ export default function PlacesPage() {
       entries,
       visibleEntries: isExpanded ? entries : entries.slice(0, 6),
       hasMore: entries.length > 6,
+      totalCount,
     };
   }, [mealsData, facetCounts.typeCounts, typeSearch, filters.types, expandedFacets.types]);
 
   // People facet items
   const peopleFacet = useMemo(() => {
-    if (!mealsData?.publicPeopleById) return { entries: [], visibleEntries: [], hasMore: false };
+    if (!mealsData?.publicPeopleById) return { entries: [], visibleEntries: [], hasMore: false, totalCount: 0 };
     const countsMap = facetCounts.peopleCounts || {};
     const selected = (filters.people || []).map((p) => String(p));
     const q = peopleSearch.trim().toLowerCase();
 
-    const entries = Array.from(mealsData.publicPeopleById.entries())
+    const allPeopleItems = Array.from(mealsData.publicPeopleById.entries())
       .filter(([id, person]) => {
         const name = (person.publicName || '').trim();
         if (!name || name === 'Hidden name' || name.includes('Just Me') || /\d{3}/.test(name)) {
@@ -322,11 +331,12 @@ export default function PlacesPage() {
         name: person.publicName,
         count: countsMap[id] || 0,
       }))
-      .filter((p) => {
-        const matches = p.name.toLowerCase().includes(q);
-        const hasCount = p.count > 0 || selected.includes(p.id);
-        return matches && hasCount;
-      })
+      .filter((p) => p.count > 0 || selected.includes(p.id));
+
+    const totalCount = allPeopleItems.length;
+
+    const entries = allPeopleItems
+      .filter((p) => p.name.toLowerCase().includes(q))
       .sort((a, b) => {
         const aSel = selected.includes(a.id);
         const bSel = selected.includes(b.id);
@@ -341,6 +351,7 @@ export default function PlacesPage() {
       entries,
       visibleEntries: isExpanded ? entries : entries.slice(0, 6),
       hasMore: entries.length > 6,
+      totalCount,
     };
   }, [mealsData, facetCounts.peopleCounts, peopleSearch, filters.people, expandedFacets.people]);
 
@@ -380,52 +391,75 @@ export default function PlacesPage() {
   const globeContainerRef = useRef(null);
   const globeInstanceRef = useRef(null);
   const isUpdatingRef = useRef(false);
+  const handleDrillRef = useRef(null);
 
   // Drill down handler (when a tower, label, or list row is clicked)
   const handleDrill = useCallback(
     (point) => {
       if (!point) return;
 
-      if (mode === 'country') {
+      // Determine target level:
+      // Prefer explicit point.id prefix ('country:', 'city:', 'area:', 'rest:')
+      const pointId = String(point.id || '');
+      let targetLevel = mode;
+      if (pointId.startsWith('country:')) {
+        targetLevel = 'country';
+      } else if (pointId.startsWith('city:')) {
+        targetLevel = 'city';
+      } else if (pointId.startsWith('area:')) {
+        targetLevel = 'area';
+      } else if (pointId.startsWith('rest:')) {
+        targetLevel = 'rest';
+      }
+
+      if (targetLevel === 'country') {
+        const countryKey = String(point.key != null ? point.key : pointId.replace('country:', ''));
         setFilters((prev) => ({
           ...prev,
-          country: String(point.key),
+          country: countryKey,
           city: '',
           area: '',
         }));
         setSelectedRestId(null);
         setMode('city');
         setOpenSections((prev) => ({ ...prev, city: true }));
-      } else if (mode === 'city') {
-        const isLondon = point.key === londonCityId;
-        const cityObj = mealsData?.citiesById?.get(point.key);
+      } else if (targetLevel === 'city') {
+        const rawCityKey = point.key != null ? point.key : pointId.replace('city:', '');
+        const cityIdNum = parseInt(rawCityKey, 10);
+        const isLondon = !isNaN(cityIdNum) && londonCityId != null && cityIdNum === parseInt(londonCityId, 10);
+        const cityObj = mealsData?.citiesById?.get(cityIdNum);
         const countryId = cityObj?.countryId || cityObj?.country?.id;
 
         setFilters((prev) => ({
           ...prev,
-          city: String(point.key),
+          city: String(rawCityKey),
           country: countryId != null ? String(countryId) : prev.country,
           area: '',
         }));
         setSelectedRestId(null);
         setMode(isLondon ? 'area' : 'rest');
-      } else if (mode === 'area') {
+      } else if (targetLevel === 'area') {
+        const rawAreaKey = point.key != null ? point.key : pointId.replace('area:', '');
         setFilters((prev) => ({
           ...prev,
-          area: String(point.key),
+          area: String(rawAreaKey),
         }));
         setSelectedRestId(null);
         setMode('rest');
       } else {
-        // mode === 'rest'
-        setSelectedRestId((prev) => (prev === point.id ? null : point.id));
+        // targetLevel === 'rest'
+        const restId = point.id || ('rest:' + point.key);
+        setSelectedRestId((prev) => (prev === restId ? null : restId));
       }
     },
     [mode, londonCityId, mealsData]
   );
 
-  // Mount 3D Globe
+  handleDrillRef.current = handleDrill;
+
+  // Mount 3D Globe once loaded
   useEffect(() => {
+    if (loading) return;
     const container = globeContainerRef.current;
     if (!container) return;
 
@@ -433,9 +467,12 @@ export default function PlacesPage() {
       const globe = createPlacesGlobe(container, {
         THREE,
         geo,
-        onSelect: (pt) => handleDrill(pt),
+        onSelect: (pt) => handleDrillRef.current?.(pt),
       });
       globeInstanceRef.current = globe;
+      if (topPoints && topPoints.length) {
+        globe.update(topPoints, { fit: true });
+      }
     } catch (err) {
       console.warn('Could not initialize PlacesGlobe:', err);
     }
@@ -450,7 +487,7 @@ export default function PlacesPage() {
         globeInstanceRef.current = null;
       }
     };
-  }, [handleDrill]);
+  }, [loading]);
 
   // Update points on Globe when data or selection changes
   useEffect(() => {
@@ -757,7 +794,7 @@ export default function PlacesPage() {
 
         {openSections.country && (
           <div className="facet-content-block">
-            {countryFacet.entries.length > 5 && (
+            {(countryFacet.totalCount > 5 || countrySearch.trim() !== '') && (
               <div className="facet-search-box">
                 <Search size={13} className="facet-search-icon" />
                 <input
@@ -834,7 +871,7 @@ export default function PlacesPage() {
 
         {openSections.city && (
           <div className="facet-content-block">
-            {cityFacet.entries.length > 5 && (
+            {(cityFacet.totalCount > 5 || citySearch.trim() !== '') && (
               <div className="facet-search-box">
                 <Search size={13} className="facet-search-icon" />
                 <input
@@ -918,7 +955,7 @@ export default function PlacesPage() {
 
         {openSections.types && (
           <div className="facet-content-block">
-            {typeFacet.entries.length > 5 && (
+            {(typeFacet.totalCount > 5 || typeSearch.trim() !== '') && (
               <div className="facet-search-box">
                 <Search size={13} className="facet-search-icon" />
                 <input
@@ -1102,7 +1139,7 @@ export default function PlacesPage() {
 
         {openSections.people && (
           <div className="facet-content-block">
-            {peopleFacet.entries.length > 5 && (
+            {(peopleFacet.totalCount > 5 || peopleSearch.trim() !== '') && (
               <div className="facet-search-box">
                 <Search size={13} className="facet-search-icon" />
                 <input

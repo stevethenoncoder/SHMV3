@@ -189,11 +189,13 @@ export function transformMealsData({
   for (const row of rawType) {
     const id = parseInt(row.Type_ID, 10);
     if (!isNaN(id)) {
+      const rawName = row.Type?.trim() || '';
+      const rawGroup = row.TypeGroup?.trim() || null;
       restaurantTypesById.set(id, {
         id,
-        name: row.Type?.trim() || '',
+        name: rawName.replace(/\.png$/i, ''),
         typeIcon: row.TypeIcon?.trim() || row.typeIcon?.trim() || null,
-        typeGroup: row.TypeGroup?.trim() || null,
+        typeGroup: rawGroup ? rawGroup.replace(/\.png$/i, '').trim() : null,
       });
     }
   }
