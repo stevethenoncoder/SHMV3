@@ -8,6 +8,7 @@ import CompanionFrequencyDistribution from './CompanionFrequencyDistribution.jsx
 import NamesThroughTimeTable from './NamesThroughTimeTable.jsx';
 import {
   filterPeopleMeals,
+  calculatePeopleFacetCounts,
   calculatePeopleOverviewKpis,
   buildPeopleThroughTimeSeries,
   buildDiningCircleNetwork,
@@ -22,12 +23,14 @@ export default function PeopleOverview({
   rawPeoplePublic = [],
   onSelectPerson,
 }) {
-  // 1. Overview Filter State
+  // 1. Overview Filter State (multi-select arrays per spec)
   const [filters, setFilters] = useState({
     search: '',
-    country: '',
-    decade: '',
-    restaurantType: '',
+    countries: [],
+    cities: [],
+    restaurantTypes: [],
+    ratings: [],
+    decades: [],
   });
 
   const handleUpdateFilter = (key, value) => {
@@ -37,59 +40,84 @@ export default function PeopleOverview({
   const handleClearFilters = () => {
     setFilters({
       search: '',
-      country: '',
-      decade: '',
-      restaurantType: '',
+      countries: [],
+      cities: [],
+      restaurantTypes: [],
+      ratings: [],
+      decades: [],
     });
   };
 
-  // 2. Compute Filter Options (Countries & Restaurant Types)
-  const { countries, restaurantTypes } = useMemo(() => {
+  // 2. Precompute Master Lists for Filter Dropdowns
+  const { allCountries, allCities, allTypes, allRatings, allDecades } = useMemo(() => {
     const cSet = new Set();
+    const citySet = new Set();
     const tSet = new Set();
+    const rSet = new Set();
+
     for (const m of meals) {
       const countryName = m.restaurant?.city?.country?.name;
       if (countryName) cSet.add(countryName);
-      const typeGroup = m.restaurant?.type?.typeGroup || m.restaurant?.type?.name;
+
+      const cityName = m.restaurant?.city?.name;
+      if (cityName) citySet.add(cityName);
+
+      const typeGroup =
+        m.restaurant?.type?.typeGroup ||
+        m.restaurant?.typeGroup ||
+        m.restaurant?.type?.name;
       if (typeGroup) tSet.add(typeGroup);
+
+      if (m.rating && m.rating !== 'Unrated') {
+        rSet.add(m.rating);
+      }
     }
+
     return {
-      countries: Array.from(cSet).sort(),
-      restaurantTypes: Array.from(tSet).sort(),
+      allCountries: Array.from(cSet).sort(),
+      allCities: Array.from(citySet).sort(),
+      allTypes: Array.from(tSet).sort(),
+      allRatings: Array.from(rSet).sort(),
+      allDecades: ['2020s', '2010s', '2000s', '1990s', 'Pre-1990'],
     };
   }, [meals]);
 
-  // 3. Filtered Meals
+  // 3. Dynamic Cascading Facet Counts
+  const facetCounts = useMemo(() => {
+    return calculatePeopleFacetCounts(meals, filters);
+  }, [meals, filters]);
+
+  // 4. Filtered Meals
   const filteredMeals = useMemo(() => {
     return filterPeopleMeals(meals, filters);
   }, [meals, filters]);
 
-  // 4. Headline KPIs
+  // 5. Headline KPIs
   const kpis = useMemo(() => {
     return calculatePeopleOverviewKpis(filteredMeals, meals, publicPeopleById);
   }, [filteredMeals, meals, publicPeopleById]);
 
-  // 5. People Through Time
+  // 6. People Through Time
   const timeSeries = useMemo(() => {
     return buildPeopleThroughTimeSeries(filteredMeals, meals);
   }, [filteredMeals, meals]);
 
-  // 6. Dining Circle Network
+  // 7. Dining Circle Network
   const network = useMemo(() => {
     return buildDiningCircleNetwork(filteredMeals, publicPeopleById, { topN: 24, minShared: 2 });
   }, [filteredMeals, publicPeopleById]);
 
-  // 7. Recurring Groups (Strictly Top 8 Groups: 3 Feature + 5 Supporting)
+  // 8. Recurring Groups (Strictly Top 8 Groups: 3 Feature + 5 Supporting)
   const recurringGroups = useMemo(() => {
     return mineRecurringGroups(filteredMeals, { limit: 8, threshold: 0.75 });
   }, [filteredMeals]);
 
-  // 8. Frequency Distribution
+  // 9. Frequency Distribution
   const freqBands = useMemo(() => {
     return buildCompanionFrequencyDistribution(filteredMeals);
   }, [filteredMeals]);
 
-  // 9. Names Through Time (Unified identities)
+  // 10. Names Through Time (Unified identities)
   const namesThroughTime = useMemo(() => {
     return extractNamesThroughTime(rawPeoplePublic, meals);
   }, [rawPeoplePublic, meals]);
@@ -101,8 +129,12 @@ export default function PeopleOverview({
         filters={filters}
         onUpdateFilter={handleUpdateFilter}
         onClearFilters={handleClearFilters}
-        countries={countries}
-        restaurantTypes={restaurantTypes}
+        facetCounts={facetCounts}
+        allCountries={allCountries}
+        allCities={allCities}
+        allTypes={allTypes}
+        allRatings={allRatings}
+        allDecades={allDecades}
       />
 
       {/* 2. Opening KPI Strip */}

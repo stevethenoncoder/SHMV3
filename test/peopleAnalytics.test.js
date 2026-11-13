@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   filterPeopleMeals,
+  calculatePeopleFacetCounts,
   calculatePeopleOverviewKpis,
   buildPeopleThroughTimeSeries,
   buildDiningCircleNetwork,
@@ -150,6 +151,19 @@ test('People Analytics: Invariant & Correctness Test Suite', async (t) => {
 
     const searchLou = filterPeopleMeals(mockMeals, { search: 'Lou Holland' });
     assert.equal(searchLou.length, 3);
+
+    // Companion-only search: venue name "The Ivy" must NOT match
+    const searchVenue = filterPeopleMeals(mockMeals, { search: 'The Ivy' });
+    assert.equal(searchVenue.length, 0, 'Search must be companion-only and not match venue names');
+
+    // Multi-select countries
+    const multiCountry = filterPeopleMeals(mockMeals, { countries: ['France', 'United Kingdom'] });
+    assert.equal(multiCountry.length, 5);
+
+    // Cascading facet counts
+    const facets = calculatePeopleFacetCounts(mockMeals, { countries: ['France'] });
+    assert.equal(facets.typeCounts['Bistro'], 1);
+    assert.equal(facets.countryCounts['United Kingdom'], 4); // other countries preserved in facet count
   });
 
   await t.test('3. People Through Time (Excludes solo person 317)', () => {

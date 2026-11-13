@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Users2, EyeOff, MessageSquareHeart } from 'lucide-react';
 
 export default function IndividualCompanions({
@@ -10,7 +10,19 @@ export default function IndividualCompanions({
   onSelectPerson,
 }) {
   const [hoveredWord, setHoveredWord] = useState(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0, isBelow: false });
+  const containerRef = useRef(null);
+
+  const handleMouseMove = (e) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const isBelow = y < 70;
+    const clampedX = Math.max(70, Math.min(rect.width - 70, x));
+    const targetY = isBelow ? y + 20 : y - 10;
+    setTooltipPos({ x: clampedX, y: targetY, isBelow });
+  };
 
   const { words = [], totalSentiments = 0 } = sentimentWordCloud || {};
 

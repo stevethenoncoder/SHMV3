@@ -834,3 +834,286 @@
     font-size: 0.74rem;
   }
 }
+
+/* ==============================================================
+   4. Dynamic Restaurants in Scope Table
+   ============================================================== */
+.places-restaurants-section {
+  margin-top: 24px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.places-restaurants-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.places-restaurants-title-block {
+  flex: 1;
+  min-width: 200px;
+}
+
+.places-restaurants-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.places-restaurants-title {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.places-restaurants-badge {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+}
+
+.places-restaurants-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 4px 0 0 0;
+}
+
+.places-restaurants-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 250px;
+}
+
+.places-rest-search-icon {
+  position: absolute;
+  left: 10px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.places-rest-search-input {
+  width: 100%;
+  padding: 8px 30px 8px 32px;
+  font-size: 0.82rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #f8fafc;
+  outline: none;
+  color: var(--text);
+  transition: all 0.15s ease;
+}
+
+.places-rest-search-input:focus {
+  background: #ffffff;
+  border-color: #0f5132;
+  box-shadow: 0 0 0 3px rgba(15, 81, 50, 0.08);
+}
+
+.places-rest-search-clear {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.places-rest-search-clear:hover {
+  color: #475569;
+}
+
+.places-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+}
+
+.places-restaurants-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.places-restaurants-table th {
+  padding: 10px 14px;
+  background: #f8fafc;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  transition: background-color 0.12s ease;
+}
+
+.places-restaurants-table th:hover {
+  background-color: #f1f5f9;
+}
+
+.places-restaurants-table th .th-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.places-restaurants-table th .th-sort-muted {
+  color: #cbd5e1;
+}
+
+.places-restaurants-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.places-restaurants-table tr:last-child td {
+  border-bottom: none;
+}
+
+.places-restaurants-table tr:hover td {
+  background-color: #fbfcfe;
+}
+
+.places-restaurants-table .cell-name {
+  min-width: 220px;
+}
+
+.places-restaurants-table .rest-primary-name {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.88rem;
+}
+
+.places-restaurants-table .rest-secondary-loc {
+  font-size: 0.76rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.places-restaurants-table .rest-cuisine-sep {
+  color: #94a3b8;
+}
+
+.places-restaurants-table .cell-meals {
+  width: 90px;
+}
+
+.places-restaurants-table .meals-count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.places-restaurants-table .cell-rating {
+  min-width: 140px;
+}
+
+.places-rest-rating-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.places-rest-unrated {
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.places-restaurants-table .cell-date {
+  color: #475569;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  width: 120px;
+}
+
+.places-table-empty {
+  text-align: center;
+  padding: 36px 16px;
+  color: #94a3b8;
+  font-size: 0.88rem;
+  font-style: italic;
+}
+
+.places-table-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+  font-size: 0.8rem;
+  color: #64748b;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.places-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.places-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  cursor: pointer;
+  color: #334155;
+  transition: all 0.15s ease;
+}
+
+.places-page-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.places-page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.places-page-indicator {
+  font-size: 0.8rem;
+  color: #475569;
+  font-weight: 500;
+}

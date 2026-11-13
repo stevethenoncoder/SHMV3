@@ -13,6 +13,8 @@
  * The camera flies to frame whatever points it is given: the whole world for a spread,
  * down to a single country or city when the points are close together.
  */
+let placesGlobeInstanceCreator = null;
+
 (function (root) {
   'use strict';
   var CSS =
@@ -322,7 +324,18 @@
     return { update: update, highlight: function (id) { selected = id; }, destroy: destroy };
   }
 
-  root.PlacesGlobe = { create: create };
-})(typeof window !== 'undefined' ? window : this);
+  placesGlobeInstanceCreator = create;
+  if (root) {
+    root.PlacesGlobe = { create: create };
+  }
+})(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : null));
 
-export const createPlacesGlobe = (container, opts) => window.PlacesGlobe.create(container, opts);
+export const createPlacesGlobe = (container, opts) => {
+  if (placesGlobeInstanceCreator) {
+    return placesGlobeInstanceCreator(container, opts);
+  }
+  if (typeof window !== 'undefined' && window.PlacesGlobe?.create) {
+    return window.PlacesGlobe.create(container, opts);
+  }
+  throw new Error('PlacesGlobe is not initialized');
+};

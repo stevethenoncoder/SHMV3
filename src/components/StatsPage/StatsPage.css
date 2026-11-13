@@ -7,6 +7,73 @@
   color: #0f172a;
 }
 
+/* Sub-navigation Header */
+.stats-subnav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.stats-title-area {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stats-main-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.stats-main-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #64748b);
+  margin: 0;
+}
+
+/* Segmented Sub-view Switcher */
+.stats-view-switcher {
+  display: inline-flex;
+  background-color: var(--bg-subtle, #f1f5f9);
+  padding: 4px;
+  border-radius: 9999px;
+  border: 1px solid var(--border, #e2e8f0);
+}
+
+.stats-switch-btn {
+  background: none;
+  border: none;
+  padding: 8px 20px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stats-switch-btn:hover:not(.active) {
+  color: var(--text-primary, #0f172a);
+}
+
+.stats-switch-btn.active {
+  background-color: #ffffff;
+  color: var(--text-primary, #0f172a);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 /* Two-column layout: Sticky Left Sidebar + Main Content */
 .stats-page-layout {
   display: flex;

@@ -21,34 +21,71 @@ export function normalizeText(str) {
 
 /**
  * Filter meals for People Overview according to:
- * - search (searches companion names, restaurant names, cities)
- * - country
- * - decade
- * - restaurantType
+ * - search (searches dining companion names ONLY)
+ * - countries / country (multi-select)
+ * - cities / city (multi-select)
+ * - decades / decade (multi-select)
+ * - restaurantTypes / restaurantType (multi-select)
+ * - ratings / rating (multi-select)
  */
 export function filterPeopleMeals(meals = [], filters = {}) {
-  const { search = '', country = '', decade = '', restaurantType = '' } = filters;
+  const {
+    search = '',
+    country = '',
+    countries = [],
+    city = '',
+    cities = [],
+    decade = '',
+    decades = [],
+    restaurantType = '',
+    restaurantTypes = [],
+    rating = '',
+    ratings = [],
+  } = filters;
+
   const searchLower = search.trim().toLowerCase();
 
+  // Normalize multi-select filter sets (case-insensitive for text)
+  const selectedCountries = new Set(
+    (countries.length > 0 ? countries : country ? [country] : []).map((c) => c.toLowerCase())
+  );
+  const selectedCities = new Set(
+    (cities.length > 0 ? cities : city ? [city] : []).map((c) => c.toLowerCase())
+  );
+  const selectedDecades = new Set(
+    decades.length > 0 ? decades : decade ? [decade] : []
+  );
+  const selectedTypes = new Set(
+    (restaurantTypes.length > 0 ? restaurantTypes : restaurantType ? [restaurantType] : []).map((t) => t.toLowerCase())
+  );
+  const selectedRatings = new Set(
+    (ratings.length > 0 ? ratings : rating ? [rating] : []).map((r) => r.toLowerCase())
+  );
+
   return meals.filter((meal) => {
-    // 1. Search Query
+    // 1. Search Query: Dining Companions only!
     if (searchLower) {
-      const matchCompanion = (meal.companions || []).some((c) =>
-        (c.publicName || '').toLowerCase().includes(searchLower)
-      );
-      const matchRest = (meal.restaurant?.name || '').toLowerCase().includes(searchLower);
-      const matchCity = (meal.restaurant?.city?.name || '').toLowerCase().includes(searchLower);
-      if (!matchCompanion && !matchRest && !matchCity) return false;
+      const matchCompanion = (meal.companions || []).some((c) => {
+        const name = (c.publicName || c.name || '').toLowerCase();
+        return name.includes(searchLower);
+      });
+      if (!matchCompanion) return false;
     }
 
-    // 2. Country
-    if (country) {
-      const mealCountry = meal.restaurant?.city?.country?.name;
-      if (!mealCountry || mealCountry.toLowerCase() !== country.toLowerCase()) return false;
+    // 2. Countries (multi-select)
+    if (selectedCountries.size > 0) {
+      const mealCountry = (meal.restaurant?.city?.country?.name || '').toLowerCase();
+      if (!mealCountry || !selectedCountries.has(mealCountry)) return false;
     }
 
-    // 3. Decade
-    if (decade) {
+    // 3. Cities (multi-select)
+    if (selectedCities.size > 0) {
+      const mealCity = (meal.restaurant?.city?.name || '').toLowerCase();
+      if (!mealCity || !selectedCities.has(mealCity)) return false;
+    }
+
+    // 4. Decades (multi-select)
+    if (selectedDecades.size > 0) {
       const year = meal.year;
       if (!year) return false;
       let mealDecade = 'Pre-1990';
@@ -56,17 +93,105 @@ export function filterPeopleMeals(meals = [], filters = {}) {
       else if (year >= 2010) mealDecade = '2010s';
       else if (year >= 2000) mealDecade = '2000s';
       else if (year >= 1990) mealDecade = '1990s';
-      if (mealDecade !== decade) return false;
+      if (!selectedDecades.has(mealDecade)) return false;
     }
 
-    // 4. Restaurant Type
-    if (restaurantType) {
-      const group = meal.restaurant?.type?.typeGroup || meal.restaurant?.type?.name;
-      if (!group || group.toLowerCase() !== restaurantType.toLowerCase()) return false;
+    // 5. Restaurant Types (multi-select)
+    if (selectedTypes.size > 0) {
+      const group = (
+        meal.restaurant?.type?.typeGroup ||
+        meal.restaurant?.typeGroup ||
+        meal.restaurant?.type?.name ||
+        ''
+      ).toLowerCase();
+      if (!group || !selectedTypes.has(group)) return false;
+    }
+
+    // 6. Meal Ratings (multi-select)
+    if (selectedRatings.size > 0) {
+      const mealRating = (meal.rating || '').toLowerCase();
+      if (!mealRating || !selectedRatings.has(mealRating)) return false;
     }
 
     return true;
   });
+}
+
+/**
+ * Calculates dynamic cascading facet counts for People Overview filters.
+ * For each dimension, evaluates meals against all other active filters.
+ */
+export function calculatePeopleFacetCounts(meals = [], filters = {}) {
+  function filterExcluding(excludeKey) {
+    return filterPeopleMeals(meals, {
+      search: filters.search,
+      countries: excludeKey === 'countries' ? [] : filters.countries,
+      country: excludeKey === 'countries' ? '' : filters.country,
+      cities: excludeKey === 'cities' ? [] : filters.cities,
+      city: excludeKey === 'cities' ? '' : filters.city,
+      decades: excludeKey === 'decades' ? [] : filters.decades,
+      decade: excludeKey === 'decades' ? '' : filters.decade,
+      restaurantTypes: excludeKey === 'restaurantTypes' ? [] : filters.restaurantTypes,
+      restaurantType: excludeKey === 'restaurantTypes' ? '' : filters.restaurantType,
+      ratings: excludeKey === 'ratings' ? [] : filters.ratings,
+      rating: excludeKey === 'ratings' ? '' : filters.rating,
+    });
+  }
+
+  // 1. Countries
+  const countryMeals = filterExcluding('countries');
+  const countryCounts = {};
+  for (const m of countryMeals) {
+    const c = m.restaurant?.city?.country?.name;
+    if (c) countryCounts[c] = (countryCounts[c] || 0) + 1;
+  }
+
+  // 2. Cities
+  const cityMeals = filterExcluding('cities');
+  const cityCounts = {};
+  for (const m of cityMeals) {
+    const city = m.restaurant?.city?.name;
+    if (city) cityCounts[city] = (cityCounts[city] || 0) + 1;
+  }
+
+  // 3. Restaurant Types
+  const typeMeals = filterExcluding('restaurantTypes');
+  const typeCounts = {};
+  for (const m of typeMeals) {
+    const t = m.restaurant?.type?.typeGroup || m.restaurant?.typeGroup || m.restaurant?.type?.name;
+    if (t) typeCounts[t] = (typeCounts[t] || 0) + 1;
+  }
+
+  // 4. Meal Ratings
+  const ratingMeals = filterExcluding('ratings');
+  const ratingCounts = {};
+  for (const m of ratingMeals) {
+    const r = m.rating;
+    if (r && r !== 'Unrated') ratingCounts[r] = (ratingCounts[r] || 0) + 1;
+  }
+
+  // 5. Decades
+  const decadeMeals = filterExcluding('decades');
+  const decadeCounts = {};
+  for (const m of decadeMeals) {
+    const year = m.year;
+    if (year) {
+      let d = 'Pre-1990';
+      if (year >= 2020) d = '2020s';
+      else if (year >= 2010) d = '2010s';
+      else if (year >= 2000) d = '2000s';
+      else if (year >= 1990) d = '1990s';
+      decadeCounts[d] = (decadeCounts[d] || 0) + 1;
+    }
+  }
+
+  return {
+    countryCounts,
+    cityCounts,
+    typeCounts,
+    ratingCounts,
+    decadeCounts,
+  };
 }
 
 /**

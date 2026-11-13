@@ -15,6 +15,12 @@ import {
   X,
   SlidersHorizontal,
   RotateCcw,
+  Star,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { loadMealsData } from '../../services/mealsDataService.js';
 import { createPlacesGlobe } from '../../places/placesGlobe.module.js';
@@ -25,6 +31,7 @@ import {
   aggregatePlacesPoints,
   calculatePlacesFacetCounts,
 } from '../../utils/placesGlobeData.js';
+import { formatRatingLabel } from '../../utils/restaurantsFilter.js';
 import '../MealsFilterSidebar/MealsFilterSidebar.css';
 import './PlacesPage.css';
 
@@ -50,27 +57,61 @@ const MODE_TRAIL_LABELS = {
   rest: 'restaurants',
 };
 
-export default function PlacesPage() {
+// Visual styling helper for qualitative meal ratings
+function getPlacesRatingBadgeStyle(rating) {
+  const r = (rating || '').toLowerCase();
+  if (r.includes('exceptional') || r.includes('the dogs')) {
+    return { bg: '#fef3c7', text: '#92400e', border: '#fde68a' };
+  }
+  if (r.includes('very good') || r.includes('superb')) {
+    return { bg: '#ecfdf5', text: '#065f46', border: '#a7f3d0' };
+  }
+  if (r.includes('good')) {
+    return { bg: '#eff6ff', text: '#1e40af', border: '#bfdbfe' };
+  }
+  if (r.includes('average') || r.includes('ok')) {
+    return { bg: '#f8fafc', text: '#475569', border: '#e2e8f0' };
+  }
+  if (r.includes('poor') || r.includes('never again') || r.includes('worst')) {
+    return { bg: '#fef2f2', text: '#991b1b', border: '#fecaca' };
+  }
+  return { bg: '#f8fafc', text: '#64748b', border: '#e2e8f0' };
+}
+
+export default function PlacesPage({ mealsData: initialMealsData } = {}) {
   // 1. Data loading state
-  const [mealsData, setMealsData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [mealsData, setMealsData] = useState(initialMealsData || null);
+  const [loading, setLoading] = useState(!initialMealsData);
   const [error, setError] = useState(null);
 
   // 2. Filter states
-  const [filters, setFilters] = useState({
-    country: '', // country ID as string
-    city: '', // city ID as string
-    area: '', // londonId as string
-    types: [], // array of restaurant typeGroup strings
-    from: 1994,
-    to: 2026,
-    decades: [], // array of decade strings
-    people: [], // array of person ID strings
+  const [filters, setFilters] = useState(() => {
+    let from = 1994;
+    let to = 2026;
+    if (initialMealsData?.meals?.length > 0) {
+      const years = initialMealsData.meals
+        .map((m) => m.year)
+        .filter((y) => typeof y === 'number' && y > 1900);
+      if (years.length > 0) {
+        from = Math.min(...years);
+        to = Math.max(...years);
+      }
+    }
+    return {
+      country: '', // country ID as string
+      city: '', // city ID as string
+      area: '', // londonId as string
+      types: [], // array of restaurant typeGroup strings
+      from,
+      to,
+      decades: [], // array of decade strings
+      people: [], // array of person ID strings
+    };
   });
 
-  // Collapsible section open/close state (matching Chronicle)
+  // Collapsible section open/close state (all start collapsed per spec)
   const [openSections, setOpenSections] = useState({
-    country: true,
+    country: false,
     city: false,
     types: false,
     years: false,
@@ -103,8 +144,24 @@ export default function PlacesPage() {
   // Mobile filter drawer open/close
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  // Load raw data on mount
+  // Load raw data on mount (or use initialMealsData)
   useEffect(() => {
+    if (initialMealsData && initialMealsData.meals && initialMealsData.meals.length > 0) {
+      setMealsData(initialMealsData);
+      const years = initialMealsData.meals
+        .map((m) => m.year)
+        .filter((y) => typeof y === 'number' && y > 1900);
+      if (years.length > 0) {
+        setFilters((prev) => ({
+          ...prev,
+          from: Math.min(...years),
+          to: Math.max(...years),
+        }));
+      }
+      setLoading(false);
+      return;
+    }
+
     let isMounted = true;
     loadMealsData()
       .then((data) => {
@@ -136,7 +193,7 @@ export default function PlacesPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [initialMealsData]);
 
   // Precompute spatial index
   const spatialIndex = useMemo(() => {
@@ -386,6 +443,142 @@ export default function PlacesPage() {
     if (!topPoints.length) return 1;
     return topPoints[0].n || 1;
   }, [topPoints]);
+
+  // 4b. Dynamic Restaurants in Scope table aggregation & pagination
+  const [restTableSearch, setRestTableSearch] = useState('');
+  const [restSortField, setRestSortField] = useState('mealCount'); // 'mealCount' | 'name' | 'rating' | 'firstVisited' | 'lastVisited'
+  const [restSortDir, setRestSortDir] = useState('desc'); // 'asc' | 'desc'
+  const [restPage, setRestPage] = useState(1);
+  const REST_PAGE_SIZE = 25;
+
+  // Reset page to 1 whenever filters or search change
+  useEffect(() => {
+    setRestPage(1);
+  }, [filters, restTableSearch, restSortField, restSortDir]);
+
+  const scopedRestaurants = useMemo(() => {
+    if (!filteredMeals || filteredMeals.length === 0) return [];
+
+    const map = new Map();
+
+    for (const meal of filteredMeals) {
+      const rest = meal.restaurant;
+      if (!rest || !rest.id) continue;
+      const restId = rest.id;
+
+      if (!map.has(restId)) {
+        map.set(restId, {
+          id: restId,
+          name: rest.name || 'Unnamed Restaurant',
+          city: rest.city?.name || '',
+          country: rest.city?.country?.name || '',
+          cuisine: rest.type?.typeGroup || rest.typeGroup || rest.type?.name || '',
+          mealCount: 0,
+          ratingSum: 0,
+          ratedMealCount: 0,
+          minTimestamp: Infinity,
+          maxTimestamp: -Infinity,
+          firstVisitedFormatted: '',
+          lastVisitedFormatted: '',
+        });
+      }
+
+      const item = map.get(restId);
+      item.mealCount += 1;
+
+      if (meal.ratingId && typeof meal.ratingId === 'number') {
+        item.ratingSum += meal.ratingId;
+        item.ratedMealCount += 1;
+      }
+
+      const ts = meal.timestamp || (meal.date ? new Date(meal.date).getTime() : 0);
+      if (ts && ts > 0) {
+        if (ts < item.minTimestamp) {
+          item.minTimestamp = ts;
+          item.firstVisitedFormatted = meal.formattedDate || meal.date;
+        }
+        if (ts > item.maxTimestamp) {
+          item.maxTimestamp = ts;
+          item.lastVisitedFormatted = meal.formattedDate || meal.date;
+        }
+      }
+    }
+
+    const list = [];
+    for (const item of map.values()) {
+      const avgScore = item.ratedMealCount > 0 ? item.ratingSum / item.ratedMealCount : null;
+      let averageRatingText = null;
+      if (avgScore !== null && mealsData?.ratingMealById) {
+        const roundedId = Math.min(8, Math.max(1, Math.round(avgScore)));
+        averageRatingText = mealsData.ratingMealById.get(roundedId)?.text || null;
+      }
+
+      list.push({
+        ...item,
+        averageRatingNumeric: avgScore,
+        averageRatingText,
+        minTimestamp: item.minTimestamp === Infinity ? 0 : item.minTimestamp,
+        maxTimestamp: item.maxTimestamp === -Infinity ? 0 : item.maxTimestamp,
+      });
+    }
+
+    return list;
+  }, [filteredMeals, mealsData]);
+
+  // Filtered & Sorted Restaurants
+  const processedRestaurants = useMemo(() => {
+    let list = scopedRestaurants;
+
+    const query = restTableSearch.trim().toLowerCase();
+    if (query) {
+      list = list.filter((r) =>
+        r.name.toLowerCase().includes(query) ||
+        r.city.toLowerCase().includes(query) ||
+        r.country.toLowerCase().includes(query) ||
+        r.cuisine.toLowerCase().includes(query)
+      );
+    }
+
+    return [...list].sort((a, b) => {
+      let cmp = 0;
+      if (restSortField === 'name') {
+        cmp = a.name.localeCompare(b.name);
+      } else if (restSortField === 'mealCount') {
+        cmp = a.mealCount - b.mealCount;
+      } else if (restSortField === 'rating') {
+        const scoreA = a.averageRatingNumeric != null ? a.averageRatingNumeric : -1;
+        const scoreB = b.averageRatingNumeric != null ? b.averageRatingNumeric : -1;
+        cmp = scoreA - scoreB;
+      } else if (restSortField === 'firstVisited') {
+        cmp = a.minTimestamp - b.minTimestamp;
+      } else if (restSortField === 'lastVisited') {
+        cmp = a.maxTimestamp - b.maxTimestamp;
+      }
+
+      if (cmp === 0) {
+        cmp = a.name.localeCompare(b.name);
+      }
+
+      return restSortDir === 'desc' ? -cmp : cmp;
+    });
+  }, [scopedRestaurants, restTableSearch, restSortField, restSortDir]);
+
+  const totalRestCount = processedRestaurants.length;
+  const totalRestPages = Math.max(1, Math.ceil(totalRestCount / REST_PAGE_SIZE));
+  const currentRestPage = Math.min(restPage, totalRestPages);
+  const pagedRestaurants = useMemo(() => {
+    const start = (currentRestPage - 1) * REST_PAGE_SIZE;
+    return processedRestaurants.slice(start, start + REST_PAGE_SIZE);
+  }, [processedRestaurants, currentRestPage]);
+
+  const handleRestSort = (field) => {
+    if (restSortField === field) {
+      setRestSortDir((prev) => (prev === 'desc' ? 'asc' : 'desc'));
+    } else {
+      setRestSortField(field);
+      setRestSortDir(field === 'name' || field === 'firstVisited' ? 'asc' : 'desc');
+    }
+  };
 
   // 5. Globe component lifecycle
   const globeContainerRef = useRef(null);
@@ -1465,6 +1658,187 @@ export default function PlacesPage() {
             )}
           </aside>
         </div>
+
+        {/* Dynamic Restaurants Table Section */}
+        <section className="places-restaurants-section" aria-label="Restaurants in scope">
+          <div className="places-restaurants-header">
+            <div className="places-restaurants-title-block">
+              <div className="places-restaurants-title-row">
+                <h3 className="places-restaurants-title">Restaurants</h3>
+                <span className="places-restaurants-badge">
+                  {scopedRestaurants.length.toLocaleString('en-GB')} {scopedRestaurants.length === 1 ? 'venue' : 'venues'}
+                </span>
+              </div>
+              <p className="places-restaurants-desc">
+                Venues visited across the selected geographic scope and filter parameters.
+              </p>
+            </div>
+
+            <div className="places-restaurants-search-box">
+              <Search size={15} className="places-rest-search-icon" />
+              <input
+                type="text"
+                className="places-rest-search-input"
+                placeholder="Filter restaurants by name, city or cuisine..."
+                value={restTableSearch}
+                onChange={(e) => setRestTableSearch(e.target.value)}
+              />
+              {restTableSearch && (
+                <button
+                  type="button"
+                  className="places-rest-search-clear"
+                  onClick={() => setRestTableSearch('')}
+                  title="Clear filter"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="places-table-wrapper">
+            <table className="places-restaurants-table">
+              <thead>
+                <tr>
+                  <th scope="col" className="col-name" onClick={() => handleRestSort('name')}>
+                    <div className="th-content">
+                      <span>Restaurant</span>
+                      {restSortField === 'name' ? (
+                        restSortDir === 'asc' ? <ArrowUp size={13} /> : <ArrowDown size={13} />
+                      ) : (
+                        <ArrowUpDown size={13} className="th-sort-muted" />
+                      )}
+                    </div>
+                  </th>
+                  <th scope="col" className="col-meals" onClick={() => handleRestSort('mealCount')}>
+                    <div className="th-content">
+                      <span>Meals</span>
+                      {restSortField === 'mealCount' ? (
+                        restSortDir === 'asc' ? <ArrowUp size={13} /> : <ArrowDown size={13} />
+                      ) : (
+                        <ArrowUpDown size={13} className="th-sort-muted" />
+                      )}
+                    </div>
+                  </th>
+                  <th scope="col" className="col-rating" onClick={() => handleRestSort('rating')}>
+                    <div className="th-content">
+                      <span>Average Rating</span>
+                      {restSortField === 'rating' ? (
+                        restSortDir === 'asc' ? <ArrowUp size={13} /> : <ArrowDown size={13} />
+                      ) : (
+                        <ArrowUpDown size={13} className="th-sort-muted" />
+                      )}
+                    </div>
+                  </th>
+                  <th scope="col" className="col-date" onClick={() => handleRestSort('firstVisited')}>
+                    <div className="th-content">
+                      <span>First Visited</span>
+                      {restSortField === 'firstVisited' ? (
+                        restSortDir === 'asc' ? <ArrowUp size={13} /> : <ArrowDown size={13} />
+                      ) : (
+                        <ArrowUpDown size={13} className="th-sort-muted" />
+                      )}
+                    </div>
+                  </th>
+                  <th scope="col" className="col-date" onClick={() => handleRestSort('lastVisited')}>
+                    <div className="th-content">
+                      <span>Last Visited</span>
+                      {restSortField === 'lastVisited' ? (
+                        restSortDir === 'asc' ? <ArrowUp size={13} /> : <ArrowDown size={13} />
+                      ) : (
+                        <ArrowUpDown size={13} className="th-sort-muted" />
+                      )}
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {pagedRestaurants.map((r) => {
+                  const badgeStyle = getPlacesRatingBadgeStyle(r.averageRatingText);
+                  const formattedRating = r.averageRatingText ? formatRatingLabel(r.averageRatingText) : null;
+                  return (
+                    <tr key={r.id}>
+                      <td className="cell-name">
+                        <div className="rest-primary-name">{r.name}</div>
+                        <div className="rest-secondary-loc">
+                          {[r.city, r.country].filter(Boolean).join(', ')}
+                          {r.cuisine && <span className="rest-cuisine-sep"> · {r.cuisine}</span>}
+                        </div>
+                      </td>
+                      <td className="cell-meals">
+                        <span className="meals-count-pill">{r.mealCount}</span>
+                      </td>
+                      <td className="cell-rating">
+                        {formattedRating ? (
+                          <span
+                            className="places-rest-rating-pill"
+                            style={{
+                              backgroundColor: badgeStyle.bg,
+                              color: badgeStyle.text,
+                              borderColor: badgeStyle.border,
+                            }}
+                          >
+                            <Star size={11} fill="currentColor" />
+                            <span>{formattedRating}</span>
+                          </span>
+                        ) : (
+                          <span className="places-rest-unrated">—</span>
+                        )}
+                      </td>
+                      <td className="cell-date">
+                        {r.firstVisitedFormatted || '—'}
+                      </td>
+                      <td className="cell-date">
+                        {r.lastVisitedFormatted || '—'}
+                      </td>
+                    </tr>
+                  );
+                })}
+
+                {pagedRestaurants.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="places-table-empty">
+                      No restaurants match the selected criteria.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {totalRestCount > REST_PAGE_SIZE && (
+            <div className="places-table-pagination">
+              <span className="places-pagination-info">
+                Showing {(currentRestPage - 1) * REST_PAGE_SIZE + 1}–
+                {Math.min(currentRestPage * REST_PAGE_SIZE, totalRestCount)} of{' '}
+                {totalRestCount.toLocaleString('en-GB')} restaurants
+              </span>
+              <div className="places-pagination-controls">
+                <button
+                  type="button"
+                  className="places-page-btn"
+                  disabled={currentRestPage <= 1}
+                  onClick={() => setRestPage((p) => Math.max(1, p - 1))}
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <span className="places-page-indicator">
+                  Page {currentRestPage} of {totalRestPages}
+                </span>
+                <button
+                  type="button"
+                  className="places-page-btn"
+                  disabled={currentRestPage >= totalRestPages}
+                  onClick={() => setRestPage((p) => Math.min(totalRestPages, p + 1))}
+                  aria-label="Next page"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
       </main>
 
       {/* Mobile Filter Drawer */}

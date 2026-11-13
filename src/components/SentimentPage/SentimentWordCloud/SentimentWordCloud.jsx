@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Cloud, X } from 'lucide-react';
 import './SentimentWordCloud.css';
 
@@ -8,9 +8,21 @@ export default function SentimentWordCloud({
   onSelectWord,
 }) {
   const [hoveredWord, setHoveredWord] = useState(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0, isBelow: false });
+  const containerRef = useRef(null);
 
   const { words = [], totalSentiments = 0 } = wordCloudData || {};
+
+  const handleMouseMove = (e) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const isBelow = y < 110;
+    const clampedX = Math.max(90, Math.min(rect.width - 90, x));
+    const targetY = isBelow ? y + 24 : y - 12;
+    setTooltipPos({ x: clampedX, y: targetY, isBelow });
+  };
 
   return (
     <div className="stats-card word-cloud-card">
@@ -47,12 +59,10 @@ export default function SentimentWordCloud({
 
       {/* Word Cloud Flow Area */}
       <div
+        ref={containerRef}
         className="word-cloud-container"
         onMouseLeave={() => setHoveredWord(null)}
-        onMouseMove={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-        }}
+        onMouseMove={handleMouseMove}
       >
         {words.length > 0 ? (
           words.map((w) => {
@@ -87,13 +97,14 @@ export default function SentimentWordCloud({
           </div>
         )}
 
-        {/* Floating Tooltip */}
+        {/* Floating Tooltip positioned above word & cursor */}
         {hoveredWord && (
           <div
             className="word-cloud-tooltip"
             style={{
-              left: `${Math.min(Math.max(mousePos.x - 60, 10), 320)}px`,
-              top: `${Math.max(10, mousePos.y - 65)}px`,
+              left: `${tooltipPos.x}px`,
+              top: `${tooltipPos.y}px`,
+              transform: tooltipPos.isBelow ? 'translate(-50%, 0)' : 'translate(-50%, -100%)',
             }}
           >
             <div className="word-tt-title">{hoveredWord.text}</div>

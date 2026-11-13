@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import OverviewPhotoCarousel from './OverviewPhotoCarousel.jsx';
 import {
   Utensils,
+  UtensilsCrossed,
   PoundSterling,
   Building2,
   ArrowRight,
@@ -214,6 +215,27 @@ export default function OverviewPage({
     return {
       totalPeople: peopleMap.size,
       topPeople,
+    };
+  }, [meals]);
+
+  // 5b. Sentiment Section: Top 5 Sentiments
+  const sentimentData = useMemo(() => {
+    const sentimentsMap = new Map();
+
+    meals.forEach((m) => {
+      const s = m.sentiment?.trim();
+      if (s && s.toLowerCase() !== 'no comment' && s.toLowerCase() !== 'null') {
+        sentimentsMap.set(s, (sentimentsMap.get(s) || 0) + 1);
+      }
+    });
+
+    const topSentiments = Array.from(sentimentsMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    return {
+      totalSentiments: sentimentsMap.size,
+      topSentiments,
     };
   }, [meals]);
 
@@ -644,213 +666,233 @@ export default function OverviewPage({
         </div>
       </section>
 
-      {/* Section 3: Categorical Top 5 Grids (Food, Locations, People) */}
+      {/* Section 3: Categorical Top 5 Grids (3x2 Grid: Food, Locations, People, Sentiment) */}
       <section className="overview-breakdowns-grid">
-        {/* Card A: Food Insights */}
+        {/* Tier 1 - Card 1: Top Cuisines */}
         <div className="breakdown-card">
           <div className="breakdown-card-header">
             <div className="breakdown-title-group">
               <Utensils size={18} className="breakdown-icon" />
-              <h3>Food & Cuisines</h3>
+              <h3>Top Cuisines</h3>
             </div>
-            <span className="text-xs text-slate-400 font-semibold">Taste Profile</span>
+            <span className="sub-breakdown-total">{foodData.totalCuisines} total</span>
           </div>
 
-          <div className="breakdown-subsections">
-            {/* Top 5 Cuisines */}
-            <div className="sub-breakdown">
-              <div className="sub-breakdown-header">
-                <span>Top Cuisines</span>
-                <span className="sub-breakdown-total">{foodData.totalCuisines} total</span>
-              </div>
-              <div className="sub-top-list">
-                {foodData.topCuisines.map(([cuisine, count]) => {
-                  const maxCount = foodData.topCuisines[0][1];
-                  const widthPct = Math.round((count / maxCount) * 100);
+          <div className="sub-top-list">
+            {foodData.topCuisines.map(([cuisine, count]) => {
+              const maxCount = foodData.topCuisines[0][1];
+              const widthPct = Math.round((count / maxCount) * 100);
 
-                  return (
+              return (
+                <div
+                  key={cuisine}
+                  className="sub-top-item"
+                  onClick={() => onApplyChronicleFilter && onApplyChronicleFilter('cuisines', cuisine)}
+                  title={`Filter chronicle for ${cuisine} cuisine`}
+                >
+                  <div className="sub-top-labels">
+                    <span className="sub-item-name">{cuisine}</span>
+                    <span className="sub-item-count">{count}</span>
+                  </div>
+                  <div className="sub-item-progress-track">
                     <div
-                      key={cuisine}
-                      className="sub-top-item"
-                      onClick={() => onApplyChronicleFilter && onApplyChronicleFilter('cuisines', cuisine)}
-                      title={`Filter chronicle for ${cuisine} cuisine`}
-                    >
-                      <div className="sub-top-labels">
-                        <span className="sub-item-name">{cuisine}</span>
-                        <span className="sub-item-count">{count}</span>
-                      </div>
-                      <div className="sub-item-progress-track">
-                        <div
-                          className="sub-item-progress-fill fill-cuisine"
-                          style={{ width: `${widthPct}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Top 5 Dish Types */}
-            <div className="sub-breakdown">
-              <div className="sub-breakdown-header">
-                <span>Top Dish Types</span>
-                <span className="sub-breakdown-total">{foodData.totalDishTypes} total</span>
-              </div>
-              <div className="sub-top-list">
-                {foodData.topDishTypes.map(([dish, count]) => {
-                  const maxCount = foodData.topDishTypes[0][1];
-                  const widthPct = Math.round((count / maxCount) * 100);
-
-                  return (
-                    <div
-                      key={dish}
-                      className="sub-top-item"
-                      onClick={() => onApplyChronicleFilter && onApplyChronicleFilter('foodTypes', dish)}
-                      title={`Filter chronicle for ${dish} dishes`}
-                    >
-                      <div className="sub-top-labels">
-                        <span className="sub-item-name">{dish}</span>
-                        <span className="sub-item-count">{count}</span>
-                      </div>
-                      <div className="sub-item-progress-track">
-                        <div
-                          className="sub-item-progress-fill fill-dish"
-                          style={{ width: `${widthPct}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                      className="sub-item-progress-fill fill-cuisine"
+                      style={{ width: `${widthPct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Card B: Location Insights */}
+        {/* Tier 1 - Card 2: Top Countries */}
         <div className="breakdown-card">
           <div className="breakdown-card-header">
             <div className="breakdown-title-group">
               <Globe2 size={18} className="breakdown-icon" />
-              <h3>Geographic Footprint</h3>
+              <h3>Top Countries</h3>
             </div>
-            <span className="text-xs text-slate-400 font-semibold">World Reach</span>
+            <span className="sub-breakdown-total">{locationData.totalCountries} countries</span>
           </div>
 
-          <div className="breakdown-subsections">
-            {/* Top 5 Countries */}
-            <div className="sub-breakdown">
-              <div className="sub-breakdown-header">
-                <span>Top Countries</span>
-                <span className="sub-breakdown-total">{locationData.totalCountries} countries</span>
-              </div>
-              <div className="sub-top-list">
-                {locationData.topCountries.map(([country, count]) => {
-                  const maxCount = locationData.topCountries[0][1];
-                  const widthPct = Math.round((count / maxCount) * 100);
+          <div className="sub-top-list">
+            {locationData.topCountries.map(([country, count]) => {
+              const maxCount = locationData.topCountries[0][1];
+              const widthPct = Math.round((count / maxCount) * 100);
 
-                  return (
+              return (
+                <div
+                  key={country}
+                  className="sub-top-item"
+                  onClick={() => onApplyChronicleFilter && onApplyChronicleFilter('countries', country)}
+                  title={`Filter chronicle for ${country}`}
+                >
+                  <div className="sub-top-labels">
+                    <span className="sub-item-name">{country}</span>
+                    <span className="sub-item-count">{count.toLocaleString()}</span>
+                  </div>
+                  <div className="sub-item-progress-track">
                     <div
-                      key={country}
-                      className="sub-top-item"
-                      onClick={() => onApplyChronicleFilter && onApplyChronicleFilter('countries', country)}
-                      title={`Filter chronicle for ${country}`}
-                    >
-                      <div className="sub-top-labels">
-                        <span className="sub-item-name">{country}</span>
-                        <span className="sub-item-count">{count.toLocaleString()}</span>
-                      </div>
-                      <div className="sub-item-progress-track">
-                        <div
-                          className="sub-item-progress-fill fill-country"
-                          style={{ width: `${widthPct}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Top 5 Cities */}
-            <div className="sub-breakdown">
-              <div className="sub-breakdown-header">
-                <span>Top Cities</span>
-                <span className="sub-breakdown-total">{locationData.totalCities} cities</span>
-              </div>
-              <div className="sub-top-list">
-                {locationData.topCities.map(([city, count]) => {
-                  const maxCount = locationData.topCities[0][1];
-                  const widthPct = Math.round((count / maxCount) * 100);
-
-                  return (
-                    <div
-                      key={city}
-                      className="sub-top-item"
-                      onClick={() => onApplyChronicleFilter && onApplyChronicleFilter('cities', city)}
-                      title={`Filter chronicle for ${city}`}
-                    >
-                      <div className="sub-top-labels">
-                        <span className="sub-item-name">{city}</span>
-                        <span className="sub-item-count">{count.toLocaleString()}</span>
-                      </div>
-                      <div className="sub-item-progress-track">
-                        <div
-                          className="sub-item-progress-fill fill-city"
-                          style={{ width: `${widthPct}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                      className="sub-item-progress-fill fill-country"
+                      style={{ width: `${widthPct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Card C: Companions & People */}
+        {/* Tier 1 - Card 3: Top Companions */}
         <div className="breakdown-card">
           <div className="breakdown-card-header">
             <div className="breakdown-title-group">
               <Users size={18} className="breakdown-icon" />
-              <h3>Dining Companions</h3>
+              <h3>Top Companions</h3>
             </div>
-            <span className="text-xs text-slate-400 font-semibold">Shared Tables</span>
+            <span className="sub-breakdown-total">{peopleData.totalPeople} recorded</span>
           </div>
 
-          <div className="breakdown-subsections">
-            <div className="sub-breakdown">
-              <div className="sub-breakdown-header">
-                <span>Top Companions</span>
-                <span className="sub-breakdown-total">{peopleData.totalPeople} recorded</span>
-              </div>
-              <div className="sub-top-list">
-                {peopleData.topPeople.map(([person, count]) => {
-                  const maxCount = peopleData.topPeople[0][1];
-                  const widthPct = Math.round((count / maxCount) * 100);
+          <div className="sub-top-list">
+            {peopleData.topPeople.map(([person, count]) => {
+              const maxCount = peopleData.topPeople[0][1];
+              const widthPct = Math.round((count / maxCount) * 100);
 
-                  return (
+              return (
+                <div
+                  key={person}
+                  className="sub-top-item"
+                  onClick={() => onApplyChronicleFilter && onApplyChronicleFilter('people', person)}
+                  title={`Filter chronicle for meals with ${person}`}
+                >
+                  <div className="sub-top-labels">
+                    <span className="sub-item-name">{person}</span>
+                    <span className="sub-item-count">{count.toLocaleString()} meals</span>
+                  </div>
+                  <div className="sub-item-progress-track">
                     <div
-                      key={person}
-                      className="sub-top-item"
-                      onClick={() => onApplyChronicleFilter && onApplyChronicleFilter('people', person)}
-                      title={`Filter chronicle for meals with ${person}`}
-                    >
-                      <div className="sub-top-labels">
-                        <span className="sub-item-name">{person}</span>
-                        <span className="sub-item-count">{count.toLocaleString()} meals</span>
-                      </div>
-                      <div className="sub-item-progress-track">
-                        <div
-                          className="sub-item-progress-fill fill-people"
-                          style={{ width: `${widthPct}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                      className="sub-item-progress-fill fill-people"
+                      style={{ width: `${widthPct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Tier 2 - Card 4: Top Dish Types */}
+        <div className="breakdown-card">
+          <div className="breakdown-card-header">
+            <div className="breakdown-title-group">
+              <UtensilsCrossed size={18} className="breakdown-icon" />
+              <h3>Top Dish Types</h3>
             </div>
+            <span className="sub-breakdown-total">{foodData.totalDishTypes} total</span>
+          </div>
+
+          <div className="sub-top-list">
+            {foodData.topDishTypes.map(([dish, count]) => {
+              const maxCount = foodData.topDishTypes[0][1];
+              const widthPct = Math.round((count / maxCount) * 100);
+
+              return (
+                <div
+                  key={dish}
+                  className="sub-top-item"
+                  onClick={() => onApplyChronicleFilter && onApplyChronicleFilter('foodTypes', dish)}
+                  title={`Filter chronicle for ${dish} dishes`}
+                >
+                  <div className="sub-top-labels">
+                    <span className="sub-item-name">{dish}</span>
+                    <span className="sub-item-count">{count}</span>
+                  </div>
+                  <div className="sub-item-progress-track">
+                    <div
+                      className="sub-item-progress-fill fill-dish"
+                      style={{ width: `${widthPct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Tier 2 - Card 5: Top Cities */}
+        <div className="breakdown-card">
+          <div className="breakdown-card-header">
+            <div className="breakdown-title-group">
+              <MapPin size={18} className="breakdown-icon" />
+              <h3>Top Cities</h3>
+            </div>
+            <span className="sub-breakdown-total">{locationData.totalCities} cities</span>
+          </div>
+
+          <div className="sub-top-list">
+            {locationData.topCities.map(([city, count]) => {
+              const maxCount = locationData.topCities[0][1];
+              const widthPct = Math.round((count / maxCount) * 100);
+
+              return (
+                <div
+                  key={city}
+                  className="sub-top-item"
+                  onClick={() => onApplyChronicleFilter && onApplyChronicleFilter('cities', city)}
+                  title={`Filter chronicle for ${city}`}
+                >
+                  <div className="sub-top-labels">
+                    <span className="sub-item-name">{city}</span>
+                    <span className="sub-item-count">{count.toLocaleString()}</span>
+                  </div>
+                  <div className="sub-item-progress-track">
+                    <div
+                      className="sub-item-progress-fill fill-city"
+                      style={{ width: `${widthPct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Tier 2 - Card 6: Top Sentiments */}
+        <div className="breakdown-card">
+          <div className="breakdown-card-header">
+            <div className="breakdown-title-group">
+              <Smile size={18} className="breakdown-icon" />
+              <h3>Sentiment</h3>
+            </div>
+            <span className="sub-breakdown-total">{sentimentData.totalSentiments} recorded</span>
+          </div>
+
+          <div className="sub-top-list">
+            {sentimentData.topSentiments.map(([sentiment, count]) => {
+              const maxCount = sentimentData.topSentiments[0][1];
+              const widthPct = Math.round((count / maxCount) * 100);
+
+              return (
+                <div
+                  key={sentiment}
+                  className="sub-top-item"
+                  onClick={() => onApplyChronicleFilter && onApplyChronicleFilter('search', sentiment)}
+                  title={`Filter chronicle for ${sentiment}`}
+                >
+                  <div className="sub-top-labels">
+                    <span className="sub-item-name">{sentiment}</span>
+                    <span className="sub-item-count">{count.toLocaleString()}</span>
+                  </div>
+                  <div className="sub-item-progress-track">
+                    <div
+                      className="sub-item-progress-fill fill-sentiment"
+                      style={{ width: `${widthPct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

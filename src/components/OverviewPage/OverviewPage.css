@@ -719,12 +719,21 @@
 .overview-breakdowns-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  column-gap: 1.5rem;
+  row-gap: 1.75rem; /* distinct vertical gap between top and bottom tiers */
 }
 
 @media (max-width: 1024px) {
   .overview-breakdowns-grid {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .overview-breakdowns-grid {
     grid-template-columns: 1fr;
+    row-gap: 1.25rem;
   }
 }
 
@@ -864,6 +873,10 @@
 
 .fill-people {
   background: linear-gradient(90deg, #8b5cf6, #6d28d9);
+}
+
+.fill-sentiment {
+  background: linear-gradient(90deg, #ec4899, #8b5cf6);
 }
 
 /* ==========================================================================

@@ -77,8 +77,11 @@ export default function App() {
     if (path.startsWith('/overview')) return 'overview';
     if (path.startsWith('/sentiment')) return 'sentiment';
     if (path.startsWith('/food')) return 'food';
-    if (path.startsWith('/stats')) return 'stats';
-    if (path.startsWith('/relationships')) return 'relationships';
+    if (path.startsWith('/stats') || params.get('section') === 'stats') return 'stats';
+    if (path.startsWith('/relationships') || params.get('section') === 'relationships') {
+      if (typeof window !== 'undefined') window.history.replaceState(null, '', '/stats?tab=relationships');
+      return 'stats';
+    }
     if (path.startsWith('/restaurants')) return 'restaurants';
     if (path.startsWith('/chronicle')) return 'chronicle';
     if (params.get('section') === 'journey' || (params.get('person') && params.get('section') !== 'people')) return 'journey';
@@ -86,8 +89,6 @@ export default function App() {
     if (params.get('section') === 'overview') return 'overview';
     if (params.get('section') === 'sentiment') return 'sentiment';
     if (params.get('section') === 'food') return 'food';
-    if (params.get('section') === 'stats') return 'stats';
-    if (params.get('section') === 'relationships') return 'relationships';
     if (params.get('section') === 'restaurants' || params.get('restaurant')) return 'restaurants';
     if (params.get('section') === 'chronicle' || params.get('meal')) return 'chronicle';
     return 'overview';
@@ -250,9 +251,10 @@ export default function App() {
         return;
       }
 
-      // 5. Match /relationships browse
+      // 5. Match /relationships browse (redirect to stats relationships tab)
       if (path.startsWith('/relationships') || params.get('section') === 'relationships') {
-        setActiveSection('relationships');
+        window.history.replaceState(null, '', '/stats?tab=relationships');
+        setActiveSection('stats');
         setActiveRestaurantId(null);
         setActiveMealId(null);
         return;
@@ -496,7 +498,6 @@ export default function App() {
     if (section === 'chronicle') targetUrl = '/chronicle';
     else if (section === 'restaurants') targetUrl = '/restaurants';
     else if (section === 'people') targetUrl = '/people';
-    else if (section === 'relationships') targetUrl = '/relationships';
     else if (section === 'sentiment') targetUrl = '/sentiment';
     else if (section === 'food') targetUrl = '/food';
     else if (section === 'stats') targetUrl = '/stats';
@@ -510,8 +511,8 @@ export default function App() {
     const origin =
       activeSection === 'people'
         ? { section: 'people', label: 'Return to People' }
-        : activeSection === 'relationships'
-        ? { section: 'relationships', label: 'Return to Relationships' }
+        : activeSection === 'stats'
+        ? { section: 'stats', label: 'Return to Stats' }
         : activeSection === 'food'
         ? { section: 'food', label: 'Return to Food' }
         : { section: 'overview', label: 'Return to Overview' };
@@ -748,7 +749,7 @@ export default function App() {
       />
 
       {/* Random Meal Memory Banner directly underneath Header */}
-      {!loading && !error && meals.length > 0 && activeSection !== 'journey' && activeSection !== 'places' && (
+      {!loading && !error && meals.length > 0 && activeSection !== 'journey' && (
         <MealCommentBar
           meals={meals}
           actionTrigger={actionTrigger}
@@ -1116,12 +1117,6 @@ export default function App() {
               onSelectRestaurant={handleOpenRestaurant}
             />
           </React.Suspense>
-        ) : activeSection === 'relationships' ? (
-          /* 5. Dining Relationships Flow View */
-          <RelationshipsPage
-            meals={meals}
-            onApplyChronicleFilter={handleApplyChronicleFilter}
-          />
         ) : activeSection === 'sentiment' ? (
           /* 6. Sentiment & Comments View */
           <SentimentPage
