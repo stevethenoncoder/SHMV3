@@ -83,7 +83,7 @@
 
   .mobile-chronicle-container {
     display: block;
-    padding: 0.65rem 0.85rem 5.5rem;
+    padding: 0.5rem 6px 5.5rem;
   }
 
   .mobile-chronicle-container.is-map-view {

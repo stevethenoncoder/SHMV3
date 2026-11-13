@@ -186,6 +186,16 @@ export default function App() {
             }));
           }
         }
+
+        // If initial path had /meals/:id, resolve activeRestaurantId for the unified screen
+        const mealMatch = path.match(/\/meals\/([0-9]+)/);
+        if (mealMatch && mealMatch[1]) {
+          const mId = parseInt(mealMatch[1], 10);
+          const m = data.mealsById.get(mId);
+          if (m?.restaurant?.id) {
+            setActiveRestaurantId(m.restaurant.id);
+          }
+        }
       }
     } catch (err) {
       console.error('Failed to load Meals data:', err);
@@ -235,9 +245,15 @@ export default function App() {
       // 1. Match /meals/:id
       const mealMatch = path.match(/\/meals\/([0-9]+)/);
       if (mealMatch && mealMatch[1]) {
+        const mId = parseInt(mealMatch[1], 10);
         setActiveSection('chronicle');
-        setActiveMealId(parseInt(mealMatch[1], 10));
-        setActiveRestaurantId(null);
+        setActiveMealId(mId);
+        const m = mealsById.get(mId);
+        if (m?.restaurant?.id) {
+          setActiveRestaurantId(m.restaurant.id);
+        } else {
+          setActiveRestaurantId(null);
+        }
         return;
       }
 
@@ -576,47 +592,62 @@ export default function App() {
       setMealOrigin({ section: 'overview', label: 'Back to Overview' });
     } else if (activeSection === 'restaurants') {
       setMealOrigin({ section: 'restaurants', label: 'Back to Restaurants' });
+    } else if (activeSection === 'people') {
+      setMealOrigin({ section: 'people', label: 'Back to People' });
+    } else if (activeSection === 'places') {
+      setMealOrigin({ section: 'places', label: 'Back to Places' });
     } else {
-      setMealOrigin(null);
+      setMealOrigin({ section: 'chronicle', label: 'Back to Chronicle' });
     }
+
+    const targetMeal = mealsById.get(mealId);
+    const restId = targetMeal?.restaurant?.id || null;
     setActiveMealId(mealId);
-    setActiveRestaurantId(null);
+    setActiveRestaurantId(restId);
     window.history.pushState(null, '', `/meals/${mealId}`);
     window.scrollTo(0, 0);
   };
 
   const handleBackToChronicle = () => {
+    const originSection = mealOrigin?.section || (activeSection === 'restaurants' ? 'restaurants' : 'chronicle');
     setActiveMealId(null);
-    if (mealOrigin?.section === 'sentiment') {
+    setActiveRestaurantId(null);
+    if (originSection === 'sentiment') {
       setActiveSection('sentiment');
       window.history.pushState(null, '', '/sentiment');
-    } else if (mealOrigin?.section === 'overview') {
+    } else if (originSection === 'overview') {
       setActiveSection('overview');
       window.history.pushState(null, '', '/');
-    } else if (mealOrigin?.section === 'restaurants') {
+    } else if (originSection === 'restaurants') {
       setActiveSection('restaurants');
       window.history.pushState(null, '', '/restaurants');
-    } else if (activeSection === 'sentiment') {
-      window.history.pushState(null, '', '/sentiment');
+    } else if (originSection === 'people') {
+      setActiveSection('people');
+      window.history.pushState(null, '', '/people');
+    } else if (originSection === 'places') {
+      setActiveSection('places');
+      window.history.pushState(null, '', '/places');
     } else {
-      let target = '/';
-      if (activeSection === 'chronicle') target = '/chronicle';
-      window.history.pushState(null, '', target);
+      setActiveSection('chronicle');
+      window.history.pushState(null, '', '/chronicle');
     }
     setMealOrigin(null);
     window.scrollTo(0, 0);
   };
 
-  const handleOpenRestaurant = (restaurantId) => {
-    setActiveSection('restaurants');
+  const handleOpenRestaurant = (restaurantId, origin = null) => {
     setActiveMealId(null);
+    setMealOrigin(origin);
     setActiveRestaurantId(restaurantId);
     window.history.pushState(null, '', `/restaurants/${restaurantId}`);
     window.scrollTo(0, 0);
   };
 
   const handleBackToRestaurants = () => {
+    setActiveMealId(null);
     setActiveRestaurantId(null);
+    setMealOrigin(null);
+    setActiveSection('restaurants');
     window.history.pushState(null, '', '/restaurants');
     window.scrollTo(0, 0);
   };
@@ -798,27 +829,32 @@ export default function App() {
               <span>Retry Connection</span>
             </button>
           </div>
-        ) : activeMealId ? (
-          /* 1. Meal Detail View */
-          <MealDetailPage
-            meal={activeMeal}
-            onBack={handleBackToChronicle}
-            onSelectRestaurant={handleOpenRestaurant}
-            backLabel={
-              mealOrigin?.label ||
-              (activeSection === 'sentiment'
-                ? 'Back to Sentiment'
-                : activeSection === 'overview'
-                ? 'Back to Overview'
-                : 'Back to Chronicle')
-            }
-          />
-        ) : activeRestaurantId ? (
-          /* 2. Restaurant Detail View */
+        ) : activeRestaurantId || activeMealId ? (
+          /* Single Unified Restaurant Detail View */
           <RestaurantDetailPage
-            restaurant={activeRestaurant}
-            onBack={handleBackToRestaurants}
-            onSelectMeal={handleOpenMeal}
+            restaurant={
+              activeRestaurant ||
+              (activeMealId && mealsById.get(activeMealId)?.restaurant?.id
+                ? restaurantsById.get(mealsById.get(activeMealId).restaurant.id) ||
+                  mealsById.get(activeMealId).restaurant
+                : null)
+            }
+            selectedMealId={activeMealId}
+            onBack={activeMealId ? handleBackToChronicle : handleBackToRestaurants}
+            backLabel={
+              activeMealId
+                ? mealOrigin?.label ||
+                  (activeSection === 'sentiment'
+                    ? 'Back to Sentiment'
+                    : activeSection === 'overview'
+                    ? 'Back to Overview'
+                    : activeSection === 'people'
+                    ? 'Back to People'
+                    : activeSection === 'places'
+                    ? 'Back to Places'
+                    : 'Back to Chronicle')
+                : 'Back to Restaurants'
+            }
           />
         ) : activeSection === 'restaurants' ? (
           /* 3. Restaurants Browse View (Redesigned Flat Directory) */

@@ -278,50 +278,7 @@
   display: block;
 }
 
-.google-place-map-overlay {
-  position: absolute;
-  bottom: 6px;
-  left: 6px;
-  right: 6px;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 6px;
-  padding: 4px 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
 
-.overlay-place-name {
-  font-size: 0.76rem;
-  font-weight: 600;
-  color: #0f172a;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.overlay-maps-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #2563eb;
-  text-decoration: none;
-  white-space: nowrap;
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: #eff6ff;
-  transition: background-color 0.15s ease;
-}
-
-.overlay-maps-link:hover {
-  background-color: #dbeafe;
-}
 
 .google-place-empty {
   display: flex;
@@ -462,10 +419,35 @@
   margin: 0;
 }
 
-.history-stats-grid {
+.history-stats-grid,
+.history-stats-desktop {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
+}
+
+.history-stats-mobile {
+  display: none;
+}
+
+.history-stat-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.88rem;
+  padding: 2px 0;
+}
+
+.stat-line-label {
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  font-weight: 500;
+}
+
+.stat-line-value {
+  color: var(--text-primary);
+  font-size: 0.94rem;
+  font-weight: 700;
 }
 
 .stat-box {
@@ -592,19 +574,141 @@
 
 .visit-history-card {
   display: flex;
-  gap: 16px;
+  flex-direction: column;
   padding: 16px;
   background-color: #f8fafc;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
+  position: relative;
 }
 
 .visit-history-card:hover {
   border-color: #94a3b8;
   background-color: #f1f5f9;
-  transform: translateX(2px);
+}
+
+/* Selected Visit from Chronicle Highlighting */
+.visit-history-card.selected-visit {
+  background-color: #ffffff;
+  border: 2px solid #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15), 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.visit-history-card.selected-visit:hover {
+  border-color: #1d4ed8;
+}
+
+.selected-visit-banner {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #bfdbfe;
+}
+
+.selected-visit-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.76rem;
+  font-weight: 700;
+  border: 1px solid #bfdbfe;
+  letter-spacing: 0.01em;
+}
+
+/* Row wrapper identical to Chronicle Meal Card */
+.meals-mobile-card-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Left Media Column with 140px thumbnail and cost badge directly underneath */
+.meals-mobile-card-left-col {
+  width: 140px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.visit-spend-badge-under-media {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary, #334155);
+  background-color: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border, #cbd5e1);
+  padding: 2px 10px;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+}
+
+.visit-history-card .meals-mobile-chips-col {
+  width: 100%;
+  margin-top: 2px;
+  min-width: 0;
+}
+
+.visit-history-card .meals-mobile-card-bottom-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* More Details Button at Bottom Right */
+.visit-more-details-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: auto;
+  align-self: flex-end;
+  transition: all 0.15s ease;
+}
+
+.visit-more-details-btn:hover {
+  background-color: #dbeafe;
+  border-color: #93c5fd;
+  color: #1e40af;
+}
+
+.more-details-chevron {
+  transition: transform 0.2s ease;
+}
+
+.more-details-chevron.open {
+  transform: rotate(180deg);
+}
+
+.visit-card-summary-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  width: 100%;
 }
 
 .visit-thumbnail-wrap {
@@ -649,6 +753,313 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.visit-expand-toggle-affordance {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background-color: rgba(0, 0, 0, 0.04);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.visit-history-card:hover .visit-expand-toggle-affordance {
+  background-color: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
+}
+
+.expand-chevron-icon {
+  transition: transform 0.2s ease;
+}
+
+.expand-chevron-icon.open {
+  transform: rotate(180deg);
+}
+
+/* EXPANDED ACCORDION DETAILS SECTION */
+.visit-expanded-details {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  cursor: default;
+}
+
+/* Expanded Review Quote */
+.expanded-review-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background-color: #f1f5f9;
+  border-left: 4px solid var(--accent, #3b82f6);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.expanded-quote-icon {
+  color: #3b82f6;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.expanded-quote-content {
+  margin: 0;
+  font-size: 0.92rem;
+  font-style: italic;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* Expanded Meta Badges Row */
+.expanded-meta-badges-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.expanded-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.expanded-badge.value-badge {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.expanded-badge.business {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
+
+.expanded-badge.leisure {
+  background-color: #f8fafc;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+.expanded-badge.sentiment {
+  background-color: #faf5ff;
+  color: #6b21a8;
+  border-color: #e9d5ff;
+}
+
+.expanded-badge .sent-cat {
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+/* Expanded Arsenal Callout */
+.expanded-arsenal-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md);
+}
+
+.arsenal-shield-icon {
+  color: #dc2626;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.arsenal-box-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.84rem;
+}
+
+.arsenal-box-title {
+  font-weight: 700;
+  color: #991b1b;
+}
+
+.arsenal-box-score {
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+.arsenal-box-comment {
+  margin: 4px 0 0 0;
+  font-style: italic;
+  color: #7f1d1d;
+}
+
+/* Expanded Subsections */
+.expanded-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.expanded-sub-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Dining Companions */
+.expanded-companions-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.expanded-companion-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background-color: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* Courses & Dishes */
+.expanded-dishes-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.expanded-dish-card {
+  padding: 10px 12px;
+  background-color: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.expanded-dish-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.expanded-dish-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.expanded-dish-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  font-weight: 700;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.expanded-dish-comment {
+  margin: 0;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+.expanded-dish-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.dish-pill {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.dish-pill.cat {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.dish-pill.ing {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.dish-pill.type {
+  background-color: #ecfdf5;
+  color: #065f46;
+}
+
+/* Photographs Gallery inside Visit */
+.expanded-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.expanded-photo-figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.expanded-photo-img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.expanded-photo-img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.expanded-photo-caption {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  line-height: 1.25;
 }
 
 .visit-date-badge {
@@ -861,7 +1272,115 @@
 }
 
 @media (max-width: 768px) {
-  .history-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+  /* Minimal screen edge margins */
+  .restaurant-detail-container {
+    padding: 10px 6px 80px 6px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .detail-nav-bar {
+    margin-bottom: 10px;
+    padding: 0 2px;
+  }
+
+  .btn-back {
+    padding: 6px 12px;
+    font-size: 0.82rem;
+  }
+
+  .restaurant-detail-content {
+    gap: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Compact section padding & border-radius on mobile */
+  .restaurant-hero-header,
+  .history-summary-card,
+  .detail-section {
+    padding: 12px 10px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  /* Personal Dining History Mobile: text lines instead of bulky box tiles */
+  .history-stats-desktop {
+    display: none;
+  }
+
+  .history-stats-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 4px 0 8px 0;
+  }
+
+  /* Visit History Card Mobile Sizing */
+  .visit-history-card {
+    padding: 10px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .visit-card-summary-row,
+  .meals-mobile-card-row {
+    gap: 10px;
+    align-items: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .visit-thumbnail-wrap {
+    width: 74px;
+    height: 74px;
+    border-radius: 8px;
+  }
+
+  .visit-expanded-details {
+    margin-top: 10px;
+    padding-top: 10px;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .expanded-review-box {
+    padding: 10px 12px;
+  }
+
+  .expanded-quote-content {
+    font-size: 0.86rem;
+  }
+
+  .expanded-meta-badges-row {
+    gap: 6px;
+  }
+
+  .expanded-badge {
+    padding: 3px 8px;
+    font-size: 0.74rem;
+  }
+
+  .expanded-companions-chips {
+    gap: 6px;
+  }
+
+  .expanded-companion-chip {
+    padding: 3px 8px;
+    font-size: 0.76rem;
+  }
+
+  .expanded-dish-card {
+    padding: 8px 10px;
+  }
+
+  .expanded-photos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
   }
 }

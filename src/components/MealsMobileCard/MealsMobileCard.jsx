@@ -1,7 +1,30 @@
 import React from 'react';
-import { Star, MapPin, Tag, Calendar, Utensils } from 'lucide-react';
+import { Star, MapPin, Tag, Calendar, Utensils, Globe } from 'lucide-react';
 import { formatRatingLabel } from '../../utils/restaurantsFilter.js';
 import './MealsMobileCard.css';
+
+/**
+ * Visual styling helper for qualitative meal ratings matching canonical UI palette.
+ */
+function getRatingBadgeStyle(rating) {
+  const r = (rating || '').toLowerCase();
+  if (r.includes('exceptional') || r.includes('the dogs')) {
+    return { bg: '#fef3c7', text: '#92400e', border: '#fde68a' }; // Amber/Gold
+  }
+  if (r.includes('very good') || r.includes('superb')) {
+    return { bg: '#ecfdf5', text: '#065f46', border: '#a7f3d0' }; // Emerald
+  }
+  if (r.includes('fine') || r.includes('good')) {
+    return { bg: '#eff6ff', text: '#1e40af', border: '#bfdbfe' }; // Blue
+  }
+  if (r.includes("wouldn't recommend") || r.includes('ok')) {
+    return { bg: '#f1f5f9', text: '#475569', border: '#cbd5e1' }; // Slate
+  }
+  if (r.includes('bad') || r.includes('never again') || r.includes('worst')) {
+    return { bg: '#fef2f2', text: '#991b1b', border: '#fecaca' }; // Crimson
+  }
+  return { bg: '#f1f5f9', text: '#64748b', border: '#e2e8f0' };
+}
 
 export default function MealsMobileCard({ meal, onSelectMeal, onShowOnMap }) {
   if (!meal) return null;
@@ -14,11 +37,11 @@ export default function MealsMobileCard({ meal, onSelectMeal, onShowOnMap }) {
     : `Meal at ${meal.restaurant?.name || 'Restaurant'}`;
 
   const restaurantName = meal.restaurant?.name || 'Unknown Restaurant';
-  const cityName = meal.restaurant?.city?.name;
-  const countryName = meal.restaurant?.city?.country?.name;
-  const locationText = [cityName, countryName].filter(Boolean).join(', ') || cityName || countryName || '—';
+  const cityName = meal.restaurant?.city?.name || null;
+  const countryName = meal.restaurant?.city?.country?.name || null;
   const cuisine = meal.restaurant?.type?.name || null;
   const ratingText = meal.rating && meal.rating !== 'Unrated' ? formatRatingLabel(meal.rating) : null;
+  const ratingBadgeStyle = getRatingBadgeStyle(meal.rating);
 
   const photoUrl =
     meal.photos && meal.photos.length > 0 && meal.photos[0]?.url
@@ -33,14 +56,14 @@ export default function MealsMobileCard({ meal, onSelectMeal, onShowOnMap }) {
       onClick={() => onSelectMeal && onSelectMeal(meal.id)}
       role="button"
       tabIndex={0}
-      aria-label={`View details for ${mealTitle}`}
+      aria-label={`View details for ${restaurantName} - ${mealTitle}`}
     >
-      {/* Left Media Thumbnail */}
+      {/* Left Media Thumbnail (Enlarged 140px, with Rating overlay at bottom center) */}
       <div className="meals-mobile-card-media-wrap">
         {photoUrl ? (
           <img
             src={photoUrl}
-            alt={mealTitle}
+            alt={restaurantName}
             className="meals-mobile-card-img"
             loading="lazy"
             onError={(e) => {
@@ -55,49 +78,64 @@ export default function MealsMobileCard({ meal, onSelectMeal, onShowOnMap }) {
           className="meals-mobile-card-placeholder"
           style={{ display: photoUrl ? 'none' : 'flex' }}
         >
-          <Utensils size={20} className="placeholder-icon" />
+          <Utensils size={24} className="placeholder-icon" />
         </div>
+
+        {/* Rating Overlay on Picture at bottom center */}
+        {ratingText && (
+          <span
+            className="meals-mobile-card-rating-overlay"
+            style={{
+              backgroundColor: ratingBadgeStyle.bg,
+              color: ratingBadgeStyle.text,
+              borderColor: ratingBadgeStyle.border,
+            }}
+          >
+            <Star size={9} fill="currentColor" />
+            <span>{ratingText}</span>
+          </span>
+        )}
       </div>
 
       {/* Right Content Area */}
       <div className="meals-mobile-card-content">
-        {/* Title */}
-        <h3 className="meals-mobile-card-title" title={mealTitle}>
-          {mealTitle}
+        {/* Restaurant Name as Main Heading (wraps if necessary) */}
+        <h3 className="meals-mobile-card-restaurant-heading" title={restaurantName}>
+          {restaurantName}
         </h3>
 
-        {/* Restaurant Name */}
-        <p className="meals-mobile-card-restaurant" title={restaurantName}>
-          {restaurantName}
+        {/* Dish Title as Subheading */}
+        <p className="meals-mobile-card-dish-sub" title={mealTitle}>
+          {mealTitle}
         </p>
 
-        {/* Rating & Date Row */}
-        <div className="meals-mobile-card-meta-row">
-          {ratingText && (
-            <span className="meals-mobile-rating">
-              <Star size={12} fill="#f59e0b" color="#f59e0b" />
-              <span>{ratingText}</span>
-            </span>
-          )}
-          {meal.formattedDate && (
+        {/* Date Row */}
+        {meal.formattedDate && (
+          <div className="meals-mobile-card-meta-row">
             <span className="meals-mobile-date">
               <Calendar size={11} className="meta-icon" />
               <span>{meal.formattedDate}</span>
             </span>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Chips Row: Location, Cuisine, and Map Pin */}
+        {/* Bottom Chips & Pin Row: City and Country sit underneath each other */}
         <div className="meals-mobile-card-bottom-row">
-          <div className="meals-mobile-chips">
-            {locationText && (
-              <span className="meals-mobile-chip location" title={locationText}>
+          <div className="meals-mobile-chips-col">
+            {cityName && (
+              <span className="meals-mobile-chip city" title={`City: ${cityName}`}>
                 <MapPin size={10} className="chip-icon" />
-                <span className="chip-text">{locationText}</span>
+                <span className="chip-text">{cityName}</span>
+              </span>
+            )}
+            {countryName && (
+              <span className="meals-mobile-chip country" title={`Country: ${countryName}`}>
+                <Globe size={10} className="chip-icon" />
+                <span className="chip-text">{countryName}</span>
               </span>
             )}
             {cuisine && (
-              <span className="meals-mobile-chip cuisine" title={cuisine}>
+              <span className="meals-mobile-chip cuisine" title={`Cuisine: ${cuisine}`}>
                 <Tag size={10} className="chip-icon" />
                 <span className="chip-text">{cuisine}</span>
               </span>
