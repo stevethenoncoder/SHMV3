@@ -146,6 +146,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 }
 
 .display-count {
@@ -158,6 +159,46 @@
 .search-filter-indicator {
   font-weight: 500;
   color: var(--text-muted);
+}
+
+/* Discreet Chronicle Share Button */
+.chronicle-share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.chronicle-share-btn:hover {
+  background-color: var(--bg-subtle);
+  color: var(--text-primary);
+  border-color: #cbd5e1;
+  transform: translateY(-0.5px);
+}
+
+.chronicle-share-btn:active {
+  transform: translateY(0);
+}
+
+.chronicle-share-btn.is-copied {
+  background-color: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.share-btn-icon {
+  flex-shrink: 0;
 }
 
 @media (max-width: 1024px) {

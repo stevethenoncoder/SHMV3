@@ -6,6 +6,10 @@ import {
   sortMeals,
   countActiveFilters,
   getDecade,
+  slugify,
+  buildChronicleShareUrl,
+  resolveChronicleSlug,
+  parseChronicleUrl,
 } from '../src/utils/mealsFilter.js';
 
 // Sample mock data representing realistic Meals records
@@ -266,6 +270,61 @@ const countBefore = filterMeals(mockMeals, stateLou).length;
 stateLou.people = [];
 const countAfter = filterMeals(mockMeals, stateLou).length;
 assert(countBefore === 3 && countAfter === 6, '16. Removing companion chip restores full dataset (3 -> 6)');
+
+// 17. Hybrid URL Generation: Single City produces clean slug
+const urlSingleCity = buildChronicleShareUrl(
+  { ...DEFAULT_MEALS_FILTER_STATE, cities: ['Lisbon'] },
+  'https://meals.stevieholland.co.uk'
+);
+assert(
+  urlSingleCity === 'https://meals.stevieholland.co.uk/chronicle/lisbon',
+  '17. Single city generates clean slug: /chronicle/lisbon'
+);
+
+// 18. Hybrid URL Generation: Single Country produces clean slug
+const urlSingleCountry = buildChronicleShareUrl(
+  { ...DEFAULT_MEALS_FILTER_STATE, countries: ['France'] }
+);
+assert(urlSingleCountry === '/chronicle/france', '18. Single country generates clean slug: /chronicle/france');
+
+// 19. Hybrid URL Generation: Multi-criteria produces query parameters
+const urlMulti = buildChronicleShareUrl(
+  { ...DEFAULT_MEALS_FILTER_STATE, cities: ['Lisbon'], ratings: ['Exceptional'] },
+  'https://meals.stevieholland.co.uk'
+);
+assert(
+  urlMulti === 'https://meals.stevieholland.co.uk/chronicle?city=Lisbon&rating=Exceptional',
+  '19. Multi-criteria generates query parameters: ?city=Lisbon&rating=Exceptional'
+);
+
+// 20. Hybrid URL Generation: Single Search produces clean slug
+const urlSearch = buildChronicleShareUrl({ ...DEFAULT_MEALS_FILTER_STATE, search: 'Curry' });
+assert(urlSearch === '/chronicle/curry', '20. Single search generates clean slug: /chronicle/curry');
+
+// 21. URL Parsing: Clean slug /chronicle/paris resolves against mealsData to Paris
+const mockMealsData = {
+  meals: mockMeals,
+  citiesById: new Map([[1, { id: 1, name: 'Paris' }], [2, { id: 2, name: 'London' }]]),
+  countriesById: new Map([[1, { id: 1, name: 'France' }]]),
+};
+const parsedSlug = parseChronicleUrl('/chronicle/paris', '', mockMealsData);
+assert(
+  Array.isArray(parsedSlug.cities) && parsedSlug.cities[0] === 'Paris',
+  '21. /chronicle/paris cleanly parses to city: Paris'
+);
+
+// 22. URL Parsing: Multi-parameter query parses cleanly
+const parsedQuery = parseChronicleUrl(
+  '/chronicle',
+  '?city=Lisbon&rating=Exceptional&photos=1',
+  mockMealsData
+);
+assert(
+  parsedQuery.cities[0] === 'Lisbon' &&
+  parsedQuery.ratings[0] === 'Exceptional' &&
+  parsedQuery.hasPhoto === true,
+  '22. Multi-parameter query parses city, rating, and photos flag'
+);
 
 console.log(`\nResults: ${passedTests}/${totalTests} tests passed.`);
 if (passedTests !== totalTests) {

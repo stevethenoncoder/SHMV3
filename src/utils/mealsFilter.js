@@ -386,3 +386,250 @@ export function sortMeals(meals, sortOption) {
       return list;
   }
 }
+
+/**
+ * Normalizes text to a clean URL slug (e.g. 'Lisbon' -> 'lisbon', 'Lou Holland' -> 'lou-holland').
+ */
+export function slugify(text) {
+  if (!text) return '';
+  return stripAccents(String(text).trim())
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * Builds a shareable Chronicle URL using the Hybrid strategy:
+ * - Single clean criterion: /chronicle/lisbon or /chronicle/france
+ * - Multiple or complex criteria: /chronicle?city=Lisbon&rating=Exceptional
+ * - Full origin included if provided (e.g. https://meals.stevieholland.co.uk)
+ */
+export function buildChronicleShareUrl(filterState = {}, origin = '') {
+  if (!filterState) return `${origin}/chronicle`;
+
+  // Analyze active criteria
+  const activeEntries = [];
+
+  const search = (filterState.search || '').trim();
+  if (search) activeEntries.push({ key: 'search', count: 1, val: search });
+
+  const cities = (filterState.cities || []).filter(Boolean);
+  if (cities.length) activeEntries.push({ key: 'cities', count: cities.length, val: cities });
+
+  const countries = (filterState.countries || []).filter(Boolean);
+  if (countries.length) activeEntries.push({ key: 'countries', count: countries.length, val: countries });
+
+  const cuisines = (filterState.cuisines || []).filter(Boolean);
+  if (cuisines.length) activeEntries.push({ key: 'cuisines', count: cuisines.length, val: cuisines });
+
+  const people = (filterState.people || []).filter(Boolean);
+  if (people.length) activeEntries.push({ key: 'people', count: people.length, val: people });
+
+  const ratings = (filterState.ratings || []).filter(Boolean);
+  if (ratings.length) activeEntries.push({ key: 'ratings', count: ratings.length, val: ratings });
+
+  const decades = (filterState.decades || []).filter(Boolean);
+  if (decades.length) activeEntries.push({ key: 'decades', count: decades.length, val: decades });
+
+  if (filterState.hasPhoto) activeEntries.push({ key: 'hasPhoto', count: 1, val: true });
+  if (filterState.isBusiness) activeEntries.push({ key: 'isBusiness', count: 1, val: true });
+  if (filterState.isArsenalMatch) activeEntries.push({ key: 'isArsenalMatch', count: 1, val: true });
+
+  const restName = filterState.restaurantName || '';
+  if (restName) activeEntries.push({ key: 'restaurant', count: 1, val: restName });
+
+  // 1. Zero active filters -> simple /chronicle
+  if (activeEntries.length === 0) {
+    return `${origin}/chronicle`;
+  }
+
+  // 2. Exactly one active filter with single item -> clean slug
+  if (activeEntries.length === 1 && activeEntries[0].count === 1) {
+    const single = activeEntries[0];
+    let slug = '';
+    if (single.key === 'cities') slug = slugify(single.val[0]);
+    else if (single.key === 'countries') slug = slugify(single.val[0]);
+    else if (single.key === 'cuisines') slug = slugify(single.val[0]);
+    else if (single.key === 'people') slug = slugify(single.val[0]);
+    else if (single.key === 'ratings') slug = slugify(single.val[0]);
+    else if (single.key === 'decades') slug = single.val[0];
+    else if (single.key === 'search') slug = slugify(single.val);
+
+    if (slug) {
+      return `${origin}/chronicle/${slug}`;
+    }
+  }
+
+  // 3. Multi-criteria or multi-value -> Query parameters
+  const params = new URLSearchParams();
+  if (search) params.set('q', search);
+  if (cities.length) params.set('city', cities.join(','));
+  if (countries.length) params.set('country', countries.join(','));
+  if (cuisines.length) params.set('cuisine', cuisines.join(','));
+  if (people.length) params.set('people', people.join(','));
+  if (ratings.length) params.set('rating', ratings.join(','));
+  if (decades.length) params.set('decade', decades.join(','));
+  if (filterState.hasPhoto) params.set('photos', '1');
+  if (filterState.isBusiness) params.set('business', '1');
+  if (filterState.isArsenalMatch) params.set('arsenal', '1');
+  if (restName) params.set('restaurant', restName);
+
+  const query = params.toString();
+  return `${origin}/chronicle${query ? `?${query}` : ''}`;
+}
+
+/**
+ * Resolves a clean slug (e.g. 'lisbon', 'france', 'lou-holland')
+ * against the dataset into the corresponding filter field.
+ */
+export function resolveChronicleSlug(slug, mealsData = null) {
+  if (!slug) return null;
+  const clean = slugify(slug);
+  if (!clean) return null;
+
+  // 1. Check for decade e.g. 2020s, 2010s
+  if (/^\d{4}s$/.test(clean)) {
+    return { key: 'decades', value: [clean] };
+  }
+
+  // 2. Check canonical ratings
+  const matchedRating = CANONICAL_RATINGS.find((r) => slugify(r) === clean);
+  if (matchedRating) {
+    return { key: 'ratings', value: [matchedRating] };
+  }
+
+  // 3. Check against dataset if available
+  if (mealsData) {
+    // Check cities
+    if (mealsData.citiesById) {
+      for (const city of mealsData.citiesById.values()) {
+        if (city?.name && slugify(city.name) === clean) {
+          return { key: 'cities', value: [city.name] };
+        }
+      }
+    } else if (Array.isArray(mealsData.meals)) {
+      for (const m of mealsData.meals) {
+        const cName = m.restaurant?.city?.name;
+        if (cName && slugify(cName) === clean) {
+          return { key: 'cities', value: [cName] };
+        }
+      }
+    }
+
+    // Check countries
+    if (mealsData.countriesById) {
+      for (const country of mealsData.countriesById.values()) {
+        if (country?.name && slugify(country.name) === clean) {
+          return { key: 'countries', value: [country.name] };
+        }
+      }
+    } else if (Array.isArray(mealsData.meals)) {
+      for (const m of mealsData.meals) {
+        const cName = m.restaurant?.city?.country?.name;
+        if (cName && slugify(cName) === clean) {
+          return { key: 'countries', value: [cName] };
+        }
+      }
+    }
+
+    // Check cuisines / restaurant types
+    if (mealsData.typesById) {
+      for (const t of mealsData.typesById.values()) {
+        const group = t?.typeGroup || t?.name;
+        if (group && slugify(group) === clean) {
+          return { key: 'cuisines', value: [group] };
+        }
+      }
+    } else if (Array.isArray(mealsData.meals)) {
+      for (const m of mealsData.meals) {
+        const tName = m.restaurant?.type?.typeGroup || m.restaurant?.type?.name;
+        if (tName && slugify(tName) === clean) {
+          return { key: 'cuisines', value: [tName] };
+        }
+      }
+    }
+
+    // Check people
+    if (Array.isArray(mealsData.meals)) {
+      for (const m of mealsData.meals) {
+        if (m.companions && m.companions.length > 0) {
+          for (const c of m.companions) {
+            const pName = c.publicName || c.name;
+            if (pName && slugify(pName) === clean) {
+              return { key: 'people', value: [pName] };
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 4. Default / Fallback: text search query
+  return { key: 'search', value: clean.replace(/-/g, ' ') };
+}
+
+/**
+ * Parses both the pathname slug and/or search query parameters into a partial filter state.
+ */
+export function parseChronicleUrl(pathname = '', search = '', mealsData = null) {
+  const result = {};
+
+  // 1. Parse query parameters
+  if (search) {
+    const params = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
+    const q = params.get('q') || params.get('search');
+    if (q) result.search = q.trim();
+
+    const cityParam = params.get('city') || params.get('cities');
+    if (cityParam) result.cities = cityParam.split(',').map((s) => s.trim()).filter(Boolean);
+
+    const countryParam = params.get('country') || params.get('countries');
+    if (countryParam) result.countries = countryParam.split(',').map((s) => s.trim()).filter(Boolean);
+
+    const cuisineParam = params.get('cuisine') || params.get('cuisines') || params.get('type') || params.get('types');
+    if (cuisineParam) result.cuisines = cuisineParam.split(',').map((s) => s.trim()).filter(Boolean);
+
+    const peopleParam = params.get('people') || params.get('person');
+    if (peopleParam) result.people = peopleParam.split(',').map((s) => s.trim()).filter(Boolean);
+
+    const ratingParam = params.get('rating') || params.get('ratings');
+    if (ratingParam) result.ratings = ratingParam.split(',').map((s) => s.trim()).filter(Boolean);
+
+    const decadeParam = params.get('decade') || params.get('decades');
+    if (decadeParam) result.decades = decadeParam.split(',').map((s) => s.trim()).filter(Boolean);
+
+    const restParam = params.get('restaurant');
+    if (restParam) {
+      const restId = parseInt(restParam, 10);
+      if (!isNaN(restId)) result.restaurantId = restId;
+      else result.restaurantName = restParam;
+    }
+
+    if (params.get('photos') === '1' || params.get('withPhotos') === 'true' || params.get('hasPhoto') === 'true') {
+      result.hasPhoto = true;
+    }
+    if (params.get('business') === '1' || params.get('isBusiness') === 'true') {
+      result.isBusiness = true;
+    }
+    if (params.get('arsenal') === '1' || params.get('isArsenalMatch') === 'true') {
+      result.isArsenalMatch = true;
+    }
+  }
+
+  // 2. Parse path slug (e.g. /chronicle/lisbon)
+  if (pathname && pathname.includes('/chronicle/')) {
+    const segments = pathname.replace(/^.*\/chronicle\//, '').split('/');
+    const slug = segments[0] ? decodeURIComponent(segments[0]).trim() : '';
+    if (slug) {
+      const resolved = resolveChronicleSlug(slug, mealsData);
+      if (resolved) {
+        if (Array.isArray(resolved.value)) {
+          result[resolved.key] = [...(result[resolved.key] || []), ...resolved.value];
+        } else {
+          result[resolved.key] = resolved.value;
+        }
+      }
+    }
+  }
+
+  return result;
+}

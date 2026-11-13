@@ -229,6 +229,38 @@
   color: var(--text-secondary, #475569);
 }
 
+.mobile-subheader-right-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  background-color: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary, #475569);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mobile-share-btn:hover {
+  background-color: var(--bg-subtle, #f8fafc);
+  color: var(--text-primary, #0f172a);
+}
+
+.mobile-share-btn.is-copied {
+  background-color: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
 .mobile-view-toggle-btn {
   display: inline-flex;
   align-items: center;

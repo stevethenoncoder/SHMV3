@@ -12,7 +12,10 @@ import {
   List,
   X,
   UtensilsCrossed,
+  Share2,
+  Check,
 } from 'lucide-react';
+import { buildChronicleShareUrl } from '../../utils/mealsFilter.js';
 import shmLogoIcon from '../../assets/shm-logo-icon.png';
 import shmLogoText from '../../assets/shm-logo-text.png';
 import './MealsMobileHeaderToolbar.css';
@@ -30,7 +33,50 @@ export default function MealsMobileHeaderToolbar({
 }) {
   const [isVisible, setIsVisible] = useState(true);
   const [isSearchOpen, setIsSearchOpen] = useState(Boolean(searchQuery));
+  const [copied, setCopied] = useState(false);
   const lastScrollY = useRef(0);
+
+  const handleShare = async () => {
+    try {
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const shareUrl = buildChronicleShareUrl(filterState, origin);
+
+      if (typeof window !== 'undefined' && window.history?.replaceState) {
+        const pathOnly = buildChronicleShareUrl(filterState, '');
+        window.history.replaceState(null, '', pathOnly);
+      }
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'Stevie Holland Meals Chronicle',
+            url: shareUrl,
+          });
+          return;
+        } catch (e) {
+          // If user cancels or share fails, fallback to clipboard
+        }
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = shareUrl;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2400);
+    } catch (err) {
+      console.warn('Share copy error:', err);
+    }
+  };
 
   // Synchronize search open state if searchQuery changed externally
   useEffect(() => {
@@ -225,30 +271,43 @@ export default function MealsMobileHeaderToolbar({
         </div>
       )}
 
-      {/* 4. Subheader Row: Displaying Count on Left, Map/List Toggle on Right */}
+      {/* 4. Subheader Row: Displaying Count on Left, Share & Map/List Toggle on Right */}
       <div className="mobile-subheader-row">
         <span className="mobile-results-count">
           Displaying {filteredCount.toLocaleString()} {filteredCount === 1 ? 'meal' : 'meals'}
         </span>
 
-        <button
-          type="button"
-          className="mobile-view-toggle-btn"
-          onClick={() => onToggleViewMode && onToggleViewMode(viewMode === 'list' ? 'map' : 'list')}
-          aria-label={viewMode === 'list' ? 'Switch to Map view' : 'Switch to List view'}
-        >
-          {viewMode === 'list' ? (
-            <>
-              <Map size={14} />
-              <span>Map</span>
-            </>
-          ) : (
-            <>
-              <List size={14} />
-              <span>List</span>
-            </>
-          )}
-        </button>
+        <div className="mobile-subheader-right-actions">
+          <button
+            type="button"
+            className={`mobile-share-btn ${copied ? 'is-copied' : ''}`}
+            onClick={handleShare}
+            aria-label="Share current view"
+            title="Share view"
+          >
+            {copied ? <Check size={13} /> : <Share2 size={13} />}
+            <span>{copied ? 'Copied' : 'Share'}</span>
+          </button>
+
+          <button
+            type="button"
+            className="mobile-view-toggle-btn"
+            onClick={() => onToggleViewMode && onToggleViewMode(viewMode === 'list' ? 'map' : 'list')}
+            aria-label={viewMode === 'list' ? 'Switch to Map view' : 'Switch to List view'}
+          >
+            {viewMode === 'list' ? (
+              <>
+                <Map size={14} />
+                <span>Map</span>
+              </>
+            ) : (
+              <>
+                <List size={14} />
+                <span>List</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </header>
   );

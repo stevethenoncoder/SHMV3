@@ -42,6 +42,7 @@ import {
   CANONICAL_DECADES,
   CANONICAL_RATINGS,
   formatRatingLabel,
+  parseChronicleUrl,
 } from './utils/mealsFilter.js';
 
 import {
@@ -124,21 +125,20 @@ export default function App() {
   // --- MEALS FILTER & PAGINATION STATE ---
   const [mealsFilterState, setMealsFilterState] = useState(() => {
     if (typeof window === 'undefined') return DEFAULT_MEALS_FILTER_STATE;
-    const params = new URLSearchParams(window.location.search);
-    const initial = { ...DEFAULT_MEALS_FILTER_STATE };
-    if (params.get('search')) initial.search = params.get('search');
-    if (params.get('restaurant')) {
-      const restId = parseInt(params.get('restaurant'), 10);
-      if (!isNaN(restId)) initial.restaurantId = restId;
+    const path = window.location.pathname;
+    const search = window.location.search;
+    if (
+      path.startsWith('/chronicle') ||
+      search.includes('city') ||
+      search.includes('country') ||
+      search.includes('rating') ||
+      search.includes('q=') ||
+      search.includes('search=')
+    ) {
+      const parsed = parseChronicleUrl(path, search, null);
+      return { ...DEFAULT_MEALS_FILTER_STATE, ...parsed };
     }
-    if (params.get('country')) initial.countries = [params.get('country')];
-    if (params.get('city')) initial.cities = [params.get('city')];
-    if (params.get('rating')) initial.ratings = [params.get('rating')];
-    if (params.get('decade')) initial.decades = [params.get('decade')];
-    if (params.get('hasPhoto') === 'true') initial.hasPhoto = true;
-    if (params.get('isArsenalMatch') === 'true') initial.isArsenalMatch = true;
-    if (params.get('isBusiness') === 'true') initial.isBusiness = true;
-    return initial;
+    return DEFAULT_MEALS_FILTER_STATE;
   });
 
   const [isMobileMealsFilterOpen, setIsMobileMealsFilterOpen] = useState(false);
@@ -172,6 +172,21 @@ export default function App() {
       setRestaurants(data.restaurants);
       setRestaurantsById(data.restaurantsById);
       setPublicPeopleById(data.publicPeopleById || new Map());
+
+      // If initial path had /chronicle/:slug or query params, refine against loaded dataset
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname;
+        const search = window.location.search;
+        if (path.startsWith('/chronicle')) {
+          const refined = parseChronicleUrl(path, search, data);
+          if (Object.keys(refined).length > 0) {
+            setMealsFilterState((prev) => ({
+              ...prev,
+              ...refined,
+            }));
+          }
+        }
+      }
     } catch (err) {
       console.error('Failed to load Meals data:', err);
       setError(err.message || 'Error loading meals archive');
@@ -273,6 +288,11 @@ export default function App() {
         setActiveSection('chronicle');
         setActiveRestaurantId(null);
         setActiveMealId(null);
+        const parsed = parseChronicleUrl(path, window.location.search, mealsDataPayload);
+        setMealsFilterState({
+          ...DEFAULT_MEALS_FILTER_STATE,
+          ...parsed,
+        });
         return;
       }
 
@@ -1002,6 +1022,7 @@ export default function App() {
                       setMealsCurrentPage(1);
                     }}
                     activeFilterCount={activeMealsFiltersCount}
+                    filterState={mealsFilterState}
                     onOpenMobileFilters={() => {
                       setMobileFilterInitialSection(null);
                       setIsMobileMealsFilterOpen(true);

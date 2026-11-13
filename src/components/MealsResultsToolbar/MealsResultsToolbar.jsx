@@ -1,5 +1,6 @@
-import React from 'react';
-import { Search, ChevronDown, X, SlidersHorizontal } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, ChevronDown, X, SlidersHorizontal, Share2, Check } from 'lucide-react';
+import { buildChronicleShareUrl } from '../../utils/mealsFilter.js';
 import './MealsResultsToolbar.css';
 
 export default function MealsResultsToolbar({
@@ -12,8 +13,41 @@ export default function MealsResultsToolbar({
   pageSize,
   onPageSizeChange,
   activeFilterCount = 0,
+  filterState = {},
   onOpenMobileFilters,
 }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    try {
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const shareUrl = buildChronicleShareUrl(filterState, origin);
+
+      // Quietly update the browser address bar with the shareable path
+      if (typeof window !== 'undefined' && window.history?.replaceState) {
+        const pathOnly = buildChronicleShareUrl(filterState, '');
+        window.history.replaceState(null, '', pathOnly);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = shareUrl;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2400);
+    } catch (err) {
+      console.warn('Share copy error:', err);
+    }
+  };
   return (
     <div className="meals-toolbar">
       {/* Top Row: Search and Controls */}
@@ -98,7 +132,7 @@ export default function MealsResultsToolbar({
         </div>
       </div>
 
-      {/* Counter Row */}
+      {/* Counter Row with Count on Left, Share Button on Right */}
       <div className="toolbar-count-row">
         <h2 className="display-count">
           Displaying {filteredCount} of {totalCount} {totalCount === 1 ? 'Meal' : 'Meals'}
@@ -108,6 +142,21 @@ export default function MealsResultsToolbar({
             </span>
           )}
         </h2>
+
+        <button
+          type="button"
+          className={`chronicle-share-btn ${copied ? 'is-copied' : ''}`}
+          onClick={handleShare}
+          title="Share current search and filter URL"
+          aria-label="Share current view"
+        >
+          {copied ? (
+            <Check size={14} className="share-btn-icon" />
+          ) : (
+            <Share2 size={14} className="share-btn-icon" />
+          )}
+          <span>{copied ? 'Link Copied!' : 'Share'}</span>
+        </button>
       </div>
     </div>
   );
